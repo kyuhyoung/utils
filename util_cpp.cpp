@@ -8,7 +8,7 @@ string python_join_equivalent(const string& dir_to_file, const string& filename)
   return full_path.u8string();                                                                               
 }
 
-
+//------------ Get the current time in the unit of second --------------  
 //  original code : https://github.com/pjreddie/darknet/blob/master/src/utils.c
 #include <sys/time.h>
 #include <unistd.h>

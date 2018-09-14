@@ -1,4 +1,5 @@
 //------------ c++ counterpart of python function "join" --------------  
+// make시 -std=c++11 또는 -std=gnu++11 옵션을 주어야 함.
 #include <experimental/filesystem>
 string python_join_equivalent(const string& dir_to_file, const string& filename)
 {

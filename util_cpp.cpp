@@ -60,3 +60,14 @@ bool mkdir_if_not_exist(const char *dir)
     }
     return is_folder_exist;
 }
+
+//------------ Display error message and die --------------  
+#include <stdlib.h>
+#include <cstdio>
+#include <cassert>
+void error(const char *s)
+{
+    perror(s);
+    assert(0);
+    exit(-1);
+}

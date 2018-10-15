@@ -23,4 +23,40 @@ double what_time_in_seconds_is_it_now()
 	return (double)time.tv_sec + (double)time.tv_usec * .000001;
 }
 
-
+//------------ Create a directory if it does not exist --------------  
+#include <sys/stat.h>
+#include <stdio.h>
+bool mkdir_if_not_exist(const char *dir)
+{
+    bool is_folder_exist = false;
+    struct stat st;
+    if(0 == stat(dir, &st))
+    {
+        if(0 != (st.st_mode & S_IFDIR))
+        {
+            is_folder_exist = true;
+            printf("%s DOES exist. \n", dir);
+        } 
+    }
+    if(!is_folder_exist)
+    {
+        int nError = 0;
+#if defined(_WIN32)
+        nError = _mkdir(dir);
+#else
+        mode_t nMode = 0733;    //UNIX style permission
+        nError = mkdir(dir, nMode);
+#endif
+        if(0 != nError)
+        {
+            // handle your error
+            printf("Can NOT make a directory %s\n", dir);
+        }
+        else
+        {
+            is_folder_exist = true;
+            printf("Just created a directory %s\n", dir);
+        }
+    }
+    return is_folder_exist;
+}

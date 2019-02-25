@@ -1,3 +1,32 @@
+# input
+#   li_num : list of numbers
+#   n : n_th largest. 
+#       1 -> the most largest
+#       2 -> the second largest
+#       3 -> the third largest
+# output
+#   n_th_largest : the n the largest number in the list
+#       For the input [1, 4, 1, 5, 4],
+#       if n is 1, the return should be 5
+#       if n is 2, the return should be 4
+#       if n is 3, the return should be 1
+#       if n is > 3, the return should be None
+
+def find_nth_largest(li_num, n):
+    n_th_largest = None
+    if li_num:        
+        for iN in range(n):
+            t1 = max(li_num)
+            while max(li_num) == t1:
+                li_num.remove(t1)
+            if not li_num:
+                break
+        if li_num:
+            n_th_largest = max(li_num)
+    return n_th_largest
+
+
+
 # Generate a list of (random) colors of the given number
 # first 15 colors : non-random
 # > 15 colors : random between 100 and 255
@@ -5,7 +34,7 @@
 #    n_class : # of colors to be generated
 # output
 #    li_color_bgr : list of the size [n_class x 3]. It doesn't have to be 'bgr' (It can be 'rgb')
-
+   
 def make_color_list(n_class):
     li_color_bgr = []
     li_color_bgr.append((255, 0, 0))

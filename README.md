@@ -5,6 +5,7 @@
   * mkdir_if_not_exist()
   * error()
 * util_python.py : python utility functions.
+  * is_only_letter_or_digit()
   * find_nth_largest()
   * make_color_list()
   * compute_margin_ratio_l_r_t_b()

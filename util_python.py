@@ -1,3 +1,27 @@
+
+
+def is_only_letter(str):
+    return str.isalpha()
+
+def is_only_number(str):
+    return str.isdigit()
+
+# input
+#   str : string
+# output
+#   is_letter_or_digit : whether the input string only consists of alphabet letters or digits.
+
+def is_only_letter_or_digit(str):
+    is_letter_or_digit = False
+    if str.isdigit() or str.isalpha():
+        is_letter_or_digit = True
+    else:
+        t1 = str.lower()
+        t2 = ''.join([char for char in t1 if char not in 'abcdefghijklmnopqrstuvwxyz0123456789'])
+        if not t2:
+            is_letter_or_digit = True
+    return is_letter_or_digit    
+
 # input
 #   li_num : list of numbers
 #   n : n_th largest. 

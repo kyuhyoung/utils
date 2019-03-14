@@ -1,3 +1,15 @@
+# input
+#   string : string
+#   sub_string : string
+# output
+#   kount : how many times 'sub_string' occurs in 'string'.
+
+def count_substring(string, sub_string):
+    kount = 0
+    idx_sub = string.find(sub_string)
+    if idx_sub >= 0:
+        kount = 1 + count_substring(string[idx_sub + 1:], sub_string)
+    return kount
 
 
 def is_only_letter(str):

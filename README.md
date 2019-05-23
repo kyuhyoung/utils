@@ -16,6 +16,7 @@
   * full_path_from_dir_id_extension()
   * get_exact_file_name_from_path()
   * is_this_empty_string()  
+  * is_this_existing_directory()
   
 #### image related  
   * make_color_list()

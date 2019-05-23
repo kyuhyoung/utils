@@ -61,7 +61,38 @@ def find_nth_largest(li_num, n):
             n_th_largest = max(li_num)
     return n_th_largest
 
+ def get_list_of_file_path_under_1st_with_2nd_extension(direc, ext = ''):
+    li_path_total = []
+    is_extension_given = is_this_empty_string(ext)
+    for dirpath, dirnames, filenames in walk(direc):
+        n_file_1 = len(filenames)
+        if n_file_1:
+            if is_extension_given:
+                li_path = [path.join(dirpath, f) for f in filenames if f.lower().endswith(ext.lower())]
+            else:
+                li_path = [path.join(dirpath, f) for f in filenames]
+            n_file_2 = len(li_path)
+            if n_file_2:
+                li_path_total += li_path
+    return sorted(li_path_total)
 
+def round_i(x):
+    return int(round(x))
+
+def full_path_from_dir_id_extension(direc, aidi, ext):
+    return path.join(direc, aidi + "." + ext.split('.')[-1])
+
+def get_exact_file_name_from_path(str_path):
+    return path.splitext(path.basename(str_path))[0]
+
+def is_this_empty_string(str):
+    return (str in (None, '')) or (not str.stip())
+
+    
+
+###################################################################################################################
+#   image related
+###################################################################################################################
 
 # Generate a list of (random) colors of the given number
 # first 15 colors : non-random

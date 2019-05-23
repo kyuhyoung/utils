@@ -146,6 +146,17 @@ def get_exact_file_name_from_path(str_path):
 def is_this_empty_string(strin):
     return (strin in (None, '')) or (not strin.stip())
 
+
+#########################################################################################################
+# input
+#   path_dir : string.
+#       ex) '/mnt/d/images'    
+# output
+#   boolean whether 'path_dir' is a existing directory.
+#       ex) True if '/mnt/d/images' exists.
+
+def is_this_existing_directory(path_dir):
+    return os.path.isdir(path_dir)
     
 
 ###################################################################################################################

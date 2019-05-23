@@ -17,6 +17,7 @@
   * get_exact_file_name_from_path()
   * is_this_empty_string()  
   * is_this_existing_directory()
+  * extract_file_extension()
   
 #### image related  
   * make_color_list()
@@ -30,3 +31,4 @@
   * make_video_recorder()
   * im2batch()
   * compute_and_draw_fps_and_cofidence_threshold()
+  * is_image_file()

@@ -149,7 +149,7 @@ def is_this_empty_string(strin):
 
 #########################################################################################################
 # input
-#   path_dir : string.
+#   path_dir : string of a directory path.
 #       ex) '/mnt/d/images'    
 # output
 #   boolean whether 'path_dir' is a existing directory.
@@ -157,7 +157,20 @@ def is_this_empty_string(strin):
 
 def is_this_existing_directory(path_dir):
     return os.path.isdir(path_dir)
-    
+
+#########################################################################################################
+# input
+#   path_file : string of file path.
+#       ex) '/mnt/d/images/img.bmp'  
+#   with_dot : boolean whether dot is included in the return
+# output
+#   string of the file exstension w/wo a dot.
+#       ex) '.bmp' if 'with_dot' is True, 'bmp' otherwise.
+
+def extract_file_extension(path_file, with_dot):
+    extension_with_dot = os.path.splitext(path_file)
+    return extension_with_dot if with_dot else extension_with_dot.split('.')[-1] 
+
 
 ###################################################################################################################
 #   image related

@@ -1,31 +1,44 @@
+#########################################################################################################
 # input
-#   string : string
-#   sub_string : string
+#   strin : string
+#   sub_str : string
 # output
-#   kount : how many times 'sub_string' occurs in 'string'.
+#   kount : how many times 'sub_str' occurs in 'strin'.
 
-def count_substring(string, sub_string):
+def count_substring(strin, sub_str):
     kount = 0
-    idx_sub = string.find(sub_string)
+    idx_sub = strin.find(sub_str)
     if idx_sub >= 0:
-        kount = 1 + count_substring(string[idx_sub + 1:], sub_string)
+        kount = 1 + count_substring(strin[idx_sub + 1:], sub_str)
     return kount
 
-
-def is_only_letter(str):
-    return str.isalpha()
-
-def is_only_number(str):
-    return str.isdigit()
-
+#########################################################################################################
 # input
-#   str : string
+#   strin : string
+# output
+#   boolean : True if 'strin' is only composed of letter.
+
+def is_only_letter(strin):
+    return strin.isalpha()
+
+#########################################################################################################
+# input
+#   strin : string
+# output
+#   boolean : True if 'strin' is only composed of number.
+
+def is_only_number(strin):
+    return strin.isdigit()
+
+#########################################################################################################
+# input
+#   strin : string
 # output
 #   is_letter_or_digit : whether the input string only consists of alphabet letters or digits.
 
-def is_only_letter_or_digit(str):
+def is_only_letter_or_digit(strin):
     is_letter_or_digit = False
-    if str.isdigit() or str.isalpha():
+    if is_only_letter(strin) or is_only_number(strin):
         is_letter_or_digit = True
     else:
         t1 = str.lower()
@@ -34,6 +47,7 @@ def is_only_letter_or_digit(str):
             is_letter_or_digit = True
     return is_letter_or_digit    
 
+#########################################################################################################
 # input
 #   li_num : list of numbers
 #   n : n_th largest. 
@@ -61,7 +75,15 @@ def find_nth_largest(li_num, n):
             n_th_largest = max(li_num)
     return n_th_largest
 
- def get_list_of_file_path_under_1st_with_2nd_extension(direc, ext = ''):
+#########################################################################################################
+# input
+#   direc : path of a folder.
+#   ext : string of file extension. 
+#       For example both '.txt' and 'txt' are OK
+# output
+#   list of file path
+
+def get_list_of_file_path_under_1st_with_2nd_extension(direc, ext = ''):
     li_path_total = []
     is_extension_given = is_this_empty_string(ext)
     for dirpath, dirnames, filenames in walk(direc):
@@ -76,17 +98,53 @@ def find_nth_largest(li_num, n):
                 li_path_total += li_path
     return sorted(li_path_total)
 
+#########################################################################################################
+# input
+#   x : number
+# output
+#   integer of rounded 'x'
+
 def round_i(x):
     return int(round(x))
+
+#########################################################################################################
+# input
+#   direc : path of a folder.
+#       ex) '/mnt/d/img/'    
+#   aidi : string of only exact file name without extension. 
+#       ex) 'people_in_office'
+#   ext : string of file extension.
+#       For example both '.txt' and 'txt' are OK
+#       ex) '.bmp'
+# output
+#   full paht composed of 'direc', 'aidi' and 'ext'
+#       ex) '/mnt/d/img/people_in_office.bmp'
 
 def full_path_from_dir_id_extension(direc, aidi, ext):
     return path.join(direc, aidi + "." + ext.split('.')[-1])
 
+#########################################################################################################
+# input
+#   str_path : path of a file.
+#       ex) '/mnt/d/img/people_in_office.bmp'    
+# output
+#   string of only the file name extracted
+#       ex) 'people_in_office'
+
 def get_exact_file_name_from_path(str_path):
     return path.splitext(path.basename(str_path))[0]
 
-def is_this_empty_string(str):
-    return (str in (None, '')) or (not str.stip())
+#########################################################################################################
+# input
+#   strin : string.
+#       ex) 'kyuhyoung choi', '', '  '    
+# output
+#   boolean whether 'strin' is really a string.
+#       ex) True if 'strin' is 'kyuhyoung choi'
+#           False if 'strin' is '' or '  '.
+
+def is_this_empty_string(strin):
+    return (strin in (None, '')) or (not strin.stip())
 
     
 

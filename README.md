@@ -8,6 +8,7 @@
   * count_substring()
   * is_only_letter_or_digit()
   * find_nth_largest()
+### image related  
   * make_color_list()
   * compute_margin_ratio_l_r_t_b()
   * rescale_normalized_bounding_boxes_with_margin_ratio()

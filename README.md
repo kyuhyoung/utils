@@ -1,10 +1,10 @@
 # utils
-* util_cpp.cpp : c++ utility functions.
+## util_cpp.cpp : c++ utility functions.
   * python_join_equivalent()
   * what_time_in_seconds_is_it_now()                                                                       
   * mkdir_if_not_exist()
   * error()
-* util_python.py : python utility functions.
+## util_python.py : python utility functions.
   * count_substring()
   * is_only_letter_or_digit()
   * find_nth_largest()

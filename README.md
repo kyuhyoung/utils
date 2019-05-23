@@ -10,6 +10,10 @@
   * is_only_letter_or_digit()
   * find_nth_largest()
   * get_list_of_file_path_under_1st_with_2nd_extension()
+  * round_i()
+  * full_path_from_dir_id_extension()
+  * get_exact_file_name_from_path()
+  * is_this_empty_string()  
   
 #### image related  
   * make_color_list()

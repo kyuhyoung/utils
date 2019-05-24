@@ -158,6 +158,24 @@ def is_this_empty_string(strin):
 def is_this_existing_directory(path_dir):
     return os.path.isdir(path_dir)
 
+
+#########################################################################################################
+# input
+#   path_dir : string of a directory path.
+#       ex) '/mnt/d/images'    
+# output
+#   is_newly_made : True if 'path_dir' is newly made and False otherwise
+
+def mkdir_if_not_exist(path_dir):
+    is_newly_made = False
+    if not os.path.exists(path_dir):
+        os.makedirs(path_dir)
+        is_newly_made = True
+    return is_newly_made
+
+
+
+
 #########################################################################################################
 # input
 #   path_file : string of file path.

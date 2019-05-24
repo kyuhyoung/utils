@@ -86,7 +86,7 @@ def find_nth_largest(li_num, n):
 def get_list_of_file_path_under_1st_with_2nd_extension(direc, ext = ''):
     li_path_total = []
     is_extension_given = is_this_empty_string(ext)
-    for dirpath, dirnames, filenames in walk(direc):
+    for dirpath, dirnames, filenames in os.walk(direc):
         n_file_1 = len(filenames)
         if n_file_1:
             if is_extension_given:

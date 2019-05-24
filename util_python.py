@@ -177,6 +177,21 @@ def extract_file_extension(path_file, with_dot):
 ###################################################################################################################
 
 #########################################################################################################
+# input
+#   dir_img : string of directory path.
+#       ex) '/mnt/d/images'
+#   ext : string of iamge extension.
+# output
+#   li_fn_img : sorted list of image file paths.
+#       ex) ['/mnt/d/images/img001.bmp', '/mnt/d/images/img002.bmp', '/mnt/d/images/img003.bmp']
+
+def get_list_of_image_path_under_this_directory(dir_img, ext = ''):
+    li_fn_img = get_list_of_file_path_under_1st_with_2nd_extension(dir_img, ext)
+    if is_this_empty_string(ext):
+        li_fn_img = [fn for fn in li_fn_img if is_image_file(fn)]
+    return sorted(li_fn_img)
+
+#########################################################################################################
 # Generate a list of (random) colors of the given number
 # first 15 colors : non-random
 # > 15 colors : random between 100 and 255

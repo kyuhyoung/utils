@@ -90,9 +90,9 @@ def get_list_of_file_path_under_1st_with_2nd_extension(direc, ext = ''):
         n_file_1 = len(filenames)
         if n_file_1:
             if is_extension_given:
-                li_path = [path.join(dirpath, f) for f in filenames if f.lower().endswith(ext.lower())]
+                li_path = [os.path.join(dirpath, f) for f in filenames if f.lower().endswith(ext.lower())]
             else:
-                li_path = [path.join(dirpath, f) for f in filenames]
+                li_path = [os.path.join(dirpath, f) for f in filenames]
             n_file_2 = len(li_path)
             if n_file_2:
                 li_path_total += li_path

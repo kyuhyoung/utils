@@ -17,6 +17,7 @@
   * get_exact_file_name_from_path()
   * is_this_empty_string()  
   * is_this_existing_directory()
+  * mkdir_if_not_exist()  
   * extract_file_extension()  
 #### image related  
   * get_list_of_image_path_under_this_directory()

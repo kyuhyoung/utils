@@ -86,7 +86,7 @@ def find_nth_largest(li_num, n):
 def get_list_of_file_path_under_1st_with_2nd_extension(direc, ext = ''):
     li_path_total = []
     is_extension_given = is_this_empty_string(ext)
-    for dirpath, dirnames, filenames in os.walk(direc):
+    for dirpath, dirnames, filenames in os.walk(os.path.expanduser(direc)):
         n_file_1 = len(filenames)
         if n_file_1:
             if is_extension_given:
@@ -121,7 +121,7 @@ def round_i(x):
 #       ex) '/mnt/d/img/people_in_office.bmp'
 
 def full_path_from_dir_id_extension(direc, aidi, ext):
-    return path.join(direc, aidi + "." + ext.split('.')[-1])
+    return path.join(os.path.expanduser(direc), aidi + "." + ext.split('.')[-1])
 
 #########################################################################################################
 # input
@@ -168,6 +168,7 @@ def is_this_existing_directory(path_dir):
 #   is_newly_made : True if 'path_dir' is newly made and False otherwise
 
 def mkdir_if_not_exist(path_dir):
+    path_dir = os.path.expanduser(path_dir)
     is_newly_made = False
     if not os.path.exists(path_dir):
         os.makedirs(path_dir)
@@ -205,6 +206,7 @@ def extract_file_extension(path_file, with_dot):
 #       ex) ['/mnt/d/images/img001.bmp', '/mnt/d/images/img002.bmp', '/mnt/d/images/img003.bmp']
 
 def get_list_of_image_path_under_this_directory(dir_img, ext = ''):
+    dir_img = os.path.expanduser(dir_img)
     li_fn_img = get_list_of_file_path_under_1st_with_2nd_extension(dir_img, ext)
     if is_this_empty_string(ext):
         li_fn_img = [fn for fn in li_fn_img if is_image_file(fn)]
@@ -388,6 +390,27 @@ def is_image_file(fn):
 #    w_h_cam : the width and height of camera image.        
 
 import cv2
+
+
+def init_cam(idx_cam_or_video_path):
+    if is_video_file(idx_cam_or_video_path):
+        path_video = idx_cam_or_video_path
+        #print('this is video file : ', path_video)
+        kam = cv2.VideoCapture(path_video)
+        if kam is None or not kam.isOpened():
+            print('Unable to open video file at : ', path_video);   exit()
+    else:
+        idx_cam = int(idx_cam_or_video_path)
+        #print('this is camera index at : ', idx_cam)
+        kam = cv2.VideoCapture(idx_cam)
+        if kam is None or not kam.isOpened():
+            print('Unable to open camera with index : ', idx_cam);   exit()
+ 
+    print('Camera : {} is opened'.format(id_cam)); #exit()
+    w_h_cam = (int(kam.get(cv2.CAP_PROP_FRAME_WIDTH)), int(kam.get(cv2.CAP_PROP_FRAME_HEIGHT))) # float
+    return kam, w_h_cam
+
+
 
 def init_cam(id_cam):
     if is_video_file(id_cam):

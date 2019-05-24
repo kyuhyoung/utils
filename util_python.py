@@ -132,7 +132,7 @@ def full_path_from_dir_id_extension(direc, aidi, ext):
 #       ex) 'people_in_office'
 
 def get_exact_file_name_from_path(str_path):
-    return os.path.splitext(path.basename(str_path))[0]
+    return os.path.splitext(os.path.basename(str_path))[0]
 
 #########################################################################################################
 # input

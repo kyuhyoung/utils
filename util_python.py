@@ -176,6 +176,7 @@ def extract_file_extension(path_file, with_dot):
 #   image related
 ###################################################################################################################
 
+#########################################################################################################
 # Generate a list of (random) colors of the given number
 # first 15 colors : non-random
 # > 15 colors : random between 100 and 255
@@ -211,6 +212,7 @@ def make_color_list(n_class):
                         li_color_bgr += t1 
     return li_color_bgr
 
+#########################################################################################################
 # In most case, the sizes of the original image and the input image of a detection-network are not the same.  
 # So the original image has to be resized and padded with additial borders at either top/bottom or left/right sides
 # This function computes the ratio of either top/bottom or left/right borders against the network input imags.
@@ -241,7 +243,7 @@ def compute_margin_ratio_l_r_t_b(w_h_ori, w_h_net):
 
 
 
-
+#########################################################################################################
 # In most case, the sizes of the original image and the input image of a detection-network are not the same.  
 # So the original image has to be resized and padded with additial borders at either top/bottom or left/right sides (such as using cv2.copyMakeBorder)  
 # After forwarding thru the detection-net, the output is likely to be an array of normalized bonding boxes.  
@@ -276,6 +278,7 @@ def rescale_normalized_bounding_boxes_with_margin_ratio(boxes, li_margin_ratio_l
     return boxes 
 
 
+#########################################################################################################
 # In most case, the sizes of the original image and the input image of a detection-network are not the same.  
 # So the original image has to be resized and padded with additial borders at either top/bottom or left/right sides (such as using cv2.copyMakeBorder)  
 # After forwarding thru the detection-net, the output is likely to be an array of normalized bonding boxes.  
@@ -305,6 +308,7 @@ def convert_bounding_boxes_to_original_image_scale(boxes, li_margin_ratio_l_r_t_
     return boxes
 
 
+#########################################################################################################
 # convert a video (avi, mpeg) to an animaged gif
 # ffmpeg should be installed in prior.
 # input
@@ -315,6 +319,7 @@ def convert_vid_2_animated_gif(fn_vid):
     return os.system('ffmpeg -i {} -r 10 {}'.format(fn_record, os.path.splitext(fn_vid)[0] + '.gif'))     
    
 
+#########################################################################################################
 # check if a file name is that of video file by extension.
 # input
 #    fn : path to the file
@@ -325,9 +330,22 @@ def is_video_file(fn):
     ext = (".3g2", ".3gp", ".asf", ".asx", ".avi", ".flv", ".m2ts", ".mkv", ".mov", ".mp4", ".mpg", ".mpeg", ".rm", ".swf", ".vob", ".wmv")
     return fn.endswith(ext)
 
+#########################################################################################################
+# check if a file name is that of image file by extension.
+# input
+#    fn : path to the file
+# output
+#    boolean whether it is image file or not.   
+
+def is_image_file(fn): 
+    ext = (".bmp", ".ppm", ".png", ".gif", ".jpg", ".jpeg", ".tif", ".pgm")
+    return fn.endswith(ext)
+
+
 #######################################################################################################################################
 ########        opencv related        #######################################################################################
 
+#########################################################################################################
 # open a camera divice or video file using opencv.
 # input
 #    id_cam : string of camera ID or video file path
@@ -361,6 +379,7 @@ def init_cam(id_cam):
 
 import cv2
 
+#########################################################################################################
 def resize_and_pad_border(im_rgb, color_rgb, w_h_desired):
     w_desired, h_desired = w_h_desired
     h_old, w_old = im_rgb.shape[:2]
@@ -381,6 +400,7 @@ def resize_and_pad_border(im_rgb, color_rgb, w_h_desired):
     return im_rgb    
 
 
+#########################################################################################################
 # open a video recorder using opencv.
 # input
 #    fn_vid : video file name
@@ -399,6 +419,7 @@ def make_video_recorder(fn_vid, w_h_vid, fps):
 #######################################################################################################################################
 ########        pytorch related        #######################################################################################
 
+#########################################################################################################
 # make a single image to a mini-batch to a PyTorch network.
 # input
 #    im_bgr : 3d array of color image
@@ -424,6 +445,7 @@ def im2batch(im_bgr, means_bgr, w_h_net):
     return batch_rgb
 
 
+#########################################################################################################
 # draw fps and threshold parameter on an image.
 # input
 #    im_bgr : 3d array of color image
@@ -447,5 +469,5 @@ def compute_and_draw_fps_and_cofidence_threshold(im_bgr, n_processed, sec_start,
     cv2.putText(im_bgr, "fps : {:.1f}".format(fps), (int(wid * 0.5 - 50), int(hei * 0.06)), cv2.FONT_HERSHEY_SIMPLEX, FONT_SCALE_FPS, (0, 0, 255))
     return im_bgr
 
-#######################################################################################################################################
+
     

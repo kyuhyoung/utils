@@ -31,5 +31,7 @@
   * init_cam()
   * resize_and_pad_border()
   * make_video_recorder()
+  * draw_and_show_xyxy_bboxes()
+  * draw_and_show_ltwh_bboxes()  
   * im2batch()
   * compute_and_draw_fps_and_cofidence_threshold()

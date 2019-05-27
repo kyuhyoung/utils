@@ -22,7 +22,7 @@
 #### image related  
   * get_list_of_image_path_under_this_directory()
   * make_color_list()
-  * compute_margin_ratio_l_r_t_b()
+  * compute_margin_ratio_left_top()
   * rescale_normalized_bounding_boxes_with_margin_ratio()
   * convert_bounding_boxes_to_original_image_scale()
   * convert_vid_2_animated_gif()

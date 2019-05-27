@@ -471,11 +471,49 @@ import cv2
 def make_video_recorder(fn_vid, w_h_vid, fps):
     fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
     return cv2.VideoWriter(fn_vid, fourcc, fps, w_h_vid)
-#######################################################################################################################################
 
+#########################################################################################################
+# draw bounding boxes given as xyxy format and show the image with bboxes.
+# input
+#   im_bgr : image with bgr order
+#   li_xyxy : list of bounding box with the format of x_from, y_from, x_to, y_to
+#   wait_ms : time for displaying in milli-seconds.        
+# output
+#   nothing.        
+
+import cv2
+
+def draw_and_show_xyxy_bboxes(im_bgr, li_xyxy, wait_ms=0):
+    for x_from, y_from, x_end, y_end in li_xyxy:
+        im_bgr = cv2.rectangle(im_bgr, (x_from, y_from), (x_end, y_end), (0, 0, 255), 1)
+    cv2.imshow('im_bgr', im_bgr);   cv2.waitKey(wait_ms)  
+    
+
+#########################################################################################################
+# draw bounding boxes given as ltwh format and show the image with bboxes.
+# input
+#   im_bgr : image with bgr order
+#   li_ltwh : list of bounding box with the format of x_left, y_top, width, height
+#   wait_ms : time for displaying in milli-seconds.        
+# output
+#   nothing.        
+
+import cv2
+
+def draw_and_show_ltwh_bboxes(im_bgr, li_ltwh, wait_ms=0):
+    
+    li_xyxy = []
+    for ltwh in li_ltwh:
+        x_from, y_from, wid, hei = ltwh
+        x_end, y_end = x_from + wid - 1, y_from + hei - 1
+        li_xyxy.append((x_from, y_from, x_end, y_end))
+    return draw_and_show_xyxy_bboxes(im_bgr, li_xyxy, wait_ms)
+
+    
 
 #######################################################################################################################################
 ########        pytorch related        #######################################################################################
+#######################################################################################################################################
 
 #########################################################################################################
 # make a single image to a mini-batch to a PyTorch network.

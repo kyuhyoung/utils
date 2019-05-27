@@ -260,22 +260,23 @@ def make_color_list(n_class):
 # output
 #    ratios of left, right, top and bottom margin against the network input image
 
-def compute_margin_ratio_l_r_t_b(w_h_ori, w_h_net):
+def compute_margin_ratio_left_top(w_h_ori, w_h_net):
     w_ori, h_ori = w_h_ori; w_net, h_net = w_h_net;
-    ratio_l, ratio_r, ratio_t, ratio_b = 0, 0, 0, 0
+    ratio_l, ratio_t = 0, 0
     ratio_w = w_net / w_ori
     ratio_h = h_net / h_ori
     if ratio_w > ratio_h:
         ratio = ratio_h
         w_resized = w_ori * ratio
         ratio_l = (w_net - w_resized) / (w_net * 2.0)
-        ratio_r = ratio_l
+        #ratio_r = ratio_l
     else:
         ratio = ratio_w
         h_resized = h_ori * ratio
         ratio_t = (h_net - h_resized) / (h_net * 2.0)
-        ratio_b = ratio_t
-    return [ratio_l, ratio_r, ratio_t, ratio_b]
+        #ratio_b = ratio_t
+    return ratio_l, ratio_t
+    #return [ratio_l, ratio_r, ratio_t, ratio_b]
 
 
 

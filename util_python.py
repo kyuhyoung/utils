@@ -201,7 +201,7 @@ def extract_file_extension(path_file, with_dot):
 
 import os
 def get_immediate_subdirectories(direc):
-    return [name for name in os.listdir(direc) if os.path.isdir(os.path.join(direc, name))]
+    return [os.path.join(direc, name) for name in os.listdir(direc) if os.path.isdir(os.path.join(direc, name))]
 
 ###################################################################################################################
 #   image related

@@ -191,6 +191,17 @@ def extract_file_extension(path_file, with_dot):
     extension_with_dot = os.path.splitext(path_file)
     return extension_with_dot if with_dot else extension_with_dot.split('.')[-1] 
 
+#########################################################################################################
+# input
+#   direc : string of directory path.
+#       ex) '/mnt/d/images'  
+# output
+#   list of string of immediate sub-directories.
+#       ex) ['/mnt/d/images/seq0', '/mnt/d/images/seq1', '/mnt/d/images/seq2'].
+
+import os
+def get_immediate_subdirectories(direc):
+    return [name for name in os.listdir(direc) if os.path.isdir(os.path.join(direc, name))]
 
 ###################################################################################################################
 #   image related

@@ -19,6 +19,8 @@
   * is_this_existing_directory()
   * mkdir_if_not_exist()  
   * extract_file_extension()  
+  * get_immediate_subdirectories()
+  
 #### image related  
   * get_list_of_image_path_under_this_directory()
   * make_color_list()

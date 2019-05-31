@@ -30,7 +30,7 @@
   * convert_vid_2_animated_gif()
   * is_video_file()
   * is_image_file()
-  * init_cam()
+  * init_from_cam_or_video()
   * resize_and_pad_border()
   * make_video_recorder()
   * draw_and_show_xyxy_bboxes()

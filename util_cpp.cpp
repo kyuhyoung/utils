@@ -23,14 +23,13 @@ double what_time_in_seconds_is_it_now()
 	return (double)time.tv_sec + (double)time.tv_usec * .000001;
 }
 
-//------------ Create a directory if it does not exist --------------  
+//------------ Check if the given directory is the existing one --------------  
 #include <sys/stat.h>
-#include <stdio.h>
-bool mkdir_if_not_exist(const char *dir)
+bool is_this_existing_diretory(const char *direc)
 {
     bool is_folder_exist = false;
     struct stat st;
-    if(0 == stat(dir, &st))
+    if(0 == stat(direc, &st))
     {
         if(0 != (st.st_mode & S_IFDIR))
         {
@@ -38,6 +37,15 @@ bool mkdir_if_not_exist(const char *dir)
             printf("%s DOES exist. \n", dir);
         } 
     }
+    return is_folder_exist;	
+}
+
+//------------ Create a directory if it does not exist --------------  
+#include <sys/stat.h>
+#include <stdio.h>
+bool mkdir_if_not_exist(const char *direc)
+{
+    bool is_folder_exist = is_this_existing_folder(direc);
     if(!is_folder_exist)
     {
         int nError = 0;
@@ -71,3 +79,38 @@ void error(const char *s)
     assert(0);
     exit(-1);
 }
+
+//------------ Check if the string is number --------------  
+bool is_only_number(const std::string& s)
+{
+    return !s.empty() && std::find_if(s.begin(), 
+        s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
+}
+
+
+bool is_this_camera_index(const std::string& strin)
+{
+	return 2 >= strin.size() && in_only_number(strin) 	
+}
+	
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+//   OpenCV related
+/////////////////////////////////////////////////////////////////////////////////////////////////
+using namespace cv;
+VideoCapture init_from_cam_or_video(const std::string& strin)
+{
+	VideoCapture cap;
+	if(is_this_camera_index(strin))
+   	{
+		int idx_cam = std::stoi(strin);
+		cap.open(idx_cam);
+	}
+	else
+    {
+		cap.open(strin);	
+	}
+	return cap;
+}
+
+

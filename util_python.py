@@ -404,7 +404,7 @@ def is_image_file(fn):
 import cv2
 
 
-def init_cam(idx_cam_or_video_path):
+def init_from_cam_or_video(idx_cam_or_video_path):
     if is_video_file(idx_cam_or_video_path):
         path_video = idx_cam_or_video_path
         #print('this is video file : ', path_video)
@@ -422,20 +422,7 @@ def init_cam(idx_cam_or_video_path):
     w_h_cam = (int(kam.get(cv2.CAP_PROP_FRAME_WIDTH)), int(kam.get(cv2.CAP_PROP_FRAME_HEIGHT))) # float
     return kam, w_h_cam
 
-
-
-def init_cam(id_cam):
-    if is_video_file(id_cam):
-        #print('this is video file')
-        kam = cv2.VideoCapture(id_cam)    
-    else:
-        kam = cv2.VideoCapture(int(id_cam))
-    if kam is None or not kam.isOpened():
-        print('Unable to open camera ID : ', id_cam);   exit()
-    print('Camera : {} is opened'.format(id_cam))
-    w_h_cam = (int(kam.get(cv2.CAP_PROP_FRAME_WIDTH)), int(kam.get(cv2.CAP_PROP_FRAME_HEIGHT))) # float
-    return kam, w_h_cam   
-    
+ 
     
 # In most case, the sizes of the original image and the input image of a detection-network are not the same.  
 # So the original image has to be resized and padded with additial borders at either top/bottom or left/right sides (such as using cv2.copyMakeBorder)  

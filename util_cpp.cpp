@@ -122,9 +122,9 @@ using namespace cv;
 void set_cam_properties_ocv(VideoCapture *cap, const int& wid, const int& hei, const int& fps)
 {
 	cap->grab();
-	cap->set(CV_CAP_PROP_FRAME_WIDTH, wid);
-	cap->set(CV_CAP_PROP_FRAME_HEIGHT, hei);
-	cap->set(CV_CAP_PROP_FPS, fps);	
+	if(wid > 0) cap->set(CV_CAP_PROP_FRAME_WIDTH, wid);
+	if(hei > 0) cap->set(CV_CAP_PROP_FRAME_HEIGHT, hei);
+	if(fps > 0) cap->set(CV_CAP_PROP_FPS, fps);	
 	return;
 }
 

@@ -9,6 +9,7 @@
   * is_this_camera_index()
 #### OpenCV related  
   * init_from_cam_or_video()
+  * set_cam_properties_ocv
   
   
   

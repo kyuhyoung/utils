@@ -1,9 +1,16 @@
 # utils
 ## util_cpp.cpp : c++ utility functions.
   * python_join_equivalent()
-  * what_time_in_seconds_is_it_now()                                                                       
+  * what_time_in_seconds_is_it_now()    
+  * is_this_existing_directory()
   * mkdir_if_not_exist()
   * error()
+  * is_only_number()
+  * is_this_camera_index()
+#### OpenCV related  
+  * init_from_cam_or_video()
+  
+  
   
 ## util_python.py : python utility functions.
   * count_substring()

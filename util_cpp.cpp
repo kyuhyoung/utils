@@ -97,6 +97,9 @@ bool is_this_camera_index(const std::string& strin)
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //   OpenCV related
 /////////////////////////////////////////////////////////////////////////////////////////////////
+
+//------------ Initialized VideoCapture from either of camera or video file --------------  
+#include "opencv2/highgui.hpp"
 using namespace cv;
 VideoCapture init_from_cam_or_video(const std::string& strin)
 {
@@ -111,6 +114,18 @@ VideoCapture init_from_cam_or_video(const std::string& strin)
 		cap.open(strin);	
 	}
 	return cap;
+}
+
+//------------ Set the camera resolution and FPS --------------  
+#include "opencv2/highgui.hpp"
+using namespace cv;
+void set_cam_properties_ocv(VideoCapture *cap, const int& wid, const int& hei, const int& fps)
+{
+	cap->grab();
+	cap->set(CV_CAP_PROP_FRAME_WIDTH, wid);
+	cap->set(CV_CAP_PROP_FRAME_HEIGHT, hei);
+	cap->set(CV_CAP_PROP_FPS, fps);	
+	return;
 }
 
 

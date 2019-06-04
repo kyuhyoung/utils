@@ -90,7 +90,7 @@ bool is_only_number(const std::string& s)
 
 bool is_this_camera_index(const std::string& strin)
 {
-	return 2 >= strin.size() && in_only_number(strin); 	
+	return 2 >= strin.size() && is_only_number(strin); 	
 }
 	
 

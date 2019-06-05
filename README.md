@@ -10,6 +10,8 @@
 #### OpenCV related  
   * init_from_cam_or_video()
   * set_cam_properties_ocv()
+  * crop_image()
+
   
   
   

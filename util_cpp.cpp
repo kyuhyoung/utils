@@ -130,3 +130,10 @@ void set_cam_properties_ocv(VideoCapture *cap, const int& wid, const int& hei, c
 }
 
 
+//------------ Crop a image then return the subimage --------------  
+Mat crop_image(const Mat& im_ori, const Rect& rect)
+{
+	Mat im_cropped = im_ori(rect);
+	return im_cropped;
+}
+

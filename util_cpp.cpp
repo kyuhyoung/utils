@@ -219,18 +219,23 @@ double angle = -45;
 cv::Point2f center((src.cols-1)/2.0, (src.rows-1)/2.0);
 cv::Mat im_rotated = roatate_image_by_degree(src, center, angle, true);
 */
+
 Mat rotate_image_by_degree(const Mat& im_src, const Point2f& p_center, double angle_deg, bool shall_resize)
 {
 	Mat im_dst, mat_rot = getRotationMatrix2D(p_center, angle_deg, 1.0);
   	if(shall_resize)
   	{
   		Rect2f bbox = RotatedRect(Point2f(), im_src.size(), angle_deg).boundingRect2f();
-  		mat_rot.at<double>(0, 2) += (bbox.width - im_src.cols) / 2.0
-  		mat_rot.at<double>(1, 2) += (bbox.height - im_src.rows) / 2.0
+  		mat_rot.at<double>(0, 2) += (bbox.width - im_src.cols) / 2.0;
+  		mat_rot.at<double>(1, 2) += (bbox.height - im_src.rows) / 2.0;
+  		warpAffine(im_src, im_dst, mat_rot, bbox.size());
+	}
+  	else
+  	{
+  		warpAffine(im_src, im_dst, mat_rot, im_src.size());
   	}
-  	warpAffine(im_src, im_dst, mat_rot, shall_resize ? bbox.size() : im_src.size());
-  	imshow("roated", im_dst);   waitKey();  exit(0);
-  	return im_dst;
+  	imshow("roated", im_dst);   waitKey();  //exit(0);
+	return im_dst;
 }
 
 

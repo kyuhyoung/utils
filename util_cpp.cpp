@@ -213,7 +213,12 @@ Mat concatenate_images(const Mat& img1, const Mat& img2, int horizontal_or_verti
 
 
 //------------ Rotatae an image by a given degrees either with resizing or not	--------------  	
-
+/* Usage
+cv::Mat src = cv::imread("im.png");
+double angle = -45;
+cv::Point2f center((src.cols-1)/2.0, (src.rows-1)/2.0);
+cv::Mat im_rotated = roatate_image_by_degree(src, center, angle, true);
+*/
 Mat rotate_image_by_degree(const Mat& im_src, const Point2f& p_center, double angle_deg, bool shall_resize)
 {
 	Mat im_dst, mat_rot = getRotationMatrix2D(p_center, angle_deg, 1.0);

@@ -15,7 +15,7 @@
   * crop_image()
   * crop_with_center_and_radius()
   * concatenate_images()
-
+  * rotate_image_by_degree(
   
   
   

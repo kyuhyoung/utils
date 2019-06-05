@@ -93,6 +93,22 @@ bool is_this_camera_index(const std::string& strin)
 	return 2 >= strin.size() && is_only_number(strin); 	
 }
 	
+vector<string> split_string_by_delimiter(const string& strin, const string& delimiter)
+{
+	vector<string> li_str;
+	size_t last = 0, next = 0;
+	while ((next = strin.find(delimiter, last)) != string::npos)
+ 	{
+ 		//cout << strin.substr(last, next - last) << endl;
+ 		li_str.push_back(strin.substr(last, next - last));
+ 		last = next + 1;
+ 	}
+ 	//cout << strin.substr(last) << endl;
+ 	li_str.push_back(strin.substr(last));
+ 	return li_str;
+}
+
+
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

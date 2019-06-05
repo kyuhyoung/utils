@@ -137,3 +137,50 @@ Mat crop_image(const Mat& im_ori, const Rect& rect)
 	return im_cropped;
 }
 
+
+Mat concatenate_images(const Mat& img1, const Mat& img2, int horizontal_or_vertical)
+{
+	Mat res;
+	//  Check if the two image have the same # of channels and type
+	//  If # channels or type is different
+	if(img1.type() != img2.type() || img1.channels() != img2.channels())    return res;
+	int rows = img1.rows + img2.rows, cols = img1.cols + img2.cols;
+	bool is_horizontal = true;
+	if(horizontal_or_vertical >= 0)
+	{
+		if(horizontal_or_vertical > 0)
+		{
+			is_horizontal = false;
+		}
+		else if(cols > rows)
+		{
+			is_horizontal = false;
+		}
+	}
+	// Get dimension of final image
+	if(is_horizontal)
+	{
+		rows = max(img1.rows, img2.rows);
+	}
+	else
+	{
+		cols = max(img1.cols, img2.cols);
+ 	}
+ 	// Create a black image
+ 	//res = Mat3b(rows, cols, Vec3b(0,0,0));
+ 	res = Mat::zeros(rows, cols, img1.type());
+ 	// Copy images in correct position
+ 	img1.copyTo(res(Rect(0, 0, img1.cols, img1.rows)));
+	if(is_horizontal)
+ 	{
+ 		img2.copyTo(res(Rect(img1.cols, 0, img2.cols, img2.rows)));
+ 	}
+ 	else
+ 	{
+ 		img2.copyTo(res(Rect(0, img1.rows, img2.cols, img2.rows)));
+ 	}
+ 	//imshow("img1", img1);waitKey();   imshow("img2", img2);   imshow("res", res); waitKey();  exit(0);
+ 	return res;
+}
+
+

@@ -159,9 +159,10 @@ Mat crop_image(const Mat& im_ori, const Rect& rect)
 Mat crop_with_center_and_radius(const Mat& im, const Point2f& p_center, float radius)
 {
 	Point pt1(cvRound(p_center.x - radius), cvRound(p_center.y - radius)),
-	pt2(cvRound(p_center.x + radius), cvRound(p_center.y + radius));
-	Rect rect(pt1, pt2);
-	return crop_image(im, rect);
+  		pt2(cvRound(p_center.x + radius), cvRound(p_center.y + radius));
+  	int side = MIN(pt2.x - pt1.x + 1, pt2.y - pt1.y + 1);
+  	Rect rect(pt1, Size(side, side));
+  	return crop_image(im, rect);
 }
 
 

@@ -155,7 +155,17 @@ Mat crop_image(const Mat& im_ori, const Rect& rect)
 	return im_cropped;	
 }	
 
+//------------ Crop a image as a bunding box of a circle --------------  	
+Mat crop_with_center_and_radius(const Mat& im, const Point2f& p_center, float radius)
+{
+	Point pt1(cvRound(p_center.x - radius), cvRound(p_center.y - radius)),
+	pt2(cvRound(p_center.x + radius), cvRound(p_center.y + radius));
+	Rect rect(pt1, pt2);
+	return crop_image(im, rect);
+}
 
+
+//------------ Crop two images either horizontally or vetically	--------------  	
 Mat concatenate_images(const Mat& img1, const Mat& img2, int horizontal_or_vertical)	
 {	
 	Mat res;	
@@ -200,4 +210,5 @@ Mat concatenate_images(const Mat& img1, const Mat& img2, int horizontal_or_verti
  	//imshow("img1", img1);waitKey();   imshow("img2", img2);   imshow("res", res); waitKey();  exit(0);	
  	return res;	
 }	
+
 

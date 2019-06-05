@@ -7,7 +7,8 @@
   * error()
   * is_only_number()
   * is_this_camera_index()
-  * split_string_by_delimiter
+  * split_string_by_delimiter()
+  
 #### OpenCV related  
   * init_from_cam_or_video()
   * set_cam_properties_ocv()

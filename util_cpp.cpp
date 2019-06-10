@@ -111,6 +111,21 @@ vector<string> split_string_by_delimiter(const string& strin, const string& deli
 	 return li_str;
 }
 
+
+//------------ Convert radians to degrees --------------  
+#define PI 3.14159265
+double rad2deg(double radian)
+{
+    return radian*180/PI;
+}
+
+//------------ Convert degrees to radians --------------  
+#define PI 3.14159265
+double deg2rad(double degree)
+{
+    return degree*PI/180;
+}
+
 	
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

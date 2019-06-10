@@ -8,6 +8,9 @@
   * is_only_number()
   * is_this_camera_index()
   * split_string_by_delimiter()
+  * rad2deg()
+  * deg2rad()
+
   
 #### OpenCV related  
   * init_from_cam_or_video()

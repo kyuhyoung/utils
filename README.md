@@ -67,5 +67,14 @@
   * make_video_recorder()
   * draw_and_show_xyxy_bboxes()
   * draw_and_show_ltwh_bboxes()  
+  * crop_image()
+  * write_one_frame_to_video()
+  * save_one_image_under_directory()
+  
+
+#### Pytorch related  
+
   * im2batch()
   * compute_and_draw_fps_and_cofidence_threshold()
+  * torch_tensor_det_letterbox_2_li_ltwh_ori()
+  * get_class_string_from_torch_tensor()

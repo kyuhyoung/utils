@@ -507,6 +507,59 @@ def draw_and_show_ltwh_bboxes(im_bgr, li_ltwh, wait_ms=0):
         li_xyxy.append((x_from, y_from, x_end, y_end))
     return draw_and_show_xyxy_bboxes(im_bgr, li_xyxy, wait_ms)
 
+
+#########################################################################################################
+#   Generalized version of cropping subimage : The subimage is kind of moving window such like bouncing ball inside the image.  
+#   with 'xy_shift' as '(0, 0)' this becomes a regular image cropping getting subimage of cv2.Rect(xy_previous, wh_cropped)
+def crop_image(im_bgr, xy_previous, xy_shift, wh_cropped):
+# shift x : '+' means from left to right
+#           '-' means from right to left
+# shift y : '+' means from top to bottom
+#           '-' means from bottom to top
+    is_x_bouncing, is_y_bouncing = False, False;
+    h_ori, w_ori = im_bgr.shape[:2]
+    x_prev, y_prev = xy_previous;   w_cropped, h_cropped = wh_cropped;  x_shift, y_shift = xy_shift
+    x_cropped = x_prev + x_shift
+    if x_cropped < 0:
+        x_cropped = float(0)
+        is_x_bouncing = True
+    if x_cropped + w_cropped > w_ori:
+        
+        x_cropped = float(w_ori - w_cropped)
+        is_x_bouncing = True
+    y_cropped = y_prev + y_shift
+    if y_cropped < 0:
+        y_cropped = float(0)
+        is_y_bouncing = True
+    if y_cropped + h_cropped > h_ori:
+        y_cropped = float(h_ori - h_cropped)
+        is_y_bouncing = True
+    xy_previous = [x_cropped, y_cropped]
+    if is_x_bouncing:
+        xy_shift[0] *= -1.0
+    if is_y_bouncing:
+        xy_shift[1] *= -1.0
+    x_cropped_i, y_cropped_i = round_i(x_cropped), round_i(y_cropped)
+    im_bgr_cropped = im_bgr[y_cropped_i : y_cropped_i + h_cropped, x_cropped_i : x_cropped_i + w_cropped]
+    #cv2.rectangle(im_bgr, (x_cropped_i, y_cropped_i), (x_cropped_i + w_cropped, y_cropped_i + h_cropped), (0,       0, 255), 1);  cv2.imshow('cropped', im_bgr)
+    return im_bgr_cropped, xy_previous, xy_shift
+
+#########################################################################################################
+def write_one_frame_to_video(im_bgr, video_writer, dir_vid, id_seq, postphix, fps, wh_img):
+    if video_writer is None:
+        #id_seq = get_last_directory_name(dir_seq);
+        #dir_res = 'result/video/';
+        mkdir_if_not_exist(dir_vid);
+        path_res = full_path_from_dir_id_extension(dir_vid, id_seq + postphix if postphix else id_seq, '.avi')
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+        video_writer = cv2.VideoWriter(path_res, fource, fps, wh_img)
+    video_writer.write(im_bgr);
+    return video_writer
+        
+        
+        
+      
+
     
 
 #######################################################################################################################################
@@ -563,5 +616,42 @@ def compute_and_draw_fps_and_cofidence_threshold(im_bgr, n_processed, sec_start,
     cv2.putText(im_bgr, "fps : {:.1f}".format(fps), (int(wid * 0.5 - 50), int(hei * 0.06)), cv2.FONT_HERSHEY_SIMPLEX, FONT_SCALE_FPS, (0, 0, 255))
     return im_bgr
 
+#########################################################################################################
+#   Convert the detection result as bouding boxes in the letterbox image to those in the original image.
+def torch_tensor_det_letterbox_2_li_ltwh_ori(torch_tensor_det_letterbox, wh_ori, wh_letterbox):
+    li_ltwh_ori = []
+    w_letterbox, h_letterbox = wh_letterbox
+    w_ori, h_ori = wh_ori
+    ratio_ori_over_letterbox = max(w_ori / w_letterbox, h_ori / h_letterbox)
+    ratio_l, ratio_t = compute_margin_ratio_left_top(wh_ori, wh_letterbox)
+    margin_l, margin_t = ratio_l * w_letterbox, ratio_t * h_letterbox
+    n_det, n_attr = torch_tensor_det_letterbox.shape
+    for idx in range(n_det):
+        x_left_letterbox = float(torch_tensor_det_letterbox[idx, 0])
+        x_left_letterbox_no_margin = x_left_letterbox - margin_l
+     
+        x_left_ori = x_left_letterbox_no_margin * ratio_ori_over_letterbox
+        y_top_letterbox = float(torch_tensor_det_letterbox[idx, 1])
+        y_top_letterbox_no_margin = y_top_letterbox - margin_t
+        y_top_ori = y_top_letterbox_no_margin * ratio_ori_over_letterbox
+
+        x_right_letterbox = float(torch_tensor_det_letterbox[idx, 2])
+        x_right_letterbox_no_margin = x_right_letterbox - margin_l
+        x_right_ori = x_right_letterbox_no_margin * ratio_ori_over_letterbox
+        y_bottom_letterbox = float(torch_tensor_det_letterbox[idx, 3])
+        y_bottom_letterbox_no_margin = y_bottom_letterbox - margin_t
+        y_bottom_ori = y_bottom_letterbox_no_margin * ratio_ori_over_letterbox
+
+        wid_ori = x_right_ori - x_left_ori + 1.0
+        hei_ori = y_bottom_ori - y_top_ori + 1.0
+
+        li_ltwh_ori.append([x_left_ori, y_top_ori, wid_ori, hei_ori])
+    return li_ltwh_ori
+
+#########################################################################################################
+#   'idx_class' is the pre-determined index for detected object class
+#   In yolo, 'idx_class' is the last column of 'tensor_det' which can be obtatined by index '-1'
+def get_class_string_from_torch_tensor(tensor_det, li_class, idx_class):
+    return [li_class[int(tensor_det[idx, idx_class])] for idx in range(len(tensor_det))]
 
     

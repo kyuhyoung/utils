@@ -389,6 +389,19 @@ def is_image_file(fn):
     ext = (".bmp", ".ppm", ".png", ".gif", ".jpg", ".jpeg", ".tif", ".pgm")
     return fn.endswith(ext)
 
+#########################################################################################################
+#   print(get_sequence_id_from_directory('/home/someuser/seq_eyedea_104/, true)
+#   => 104
+#   print(get_sequence_id_from_directory('/home/someuser/seq_eyedea_104/, false)
+#   => seq_eyedea_104
+
+def get_sequence_id_from_directory(direc, is_ai_challenge_19):
+    if is_ai_challenge_19:
+        return int(direc.split('_')[-1])
+    else:
+        return os.path.basename(os.path.normpath(direc))
+
+
 
 #######################################################################################################################################
 ########        opencv related        #######################################################################################
@@ -556,7 +569,16 @@ def write_one_frame_to_video(im_bgr, video_writer, dir_vid, id_seq, postphix, fp
     video_writer.write(im_bgr);
     return video_writer
         
-        
+    
+#########################################################################################################
+#def save_one_image_under_directory(im_bgr, id_seq, path_ori_img, postphix):
+def save_one_image_under_directory(im_bgr, dir_save, id_seq, path_ori_img, postphix):
+    #dir_res = os.path.join('result/sequence/', id_seq)
+    dir_res = os.path.join(dir_save, id_seq)
+    mkdir_if_not_exist(dir_res)
+    id_img = get_exact_file_name_from_path(path_ori_img);
+    path_res = full_path_from_dir_id_extension(dir_res, id_img + postphix, 'bmp')
+    cv2.imwrite(path_res, im_bgr);
         
       
 

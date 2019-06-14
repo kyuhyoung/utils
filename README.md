@@ -10,16 +10,31 @@
   * split_string_by_delimiter()
   * rad2deg()
   * deg2rad()
+  * make_string_uppercase()
+  * make_string_lowercase()
+  * is_image_file()
+  * get_last_integer_substring()
+  * get_exact_file_name_from_path()
+  * get_id_of_file_as_number()
+  * get_list_of_image_path_under_this_directory() 
+  
 
   
 #### OpenCV related  
+
+  * draw_rect_with_padding() 
   * init_from_cam_or_video()
   * set_cam_properties_ocv()
   * crop_image()
   * crop_with_center_and_radius()
   * concatenate_images()
   * rotate_image_by_degree()
+  * make_set_of_rotated_square_images()
+  * compute_circle_margin()
+  * image_inside_circle()
   
+  
+
   
   
 ## util_python.py : python utility functions.

@@ -1,3 +1,8 @@
+#######################################################################################################################################
+########        system related        #######################################################################################
+#########################################################################################################
+
+
 #########################################################################################################
 # input
 #   strin : string
@@ -203,6 +208,93 @@ import os
 def get_immediate_subdirectories(direc):
     return sorted([os.path.join(direc, name) for name in os.listdir(direc) if os.path.isdir(os.path.join(direc, name))])
 
+#########################################################################################################
+def flatten(x):
+    if isinstance(x, collections.Iterable):
+        return [a for i in x for a in flatten(i)]
+    else:
+        return [x]
+
+
+#########################################################################################################
+def get_num_gpu_nvidia():
+    cmd = ['nvidia-smi', '--query-gpu=temperature.gpu', '--format=csv,noheader']
+    try:
+        output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+        li_gpu_temperature = output.split()
+        try:
+            n_gpu = len(li_gpu_temperature)
+        except ValueError:
+            n_gpu = 0
+    except:
+        n_gpu = 0
+    return n_gpu
+    
+
+#########################################################################################################
+def get_file_path_if_string_is_a_substring_of_the_path_among_the_list(li_fn, strng):
+    li_path = [fn for fn in li_fn if strng in get_exact_file_name_from_path(fn)]
+    n_file = len(li_path)
+    if len(li_path) > 1:
+        print('There is more than one file whose name includes : ' + strng)
+        sys.exit(1)
+    elif 0 == n_file:
+        print('There is NO such a file whose name includes : ' + strng)
+        return None
+    return li_path[0]
+
+#########################################################################################################
+def find_paths_from_the_list_whose_file_name_is_the_same_as_query(li_path, fn_query):
+    return [path for path in li_path if fn_query == basename(fn)]
+
+#########################################################################################################
+def is_this_file_name_in_the_path_list(li_fn, fn_query):
+    li_path = find_paths_from_the_list_whose_file_name_is_the_same_as_query(li_fn, fn_query)
+    n_same = len(li_path)
+    return n_same > 0
+
+
+#########################################################################################################
+def get_list_of_file_names_with_string_in_multi_directories_of_text_file(txt_li_dir):
+    li_fn = []
+    with open(txt_li_dir) as f:
+        for line in f:
+            line = line.strip()
+            li_str = line.split()
+            n_str = len(li_str)
+            if 3 <= n_str:
+                dir = li_str[0]
+                ext = li_str[1]
+                substring = li_str[2]
+                li_fn_str = \
+                    [join(dir, f) for f in listdir(dir) if (isfile(join(dir, f)) and f.endswith(ext) and substring in f and (not is_this_file_name_in_the_path_list(li_fn, f)))]
+            elif 2 == n_str:
+                dir = li_str[0]
+                ext = li_str[1]
+                li_fn_str = \
+                    [join(dir, f) for f in listdir(dir) if (isfile(join(dir, f)) and f.endswith(ext) and (not is_this_file_name_in_the_path_list(li_fn, f)))]
+            elif 1 == n_str:
+                dir = li_str[0]
+                li_fn_str = \
+                    [join(dir, f) for f in listdir(dir) if (isfile(join(dir, f)) and (not is_this_file_name_in_the_path_list(li_fn, f)))]
+            li_fn += li_fn_str
+    return li_fn
+
+
+#########################################################################################################
+def get_batch_size_as_multiple_of_num_gpu(len_batch):
+    #batch_size = 0
+    n_gpu = get_num_gpu_nvidia()
+    batch_per_gpu_actuall = 0
+    if len_batch >= n_gpu:
+        batch_per_gpu_actuall = int(math.floor(float(len_batch) / float(n_gpu)))
+        #batch_size = batch_per_gpu_actuall * n_gpu
+    return batch_per_gpu_actuall
+
+
+
+
+
 ###################################################################################################################
 #   image related
 ###################################################################################################################
@@ -232,7 +324,7 @@ def get_list_of_image_path_under_this_directory(dir_img, ext = ''):
 # output
 #    li_color_bgr : list of the size [n_class x 3]. It doesn't have to be 'bgr' (It can be 'rgb')
    
-def make_color_list(n_class):
+def genereate_random_color_list(n_class):
     li_color_bgr = []
     li_color_bgr.append((255, 0, 0))
     li_color_bgr.append((0, 255, 0))
@@ -258,6 +350,20 @@ def make_color_list(n_class):
                         t1 = [(random.randint(100, 255), random.randint(100, 255), random.randint(100, 255)) for k in range(more)]
                         li_color_bgr += t1 
     return li_color_bgr
+
+#########################################################################################################
+# input 
+#   r_min   : minimum intensity of red channel
+#   g_min   : minimum intensity of green channel
+#   b_min   : minimum intensity of blue channel
+# output
+#    tuple of random rgb values.
+def gen_random_color_bgr(r_min, g_min, b_min):
+    rr = np.random.randint(r_min, 256)
+    gg = np.random.randint(g_min, 256)
+    bb = np.random.randint(b_min, 256)
+    return (rr, gg, bb)
+
 
 #########################################################################################################
 # In most case, the sizes of the original image and the input image of a detection-network are not the same.  
@@ -402,9 +508,123 @@ def get_sequence_id_from_directory(direc, is_ai_challenge_19):
         return os.path.basename(os.path.normpath(direc))
 
 
+#########################################################################################################
+#   Generalized version of cropping subimage : The subimage is kind of moving window such like bouncing ball inside the image.  
+#   with 'xy_shift' as '(0, 0)' this becomes a regular image cropping getting subimage of cv2.Rect(xy_previous, wh_cropped)
+def crop_image(im_bgr, xy_previous, xy_shift, wh_cropped):
+# shift x : '+' means from left to right
+#           '-' means from right to left
+# shift y : '+' means from top to bottom
+#           '-' means from bottom to top
+    is_x_bouncing, is_y_bouncing = False, False;
+    h_ori, w_ori = im_bgr.shape[:2]
+    x_prev, y_prev = xy_previous;   w_cropped, h_cropped = wh_cropped;  x_shift, y_shift = xy_shift
+    x_cropped = x_prev + x_shift
+    if x_cropped < 0:
+        x_cropped = float(0)
+        is_x_bouncing = True
+    if x_cropped + w_cropped > w_ori:
+        
+        x_cropped = float(w_ori - w_cropped)
+        is_x_bouncing = True
+    y_cropped = y_prev + y_shift
+    if y_cropped < 0:
+        y_cropped = float(0)
+        is_y_bouncing = True
+    if y_cropped + h_cropped > h_ori:
+        y_cropped = float(h_ori - h_cropped)
+        is_y_bouncing = True
+    xy_previous = [x_cropped, y_cropped]
+    if is_x_bouncing:
+        xy_shift[0] *= -1.0
+    if is_y_bouncing:
+        xy_shift[1] *= -1.0
+    x_cropped_i, y_cropped_i = round_i(x_cropped), round_i(y_cropped)
+    im_bgr_cropped = im_bgr[y_cropped_i : y_cropped_i + h_cropped, x_cropped_i : x_cropped_i + w_cropped]
+    #cv2.rectangle(im_bgr, (x_cropped_i, y_cropped_i), (x_cropped_i + w_cropped, y_cropped_i + h_cropped), (0,       0, 255), 1);  cv2.imshow('cropped', im_bgr)
+    return im_bgr_cropped, xy_previous, xy_shift
+
+
+#########################################################################################################
+def compute_optical_density(intensity, intensity_0):
+    t1 = np.maximum(1., intensity.astype(float))
+    #t6 = np.max(t1)
+    #t7 = np.min(t1)
+    t2 = t1 / intensity_0
+    #t8 = np.max(t2)
+    #t9 = np.min(t2)
+    t3 = -np.log(t2)
+    #t10 = np.max(t3)
+    #t11 = np.min(t3)
+    return t3
+
+
+#########################################################################################################
+def get_image_size_from_list_of_contour(li_li_point, margin):
+    x_margin, y_margin = margin
+    li_xy = flatten(li_li_point)
+    li_x, li_y = li_xy[::2], li_xy[1::2]
+    w_img = int(round(max(li_x) + x_margin))
+    h_img = int(round(max(li_y) + y_margin))
+    return (w_img, h_img)
+
+#########################################################################################################
+def convert_list_of_contour_2_opencv_contours(li_li_point):
+    contours = []
+    for li_point in li_li_point:
+        li_point_int = [[int(round(point[0])), int(round(point[1]))] for point in li_point]
+        contour = np.array(li_point_int, dtype=np.int32)
+        contours.append(contour)
+#        contours = [numpy.array([[1, 1], [10, 50], [50, 50]], dtype=numpy.int32),
+#                numpy.array([[99, 99], [99, 60], [60, 99]], dtype=numpy.int32)]
+    return contours
+
+#########################################################################################################
+def resize_if_necessary(im, r_x, r_y, min_r):
+    if r_x < min_r or r_y < min_r:
+        ratio = min(r_x, r_y)
+        im = cv2.resize(im, None, fx = ratio, fy = ratio)
+    return im, im.shape[1], im.shape[0]
+
+#########################################################################################################
+def compute_bounding_box_of_non_zero_pixels(im_bool):
+    ar_y, ar_x = np.nonzero(im_bool)
+    x_min = min(ar_x)
+    x_max = max(ar_x)
+    y_min = min(ar_y)
+    y_max = max(ar_y)
+    return (x_min, y_min), (x_max, y_max)
+
+
+#########################################################################################################
+def generate_tiled_tif(fn_img, shall_remove_non_tif, postfix):
+    #fn_tif = marked_image_path.replace('.untiled.tif', '.mark.tif')
+    if None == postfix:
+        fn_tif = os.path.splitext(fn_img)[0] + '.tif'
+    else:
+        fn_tif = os.path.splitext(fn_img)[0] + '_' + postfix + '.tif'
+    cmd = 'vips tiffsave "%s" "%s" --compression=jpeg --vips-progress --tile --pyramid --tile-width=240 --tile-height=240' % (fn_img, fn_tif)
+    #print(cmd)
+    call(cmd, shell=True)
+    if shall_remove_non_tif:
+        os.remove(fn_img)
+        
+        
+#########################################################################################################
+def generate_tiled_tif_2(fn_img, fn_result, postfix):
+    #file_name_only = get_exact_file_name_from_path(fn_img)
+    #fn_tif = marked_image_path.replace('.untiled.tif', '.mark.tif')
+    fn_tif = fn_result + '.' + postfix + '.tif'
+    cmd = 'vips tiffsave "%s" "%s" --compression=jpeg --vips-progress --tile --pyramid --tile-width=240 --tile-height=240' % (fn_img, fn_tif)
+    #print(cmd)
+    call(cmd, shell=True)
+
+
 
 #######################################################################################################################################
 ########        opencv related        #######################################################################################
+#########################################################################################################
+
 
 #########################################################################################################
 # open a camera divice or video file using opencv.
@@ -522,42 +742,6 @@ def draw_and_show_ltwh_bboxes(im_bgr, li_ltwh, wait_ms=0):
 
 
 #########################################################################################################
-#   Generalized version of cropping subimage : The subimage is kind of moving window such like bouncing ball inside the image.  
-#   with 'xy_shift' as '(0, 0)' this becomes a regular image cropping getting subimage of cv2.Rect(xy_previous, wh_cropped)
-def crop_image(im_bgr, xy_previous, xy_shift, wh_cropped):
-# shift x : '+' means from left to right
-#           '-' means from right to left
-# shift y : '+' means from top to bottom
-#           '-' means from bottom to top
-    is_x_bouncing, is_y_bouncing = False, False;
-    h_ori, w_ori = im_bgr.shape[:2]
-    x_prev, y_prev = xy_previous;   w_cropped, h_cropped = wh_cropped;  x_shift, y_shift = xy_shift
-    x_cropped = x_prev + x_shift
-    if x_cropped < 0:
-        x_cropped = float(0)
-        is_x_bouncing = True
-    if x_cropped + w_cropped > w_ori:
-        
-        x_cropped = float(w_ori - w_cropped)
-        is_x_bouncing = True
-    y_cropped = y_prev + y_shift
-    if y_cropped < 0:
-        y_cropped = float(0)
-        is_y_bouncing = True
-    if y_cropped + h_cropped > h_ori:
-        y_cropped = float(h_ori - h_cropped)
-        is_y_bouncing = True
-    xy_previous = [x_cropped, y_cropped]
-    if is_x_bouncing:
-        xy_shift[0] *= -1.0
-    if is_y_bouncing:
-        xy_shift[1] *= -1.0
-    x_cropped_i, y_cropped_i = round_i(x_cropped), round_i(y_cropped)
-    im_bgr_cropped = im_bgr[y_cropped_i : y_cropped_i + h_cropped, x_cropped_i : x_cropped_i + w_cropped]
-    #cv2.rectangle(im_bgr, (x_cropped_i, y_cropped_i), (x_cropped_i + w_cropped, y_cropped_i + h_cropped), (0,       0, 255), 1);  cv2.imshow('cropped', im_bgr)
-    return im_bgr_cropped, xy_previous, xy_shift
-
-#########################################################################################################
 def write_one_frame_to_video(im_bgr, video_writer, dir_vid, id_seq, postphix, fps, wh_img):
     if video_writer is None:
         #id_seq = get_last_directory_name(dir_seq);
@@ -582,7 +766,78 @@ def save_one_image_under_directory(im_bgr, dir_save, id_seq, path_ori_img, postp
         
       
 
+#######################################################################################################################################
+########        skimage related        #######################################################################################
+#########################################################################################################
+
+
+#########################################################################################################
+from skimage.filters import threshold_otsu
+def otsu_thresholding(im_float, scale_otsu = 1.0):
+    print ('threshold_otsu')
+    threshold_global_Otsu = threshold_otsu(im_float)
+    threshold_global_Otsu *= scale_otsu
+    #   thresholding을 한다.
+    im_bool = im_float >= threshold_global_Otsu
+    return im_bool
     
+    
+#########################################################################################################
+from skimage.transform.integral import integrate
+def get_sum_of_rectangle(im_int, x, y, w, h):
+    x_f = round_i(x)
+    y_f = round_i(y)
+    x_t = round_i(x + w) - 1
+    y_t = round_i(y + h) - 1
+    area =  integrate(im_int, y_f, x_f, y_t, x_t)
+    if isinstance(area, (collections.Sequence, np.ndarray)):
+        return area[0]
+    else:
+        return area
+
+    
+#########################################################################################################
+def is_this_rect_belong_2_blob(im_int, x, y, wid, hei, th_occ_rate):
+    h_int, w_int = im_int.shape
+    if x + wid < w_int and y + hei < h_int:
+        #   점유도를 구한다.
+        #im_integral, y_from, x_from, y_to, x_to
+        area = get_sum_of_rectangle(im_int, x, y, wid, hei)
+        area_tile = wid * hei
+        r_occu = float(area) / float(area_tile)
+    else:
+        r_occu = 0
+    #   점유도가 충분히 크면
+    return r_occu >= th_occ_rate, r_occu
+
+
+#########################################################################################################
+def is_this_patch_below_threshold(im_e_i, th_n_pxl, x_f, y_f, wid, hei):
+    n_pixel = get_sum_of_rectangle(im_e_i, x_f, y_f, wid, hei)
+    return n_pixel < th_n_pxl
+
+#########################################################################################################
+def is_this_patch_below_or_equal_to_threshold(im_e_i, th_n_pxl, x_f, y_f, wid, hei):
+    n_pixel = get_sum_of_rectangle(im_e_i, x_f, y_f, wid, hei)
+    return n_pixel <= th_n_pxl
+
+#########################################################################################################
+def is_this_patch_above_threshold(im_e_i, th_n_pxl, x_f, y_f, wid, hei):
+    return (not is_this_patch_below_or_equal_to_threshold(im_e_i, th_n_pxl, x_f, y_f, wid, hei))
+
+#########################################################################################################
+def is_this_patch_above_or_equal_to_threshold(im_e_i, th_n_pxl, x_f, y_f, wid, hei):
+    return (not is_this_patch_below_threshold(im_e_i, th_n_pxl, x_f, y_f, wid, hei))
+
+#########################################################################################################
+def compute_edge_integral(im_rgb, th_Canny_1 = 130, th_Canny_2 = 230):
+    im_tissue_gray = cv2.cvtColor(im_rgb, cv2.COLOR_RGB2GRAY)
+    im_edge_255 = cv2.Canny(im_tissue_gray, th_Canny_1, th_Canny_2)
+    _, im_edge_bin = cv2.threshold(im_edge_255, 1, 1, cv2.THRESH_BINARY)
+    im_uint64_edge_integral = integral_image(im_edge_bin)
+    return im_uint64_edge_integral, im_edge_bin
+
+
 
 #######################################################################################################################################
 ########        pytorch related        #######################################################################################

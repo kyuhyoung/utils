@@ -28,7 +28,7 @@ double what_time_in_seconds_is_it_now()
 
 //------------ Check if the given directory is the existing one --------------  
 #include <sys/stat.h>
-bool is_this_existing_diretory(const char *direc)
+bool is_this_existing_directory(const char *direc)
 {
     bool is_folder_exist = false;
     struct stat st;
@@ -48,7 +48,7 @@ bool is_this_existing_diretory(const char *direc)
 #include <stdio.h>
 bool mkdir_if_not_exist(const char *direc)
 {
-    bool is_folder_exist = is_this_existing_folder(direc);
+    bool is_folder_exist = is_this_existing_directory(direc);
     if(!is_folder_exist)
     {
         int nError = 0;

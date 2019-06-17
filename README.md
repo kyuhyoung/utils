@@ -1,5 +1,8 @@
 # utils
 ## util_cpp.cpp : c++ utility functions.
+
+#### system related  
+
   * python_join_equivalent()
   * what_time_in_seconds_is_it_now()    
   * is_this_existing_directory()
@@ -38,6 +41,9 @@
   
   
 ## util_python.py : python utility functions.
+
+#### system related  
+
   * count_substring()
   * is_only_letter()
   * is_only_number()
@@ -52,25 +58,55 @@
   * mkdir_if_not_exist()  
   * extract_file_extension()  
   * get_immediate_subdirectories()
-  
+  * flatten()
+  * get_num_gpu_nvidia()
+  * get_file_path_if_string_is_a_substring_of_the_path_among_the_list()
+  * find_paths_from_the_list_whose_file_name_is_the_same_as_query()
+  * is_this_file_name_in_the_path_list()
+  * get_list_of_file_names_with_string_in_multi_directories_of_text_file()
+  * get_batch_size_as_multiple_of_num_gpu()
+
+
+
 #### image related  
   * get_list_of_image_path_under_this_directory()
-  * make_color_list()
+  * genereate_random_color_list()
+  * gen_random_color_bgr()
   * compute_margin_ratio_left_top()
   * rescale_normalized_bounding_boxes_with_margin_ratio()
   * convert_bounding_boxes_to_original_image_scale()
   * convert_vid_2_animated_gif()
   * is_video_file()
   * is_image_file()
+  * crop_image()
+  * compute_optical_density()
+  * get_image_size_from_list_of_contour()
+  * convert_list_of_contour_2_opencv_contours()
+  * resize_if_necessary()
+  * compute_bounding_box_of_non_zero_pixels()
+  * generate_tiled_tif()
+  * generate_tiled_tif_2()
+
+  
+#### OpenCV related   
   * init_from_cam_or_video()
   * resize_and_pad_border()
   * make_video_recorder()
   * draw_and_show_xyxy_bboxes()
   * draw_and_show_ltwh_bboxes()  
-  * crop_image()
   * write_one_frame_to_video()
   * save_one_image_under_directory()
   
+#### skimage related  
+  * otsu_thresholding()
+  * get_sum_of_rectangle()
+  * is_this_rect_belong_2_blob()
+  * is_this_patch_below_threshold()
+  * is_this_patch_below_or_equal_to_threshold()
+  * is_this_patch_above_threshold()
+  * is_this_patch_above_or_equal_to_threshold()
+  * compute_edge_integral()
+
 
 #### Pytorch related  
 

@@ -37,7 +37,7 @@ bool is_this_existing_directory(const char *direc)
         if(0 != (st.st_mode & S_IFDIR))
         {
             is_folder_exist = true;
-            printf("%s DOES exist. \n", dir);
+            printf("%s DOES exist. \n", direc);
         } 
     }
     return is_folder_exist;	

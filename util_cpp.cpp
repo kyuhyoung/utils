@@ -53,20 +53,20 @@ bool mkdir_if_not_exist(const char *direc)
     {
         int nError = 0;
 #if defined(_WIN32)
-        nError = _mkdir(dir);
+        nError = _mkdir(direc);
 #else
         mode_t nMode = 0733;    //UNIX style permission
-        nError = mkdir(dir, nMode);
+        nError = mkdir(direc, nMode);
 #endif
         if(0 != nError)
         {
             // handle your error
-            printf("Can NOT make a directory %s\n", dir);
+            printf("Can NOT make a directory %s\n", direc);
         }
         else
         {
             is_folder_exist = true;
-            printf("Just created a directory %s\n", dir);
+            printf("Just created a directory %s\n", direc);
         }
     }
     return is_folder_exist;

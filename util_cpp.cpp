@@ -244,6 +244,8 @@ int get_id_of_file_as_number(const string& fn)
 //	vector<string> li_fn_img = li_get_list_of_image_path_under_this_directory("/home/someuser/somefolder/", 412, 414);
 //	for(int i = 0; i < li_fn_img.size(); i++) cout << li_fn_img[i] << " ";
 //	=> /home/someuser/somefolder/img412.bmp /home/someuser/somefolder/img413.png /home/someuser/somefolder/img414.jpg 
+#include <experimental/filesystem>  // this requires to use "-lstdc++fs" as a library in Makefile.
+namespace fs = std::experimental::filesystem;
 vector<string> get_list_of_image_path_under_this_directory(const string& dir_img, int id_frm_start, int id_frm_last)
 {
 	vector<string> li;

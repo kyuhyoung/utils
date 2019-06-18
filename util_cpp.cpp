@@ -1,5 +1,8 @@
-//------------ c++ counterpart of python function "join" --------------  
-// make시 -std=c++11 또는 -std=gnu++11 옵션을 주어야 함.
+//------------ c++ counterpart of python function "join" -------------- 
+//	experimental::filesystem linker error 시
+//	Makefile에 -lstdc++fs 옵션을 주어야 함.
+//	https://stackoverflow.com/questions/33149878/experimentalfilesystem-linker-error
+//
 //	cout << python_join_equivalent("/home/someuser/", "/somefolder/somefile.somext");
 //	=> /home/someuser/somefolder/somefile.somext
 

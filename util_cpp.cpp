@@ -269,6 +269,16 @@ vector<string> get_list_of_image_path_under_this_directory(const string& dir_img
 //   OpenCV related
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+//------------ pad_image  -------------- 
+Mat pad_image(const Mat& im_ori, int pad_l, int pad_r, int pad_t, int pad_b)
+{
+	if(0 >= pad_l || 0 >= pad_r || 0 >= pad_t || 0 >= pad_b) 
+	{	cout << "Padding is NOT applied due to inappropriate margins given" << endl; return im_ori;	}
+	Mat im_padded = Mat::zeros(im_ori.rows + pad_t + pad_b, im_ori.cols + pad_l + pad_r, im_ori.type());
+ 	im_ori.copyTo(im_padded(Rect(pad_l, pad_t, im_ori.cols, im_ori.rows)));
+	return im_padded;
+}	
+
 
 //------------ Generalized version of draw rectangle  -------------- 
 //	'pt_ul' and 'pt_lr' are updated variables to determine 'pad_l', 'pad_r', 'pad_t' and 'pad_b'. 
@@ -300,9 +310,12 @@ Mat draw_rect_with_padding(Point *pt_ul, Point *pt_lr, const Mat& im_bgr, const 
 	Mat im_bgr_padded;
 	if(need_padding)
  	{
+		im_bgr_padded = pad_image(im_bgr, pad_l, pad_r, pad_t, pad_b);
+		/*
 		im_bgr_padded = Mat::zeros(im_bgr.rows + pad_t + pad_b, im_bgr.cols + pad_l + pad_r, im_bgr.type());
  		im_bgr.copyTo(im_bgr_padded(Rect(pad_l, pad_t, im_bgr.cols, im_bgr.rows)));
- 		rectangle(im_bgr_padded, Rect(roi.x + pad_l, roi.y + pad_t, roi.width, roi.height), color_bgr, thick, 8);
+ 		*/
+		rectangle(im_bgr_padded, Rect(roi.x + pad_l, roi.y + pad_t, roi.width, roi.height), color_bgr, thick, 8);
  	}
  	else
  	{

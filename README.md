@@ -25,6 +25,7 @@
   
 #### OpenCV related  
 
+  * pad_image()
   * draw_rect_with_padding() 
   * init_from_cam_or_video()
   * set_cam_properties_ocv()

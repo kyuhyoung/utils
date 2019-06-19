@@ -27,7 +27,7 @@
 
   * pad_image()
   * draw_rect_with_padding() 
-  * init_from_cam_or_video()
+  * init_from_cam_or_video_or_directory()
   * set_cam_properties_ocv()
   * crop_image()
   * crop_with_center_and_radius()
@@ -36,6 +36,7 @@
   * make_set_of_rotated_square_images()
   * compute_circle_margin()
   * image_inside_circle()
+  * concatenate_images_from_seqeunces_into_video_or_sequence()
   
   
 

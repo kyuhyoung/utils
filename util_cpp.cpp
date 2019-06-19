@@ -328,18 +328,22 @@ Mat draw_rect_with_padding(Point *pt_ul, Point *pt_lr, const Mat& im_bgr, const 
 	
 	
 //------------ Initialized VideoCapture from either of camera or video file --------------  
+//	init_from_cam_or_video_or_directory("0") //	for camera
+//	init_from_cam_or_video_or_directory("/home/folder/aaa.avi") //	for video file
+//	init_from_cam_or_video_or_directory("/home/folder/%03.bmp") //	for image sequence /home/folder/001.bmp, /home/folder/002.bmp, etc.
+
 #include "opencv2/highgui.hpp"
 using namespace cv;
-VideoCapture init_from_cam_or_video(const std::string& strin)
+VideoCapture init_from_cam_or_video_or_directory(const std::string& strin)
 {
 	VideoCapture cap;
 	if(is_this_camera_index(strin))
-   	{
+	{
 		int idx_cam = std::stoi(strin);
 		cap.open(idx_cam);
 	}
 	else
-    {
+  {
 		cap.open(strin);	
 	}
 	return cap;
@@ -566,6 +570,101 @@ Mat image_inside_circle(const Mat& im_bin0255, float portion_center, float th_ra
 	//waitKey();  //exit(0);
 	return im_bin0255_inside_circle_wo_circle;
 }
+
+
+
+0 void sort_two_seqs_as_first_seq_sorted(vector<vector<int>>& li_li_int, vector<vector<string>>& li_li_string)
+301 {
+302     int n_seq = li_li_int.size();
+303     for(int iS = 0; iS < n_seq; iS++)
+304     {
+305         auto p = sort_permutation(li_li_int[iS], [](int const& a, int const& b) {return a < b;});
+306         apply_permutation_in_place(li_li_int[iS], p);
+307         apply_permutation_in_place(li_li_string[iS], p);
+308     }
+309     return;
+310 }
+
+
+//-----------------------------------------------------------------------------------------------------  
+//	vector<vector<int> li_li_id;
+//	vector<int> li_id({ 1, 3, 4, 5, 7, 8, 9 });	
+//	vector<string> li_path_2({ "/home/dir2/000.bmp", "/home/dir2/002.bmp", "/home/dir2/003.bmp" });	
+//	vector<string> li_path_3({ "/home/dir3/002.bmp", "/home/dir3/003.bmp", "/home/dir3/004.bmp" });
+
+bool get_next_index(vector<int>& li_idx, const vector<vector<int>>& li_li_id)
+{
+	bool is_the_end = false;
+	int is_max = -1, id_max = -1000000, n_seq = li_idx.size();
+	while(!is_the_end)
+	{
+		int id_min = 1000000;
+		for(int iS = 0; iS < n_seq; iS++)
+		{
+			if(iS == is_max) continue;
+			int idx_cur = li_idx[iS] + 1, n_elem = li_li_id[iS].size();
+			if(idx_cur == n_elem)
+			{
+				is_the_end = true;  break;
+			}
+			li_idx[iS] = idx_cur;
+			int id_cur = li_li_id[iS][idx_cur];
+			if(id_cur < id_min) id_min = id_cur;
+			if(id_cur > id_max)
+			{
+				id_max = id_cur;
+				is_max = iS;
+			}
+		}
+		if(is_the_end) break;
+		cout << "id_max : " << id_max << ", id_min : " << id_min << endl;
+		if(id_max == id_min) break;
+	}
+	cout << "is_the_end : " << is_the_end << endl;  //exit(0);
+	return !is_the_end;
+}
+			
+			
+//-----------------------------------------------------------------------------------------------------  
+//	vector<vector<string>> li_li_path;
+//	vector<string> li_path_1({ "/home/dir1/001.bmp", "/home/dir1/002.bmp", "/home/dir1/003.bmp" });	
+//	vector<string> li_path_2({ "/home/dir2/000.bmp", "/home/dir2/002.bmp", "/home/dir2/003.bmp" });	
+//	vector<string> li_path_3({ "/home/dir3/002.bmp", "/home/dir3/003.bmp", "/home/dir3/004.bmp" });
+//	li_li_path.push_back(li_path_1);	li_li_path.push_back(li_path_2);	li_li_path.push_back(li_path_3);
+//	concatenate_images_from_seqeunces_into_video_or_sequence(li_li_path, -1, true, "/home/dir4/");
+//	=> The video of concatenated images are saved at : /home/dir4/output.avi
+//	=> The first frame of the video is composed of "/home/dir1/002.bmp", "/home/dir2/002.bmp" and "/home/dir2/002.bmp".   
+//	=> The second(which is the last) frame of the video is composed of "/home/dir1/003.bmp", "/home/dir2/003.bmp" and "/home/dir3/003.bmp".   
+void concatenate_images_from_seqeunces_into_video_or_sequence(vector< vector<string> >& li_li_path, 
+							      int hori_minus_vert_plus, bool save_as_video, const string& dir_save)
+{
+	vector<vector<int> > li_li_id = get_list_of_list_of_ids_as_number(li_li_path);
+	sort_two_seqs_as_first_seq_sorted(li_li_id, li_li_path);
+	int iF = 0, n_seq = li_li_path.size(), cv_read_flag =
+		is_all_seq_gray(li_li_path) ? CV_LOAD_IMAGE_GRAYSCALE : CV_LOAD_IMAGE_COLOR;
+	vector<int> li_idx(n_seq, -1);
+	VideoWriter vw;
+	mkdir_if_not_exist(dir_save.c_str());
+	string path_vid = python_join_equivalent(dir_save, "output.avi");
+     	while(get_next_index(li_idx, li_li_id))
+	{
+		int idx = li_idx[0];
+		string fn = li_li_path[0][idx];
+		Mat im_cur = imread(fn, cv_read_flag);
+		for(int iS = 1; iS < n_seq; iS++)
+		{
+			idx = li_idx[iS];
+			fn = li_li_path[iS][idx];
+			im_cur = concatenate_images(im_cur, imread(fn, cv_read_flag), hori_minus_vert_plus);
+		}
+         	if(save_as_video) vw = write_one_frame_to_video(vw, im_cur, 0 == iF, path_vid, 30, 1000);
+		else save_one_image_under_directory(im_cur, dir_save, "comparision_");
+		iF++;
+	}
+	if(save_as_video) { cout << "concatenated video has just saved at : " << path_vid << endl;  vw.release(); }
+}
+	
+
 	
 		
 

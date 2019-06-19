@@ -243,6 +243,37 @@ int get_id_of_file_as_number(const string& fn)
 	return get_last_integer_substring(fn_wo_ext);
 }
 
+
+//---------------------------------------------------------------------
+//	vector<vector<string>> li_li_path;
+//	vector<string> li_path_1({ "/home/dir1/001.bmp", "/home/dir1/002.bmp", "/home/dir1/003.bmp" });	
+//	vector<string> li_path_2({ "/home/dir2/000.bmp", "/home/dir2/002.bmp", "/home/dir2/003.bmp" });	
+//	vector<string> li_path_3({ "/home/dir3/002.bmp", "/home/dir3/003.bmp", "/home/dir3/004.bmp" });
+//	li_li_path.push_back(li_path_1);	li_li_path.push_back(li_path_2);	li_li_path.push_back(li_path_3);
+//	vector<vector<int>> li_li_id = get_list_of_list_of_ids_as_number(li_li_path);
+//	for(int i1 = 0; i1 < li_li_id.size(); i1++) 
+//	{ 
+//		for(int i2 = 0; i2 < li_li_id[i1].size(); i2++) cout << li_li_id[i1][i2] << ", ";
+//		cout << endl; 
+//	}
+//	=> 1, 2, 3 
+//	=> 0, 2, 3 
+//	=> 2, 3, 4 
+
+vector< vector<int> > get_list_of_list_of_ids_as_number(const vector< vector<string> >& li_li_path)
+{
+	vector< vector<int> > li_li_id;
+ 	for(int iL = 0; iL < li_li_path.size(); iL++)
+ 	{
+ 		vector<int> li_id;
+ 		for(int iP = 0; iP < li_li_path[iL].size(); iP++) li_id.push_back(get_id_of_file_as_number(li_li_path[iL][iP]));
+ 		li_li_id.push_back(li_id);
+ 	}
+ 	return li_li_id;
+}
+
+
+
 //------------ get_list_of_image_path_under_this_directory --------------
 //	vector<string> li_fn_img = li_get_list_of_image_path_under_this_directory("/home/someuser/somefolder/", 412, 414);
 //	for(int i = 0; i < li_fn_img.size(); i++) cout << li_fn_img[i] << " ";
@@ -543,9 +574,7 @@ Mat image_inside_circle(const Mat& im_bin0255, float portion_center, float th_ra
 	margin_l = compute_circle_margin(im_bin0255, ratio_circle, h_half, th_ratio, portion_center, 0, "left");
 	margin_r = compute_circle_margin(im_bin0255, ratio_circle, h_half, th_ratio, portion_center, 1, "right");
 	margin_t = compute_circle_margin(im_bin0255, ratio_circle, w_half, th_ratio, portion_center, 2, "top");
-	
-		
-    margin_b = compute_circle_margin(im_bin0255, ratio_circle, w_half, th_ratio, portion_center, 3, "bottom");
+	margin_b = compute_circle_margin(im_bin0255, ratio_circle, w_half, th_ratio, portion_center, 3, "bottom");
 	Rect rect(margin_l, margin_t, im_bin0255.cols - margin_r - margin_l, im_bin0255.rows - margin_b - margin_t);
 	if(0 == side)
 	{
@@ -559,7 +588,7 @@ Mat image_inside_circle(const Mat& im_bin0255, float portion_center, float th_ra
 		threshold(im_bin0255_inside_circle, im_bin0255_inside_circle, 0, 255, THRESH_OTSU);
 		//show_image("im_bin0255_inside_circle_after", im_bin0255_inside_circle); //waitKey();  //exit(0);
 	}	
-    Point2f p_center(0.5 * (im_bin0255_inside_circle.cols - 1), 0.5 * (im_bin0255_inside_circle.rows - 1));
+	Point2f p_center(0.5 * (im_bin0255_inside_circle.cols - 1), 0.5 * (im_bin0255_inside_circle.rows - 1));
 	Mat im_bin0255_circle = Mat::zeros(im_bin0255_inside_circle.size(), im_bin0255_inside_circle.type());
 	float radius = MIN(im_bin0255_inside_circle.rows * 0.5 - 2, im_bin0255_inside_circle.cols * 0.5 - 2);
 	circle(im_bin0255_circle, p_center, radius, Scalar(255, 255, 255), -1);
@@ -572,25 +601,32 @@ Mat image_inside_circle(const Mat& im_bin0255, float portion_center, float th_ra
 }
 
 
-
-0 void sort_two_seqs_as_first_seq_sorted(vector<vector<int>>& li_li_int, vector<vector<string>>& li_li_string)
-301 {
-302     int n_seq = li_li_int.size();
-303     for(int iS = 0; iS < n_seq; iS++)
-304     {
-305         auto p = sort_permutation(li_li_int[iS], [](int const& a, int const& b) {return a < b;});
-306         apply_permutation_in_place(li_li_int[iS], p);
-307         apply_permutation_in_place(li_li_string[iS], p);
-308     }
-309     return;
-310 }
-
+//-----------------------------------------------------------------------------------------------------  
+//	vector<int> li_int({4, 1, 3, 2});
+//	vector<string> li_string({"aa", "bb", "cc", "dd"});
+//	sort_two_seqs_as_first_seq_sorted(li_int, li_string, true);
+//	=> li_int : 1, 2, 3, 4 and li_string : "bb", "dd", "cc", "aa" 
+//	sort_two_seqs_as_first_seq_sorted(li_int, li_string, false);
+//	=> li_int : 4, 3, 2, 1 and li_string : "aa", "cc", "dd", "bb"  
+	
+void sort_two_seqs_as_first_seq_sorted(vector<int>& li_int, vector<string>& li_string, bool is_descending)
+{
+	auto p = sort_permutation(li_int, [](int const& a, int const& b) {return is_descending ? a < b : a > b;});
+	apply_permutation_in_place(li_int, p);
+	apply_permutation_in_place(li_string, p);
+}
 
 //-----------------------------------------------------------------------------------------------------  
+//	vector<int> li_idx({ 1, 3, 2 });	
 //	vector<vector<int> li_li_id;
-//	vector<int> li_id({ 1, 3, 4, 5, 7, 8, 9 });	
-//	vector<string> li_path_2({ "/home/dir2/000.bmp", "/home/dir2/002.bmp", "/home/dir2/003.bmp" });	
-//	vector<string> li_path_3({ "/home/dir3/002.bmp", "/home/dir3/003.bmp", "/home/dir3/004.bmp" });
+//	vector<int> li_id_1({ 3, 5, 7, 9, 11 });	
+//	vector<int> li_id_1({ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 });	
+//	vector<int> li_id_3({ 1, 4, 5, 8, 9, 11, 13 });
+//	li_li_id.push_back(li_id_1);	li_li_id.push_back(li_id_2);	li_li_id.push_back(li_id_3);
+//	get_next_index(li_idx, li_li_id);
+//	=> li_idx becomes from { 1, 3, 2 } to { 3, 7, 4 } which are indices of the common element "9"
+//	get_next_index(li_idx, li_li_id);
+//	=> li_idx becomes from { 3, 7, 4 } to { 4, 9, 5 } which are index of the common element "11"
 
 bool get_next_index(vector<int>& li_idx, const vector<vector<int>>& li_li_id)
 {
@@ -635,11 +671,12 @@ bool get_next_index(vector<int>& li_idx, const vector<vector<int>>& li_li_id)
 //	=> The video of concatenated images are saved at : /home/dir4/output.avi
 //	=> The first frame of the video is composed of "/home/dir1/002.bmp", "/home/dir2/002.bmp" and "/home/dir2/002.bmp".   
 //	=> The second(which is the last) frame of the video is composed of "/home/dir1/003.bmp", "/home/dir2/003.bmp" and "/home/dir3/003.bmp".   
+
 void concatenate_images_from_seqeunces_into_video_or_sequence(vector< vector<string> >& li_li_path, 
 							      int hori_minus_vert_plus, bool save_as_video, const string& dir_save)
 {
 	vector<vector<int> > li_li_id = get_list_of_list_of_ids_as_number(li_li_path);
-	sort_two_seqs_as_first_seq_sorted(li_li_id, li_li_path);
+	for(int iS = 0; iS < li_li_id.size(); iS++) sort_two_seqs_as_first_seq_sorted(li_li_id[iS], li_li_path[iS], true);
 	int iF = 0, n_seq = li_li_path.size(), cv_read_flag =
 		is_all_seq_gray(li_li_path) ? CV_LOAD_IMAGE_GRAYSCALE : CV_LOAD_IMAGE_COLOR;
 	vector<int> li_idx(n_seq, -1);
@@ -663,7 +700,104 @@ void concatenate_images_from_seqeunces_into_video_or_sequence(vector< vector<str
 	}
 	if(save_as_video) { cout << "concatenated video has just saved at : " << path_vid << endl;  vw.release(); }
 }
-	
+
+//-----------------------------------------------------------------------------------------------------  
+//	Mat im = imread("aaa.bmp");
+//	save_one_image_under_directory(im, "/home/folder", "bbb.bmp");
+//	=> An image is saved at /home/folder/bbb.bmp".
+
+void save_one_image_under_directory(const Mat& im, const string& dir_save, const string& fn_img)
+{
+	mkdir_if_not_exist(dir_save.c_str());
+	string path_res = python_join_equivalent(dir_save, fn_img);
+	imwrite(path_res, im);
+}
+
+
+//-----------------------------------------------------------------------------------------------------  
+//	VideoWriter vw = init_video_writer("/home/folder/aaa.avi", 30, Size(640, 480));
+
+VideoWriter init_video_writer(const string& fn_path, double fps, const Size& saiz)
+{
+	VideoWriter writer;
+	writer.open(fn_path, VideoWriter::fourcc('X', 'V', 'I', 'D'), fps, saiz, true);
+	if (!writer.isOpened())
+	{
+		cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;	exit(0);
+	}
+	return writer;
+}
+
+
+
+//-----------------------------------------------------------------------------------------------------  
+//	VideoWriter vw;
+//	Mat im = imread("/home/folder/bbb.bmp");
+//	vw = write_one_frame_to_video(vw, im, true, "/home/folder/aaa.avi");
+//	im = imread("/home/folder/ccc.bmp");
+//	vw = write_one_frame_to_video(vw, im, false, "/home/folder/aaa.avi");
+//	vw.realese();
+//	=> A video is saved at "/home/folder/aaa.avi" whose first frame is "/home/folder/bbb.bmp" and the second (last) frame is "/home/folder/ccc.bmp".
+
+VideoWriter write_one_frame_to_video(VideoWriter& vw, Mat& im, bool is_first_frame, const string& path_vid,          double fps, int max_side)
+{
+	if(max_side > 0) im = resize_image(im, 0, 0, 0, 0, max_side);
+	if(is_first_frame) vw = init_video_writer(path_vid, fps, im.size());
+	vw.write(im);
+	return vw;
+}
+
+//-----------------------------------------------------------------------------------------------------  
+//	Mat im = imread("/home/folder/im_1280_720.bmp");
+//	=> The size of im is (1280, 720)
+//	Mat im_resized_1 = resize_image(im, 640, 480, 0, 0, 0);
+//	=> The size of im_resized_1 is (640, 480)
+//	Mat im_resized_2 = resize_image(im, 0, 0, 0.5, 0.25, 0);
+//	=> The size of im_resized_2 is (640, 180)
+//	Mat im_resized_3 = resize_image(im, 0, 0, 0, 0, 320);
+//	=> The size of im_resized_3 is (320, 180)
+
+Mat resize_image(const Mat& im_ori, int w_new, int h_new, float fx, float fy, int max_side)
+{
+	Mat im_resized;
+	int max_wh = MAX(im_ori.cols, im_ori.rows);
+	if(w_new > 0 && h_new > 0) resize(im_ori, im_resized, Size(w_new, h_new), 0, 0);
+	else if(fx > 0 && fy > 0) resize(im_ori, im_resized, Size(0, 0), fx, fy);
+	else if(max_side < max_wh)
+	{
+		float ratio = float(max_side) / float(max_wh);
+		resize(im_ori, im_resized, Size(0, 0), ratio, ratio);
+	}
+	else if(max_side > 0)
+	{
+		im_resized = im_ori.clone();
+		cout << "Resize is NOT applied since does NOT have to !!" << endl;
+	}
+	else { cout << "Can NOT resize image since NO guide is given !!" << endl; exit(0); };
+	return im_resized;
+}
+
+
+//-----------------------------------------------------------------------------------------------------  
+//	vector<vector<string>> li_li_path;
+//	vector<string> li_path_1({ "/home/dir1/001.bmp", "/home/dir1/002.bmp", "/home/dir1/003.bmp" });	
+//	vector<string> li_path_2({ "/home/dir2/000.bmp", "/home/dir2/002.bmp", "/home/dir2/003.bmp" });	
+//	vector<string> li_path_3({ "/home/dir3/002.bmp", "/home/dir3/003.bmp", "/home/dir3/004.bmp" });
+//	li_li_path.push_back(li_path_1);	li_li_path.push_back(li_path_2);	li_li_path.push_back(li_path_3);
+//	if(are_all_seqs_gray(li_li_path))
+//	{
+//		....		
+
+bool are_all_seqs_gray(const vector<vector<string> >& li_li_path)
+{
+	bool is_all_gray = true;
+ 	for(int iL = 0; iL < li_li_path.size(); iL++)
+ 	{
+ 		Mat im = imread(li_li_path[iL][0], CV_LOAD_IMAGE_UNCHANGED);
+ 		if(im.channels() > 1) { is_all_gray = false; break; }
+ 	}
+	return is_all_gray;
+}
 
 	
 		

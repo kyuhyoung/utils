@@ -19,6 +19,7 @@
   * get_last_integer_substring()
   * get_exact_file_name_from_path()
   * get_id_of_file_as_number()
+  * get_list_of_list_of_ids_as_number
   * get_list_of_image_path_under_this_directory() 
   
 
@@ -36,8 +37,14 @@
   * make_set_of_rotated_square_images()
   * compute_circle_margin()
   * image_inside_circle()
+  * sort_two_seqs_as_first_seq_sorted()
+  * get_next_index()
   * concatenate_images_from_seqeunces_into_video_or_sequence()
-  
+  * save_one_image_under_directory()
+  * write_one_frame_to_video()
+  * resize_image()
+  * are_all_seqs_gray()
+
   
 
   

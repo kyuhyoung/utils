@@ -101,7 +101,7 @@ bool is_only_number(const std::string& s)
 //	=> true
 bool is_this_camera_index(const std::string& strin)
 {
-	return 2 >= strin.size() && is_only_number(strin) 	
+	return 2 >= strin.size() && is_only_number(strin);	
 }
 
 //------------ Check parse string by delimiter into a vector of strings --------------  

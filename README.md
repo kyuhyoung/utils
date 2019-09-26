@@ -13,6 +13,7 @@
   * split_string_by_delimiter()
   * rad2deg()
   * deg2rad()
+  * itos_formatted()
   * make_string_uppercase()
   * make_string_lowercase()
   * is_image_file()

@@ -143,6 +143,19 @@ double deg2rad(double degree)
     return degree*PI/180;
 }
 
+//------------ Integer to string with formatting --------------  
+//	cout << itos_formatted(278, 5) << endl;
+//	=> 00278
+
+#include <sstream>
+#include <iomanip>
+string itos_formatted(int ii, int n_digit)
+{	
+	std::stringstream ss;
+	ss << std::setw(n_digit) << std::setfill('0') << ii;
+	return ss.str();
+}	
+
 //------------ Capitialized a string --------------  
 //	cout << make_string_lowercase("abcDEfGhijK") << endl;
 //	=> ABCDEFGHIJK

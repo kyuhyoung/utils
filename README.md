@@ -11,6 +11,7 @@
   * is_only_number()
   * is_this_camera_index()
   * split_string_by_delimiter()
+  * is_first_a_factor_of_second()
   * rad2deg()
   * deg2rad()
   * itos_formatted()

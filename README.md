@@ -8,6 +8,7 @@
   * is_this_existing_directory()
   * mkdir_if_not_exist()
   * error()
+  * itos_formatted()
   * is_only_number()
   * is_this_camera_index()
   * split_string_by_delimiter()

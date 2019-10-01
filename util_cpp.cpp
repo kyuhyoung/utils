@@ -86,13 +86,6 @@ void error(const char *s)
     exit(-1);
 }
 
-//------------ Convert integer to string with format --------------  
-std::string itos_formatted(int ii, int n_digit)
-{
-    std::stringstream ss;
-    ss << std::setw(n_digit) << std::setfill('0') << ii;
-    return ss.str();
-}
 
 //------------ Check if the string is number --------------  
 //	cout << is_only_number("001234");
@@ -132,6 +125,15 @@ vector<string> split_string_by_delimiter(const string& strin, const string& deli
 	 return li_str;
 }
 
+//------------ Check if the first integer is one of factors of the second integer --------------  
+//	cout << is_first_a_factor_of_second(3, 15) << endl;
+//	=> true
+//	cout << is_first_a_factor_of_second(2, 15) << endl;
+//	=> false
+bool is_first_a_factor_of_second(int first, int second)
+{
+    return 0 == second % first;
+}
 
 //------------ Convert radians to degrees --------------  
 //	cout << rad2deg(PI) << endl;

@@ -86,6 +86,14 @@ void error(const char *s)
     exit(-1);
 }
 
+//------------ Convert integer to string with format --------------  
+std::string itos_formatted(int ii, int n_digit)
+{
+    std::stringstream ss;
+    ss << std::setw(n_digit) << std::setfill('0') << ii;
+    return ss.str();
+}
+
 //------------ Check if the string is number --------------  
 //	cout << is_only_number("001234");
 //	=> true

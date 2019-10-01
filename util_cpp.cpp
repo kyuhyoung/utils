@@ -770,6 +770,58 @@ VideoWriter write_one_frame_to_video(VideoWriter& vw, Mat& im, bool is_first_fra
 	return vw;
 }
 
+//----------------------------------------------------------------------------------------------------- 
+//	cout << compute_size_smaller_than(Size(1920, 720), Size(640, 480)) << endl;
+//	=> [960 x 360]	
+//	cout << compute_size_smaller_than(Size(1280, 960), Size(640, 480)) << endl;
+//	=> [640 x 480]
+//	cout << compute_size_smaller_than(Size(960, 720), Size(640, 480)) << endl;
+//	=> [480 x 360]
+//	cout << compute_size_smaller_than(Size(640, 480), Size(640, 480)) << endl;
+//	=> [640 x 480]
+Size compute_size_smaller_than(const Size& size_src, const Size& size_tgt)
+{
+    Size size_smaller_than(size_src);
+    if((size_src.width > size_tgt.width && size_src.height > size_tgt.height) || 
+        (size_src.width < size_tgt.width && size_src.height < size_tgt.height))
+    {   
+        bool shall_shrink = size_src.width > size_tgt.width;
+        for(int iS = 2; iS < 10000; iS++)
+        {
+            if(shall_shrink)
+            {
+                if(is_first_a_factor_of_second(iS, size_src.width) && is_first_a_factor_of_second(iS, size_src.height))
+                {
+                    int wid = size_src.width / iS, hei = size_src.height / iS;
+                    if(wid <= size_tgt.width || hei <= size_tgt.height)
+                    {
+                        size_smaller_than.width = wid;  size_smaller_than.height = hei;
+                        break;
+                    }
+                }       
+            }
+            else
+            {
+                int wid = size_src.width * iS,  hei = size_src.height * iS;
+                if(wid >= size_tgt.width && hei >= size_tgt.height)
+                {
+                    size_smaller_than.width = size_src.width * (iS - 1);
+                    size_smaller_than.height = size_src.height * (iS - 1);
+                    break;
+                }
+                else if(wid >= size_tgt.width || hei >= size_tgt.height)
+                {
+                    size_smaller_than.width = wid;  size_smaller_than.height = hei;
+                    break;
+                }
+            }
+        }
+    
+    }
+    return size_smaller_than;
+}
+
+
 //-----------------------------------------------------------------------------------------------------  
 //	Mat im = imread("/home/folder/im_1280_720.bmp");
 //	=> The size of im is (1280, 720)
@@ -779,7 +831,6 @@ VideoWriter write_one_frame_to_video(VideoWriter& vw, Mat& im, bool is_first_fra
 //	=> The size of im_resized_2 is (640, 180)
 //	Mat im_resized_3 = resize_image(im, 0, 0, 0, 0, 320);
 //	=> The size of im_resized_3 is (320, 180)
-
 Mat resize_image(const Mat& im_ori, int w_new, int h_new, float fx, float fy, int max_side)
 {
 	Mat im_resized;

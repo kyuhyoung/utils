@@ -135,24 +135,6 @@ bool is_first_a_factor_of_second(int first, int second)
     return 0 == second % first;
 }
 
-//------------ Convert radians to degrees --------------  
-//	cout << rad2deg(PI) << endl;
-//	=> 180
-#define PI 3.14159265
-double rad2deg(double radian)
-{
-    return radian*180/PI;
-}
-
-//------------ Convert degrees to radians --------------  
-//	cout << deg2rad(180) << endl;
-//	=> 3.14159265
-#define PI 3.14159265
-double deg2rad(double degree)
-{
-    return degree*PI/180;
-}
-
 //------------ Integer to string with formatting --------------  
 //	cout << itos_formatted(278, 5) << endl;
 //	=> 00278
@@ -317,6 +299,45 @@ vector<string> get_list_of_image_path_under_this_directory(const string& dir_img
 	sort(li.begin(), li.end());
 	return li;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+//   math related
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+//------------ Convert radians to degrees --------------  
+//	cout << rad2deg(PI) << endl;
+//	=> 180
+#define PI 3.14159265
+double rad2deg(double radian)
+{
+    return radian*180/PI;
+}
+
+//------------ Convert degrees to radians --------------  
+//	cout << deg2rad(180) << endl;
+//	=> 3.14159265
+#define PI 3.14159265
+double deg2rad(double degree)
+{
+    return degree*PI/180;
+}
+
+//------------ Calculate the area of triangle defined by three points --------------  
+//	cout << calc_area_triangle(0, 0, 3, 0, 3, 2) << endl;
+//	=> 3
+float calc_area_triangle(float x0, float y0, float x1, float y1, float x2, float y2)
+{
+	return std::abs(x0 * (y1 - y2) + x1 * (y2 - y0) + x2 * (y0 - y1)) / 2.0;	
+}	
+
+//------------ Calculate the area of quadrangle defined by four points --------------  
+//	cout << calc_area_quadrangle(0, 0, 4, 0, 3, 2, 0, 2) << endl;
+//	=> 7
+float calc_area_quadrangle(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3)
+{
+	float a012 = calc_area_triangle(x0, y0, x1, y1, x2, y2), a023 = calc_area_triangle(x0, y0, x2, y2, x3, y3);
+	return a012 + a023;
+}	
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

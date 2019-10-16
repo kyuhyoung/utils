@@ -27,6 +27,7 @@
   * rad2deg()
   * deg2rad()
   * calc_area_triangle()
+  * calc_area_quadrangle
   
 #### OpenCV related  
 

@@ -12,8 +12,6 @@
   * is_this_camera_index()
   * split_string_by_delimiter()
   * is_first_a_factor_of_second()
-  * rad2deg()
-  * deg2rad()
   * itos_formatted()
   * make_string_uppercase()
   * make_string_lowercase()
@@ -24,7 +22,11 @@
   * get_list_of_list_of_ids_as_number
   * get_list_of_image_path_under_this_directory() 
   
+#### math related
 
+  * rad2deg()
+  * deg2rad()
+  * calc_area_triangle()
   
 #### OpenCV related  
 

@@ -322,6 +322,15 @@ double deg2rad(double degree)
     return degree*PI/180;
 }
 
+//------------ Calculate distance between two 2D points --------------  
+//	cout << dist_two_points(0, 0, 2, 0) << endl;
+//	=> 2
+float dist_two_points(float x1, float y1, float x2, float y2)
+{
+	float dx = x1 - x2, dy = y1 - y2;
+	return sqrt(dx * dx + dy * dy);
+}
+
 //------------ Calculate the area of triangle defined by three points --------------  
 //	cout << calc_area_triangle(0, 0, 3, 0, 3, 2) << endl;
 //	=> 3
@@ -338,6 +347,129 @@ float calc_area_quadrangle(float x0, float y0, float x1, float y1, float x2, flo
 	float a012 = calc_area_triangle(x0, y0, x1, y1, x2, y2), a023 = calc_area_triangle(x0, y0, x2, y2, x3, y3);
 	return a012 + a023;
 }	
+
+//------------ Calculate determinant of 2 by 2 matrix --------------
+//	[a b]
+//	[c d]
+//	cout << Det(1, 2, 3, 4) << endl;
+//	=> -2
+double Det(double a, double b, double c, double d)
+{
+	return a*d - b*c;
+}
+ 
+//------------ Calculate intersection of two lines --------------
+//	return true if found, false if not found or error
+//	double ix = -1.0, iy = -1.0;
+//	bool result = LineLineIntersect(4.0, 0.0, 6.0, 10.0, 0.0, 3.0, 10.0, 7.0, ix, iy);
+//	cout << "result : " <<  result << ", " << ix << ", " << iy << endl;
+// => result : 1, 5, 5
+//	bool result = LineLineIntersect(0.0, 0.0, 1.0, 1.0, 1.0, 3.0, 3.0, 1.0, ix, iy);
+//	cout << "result : " <<  result << ", " << ix << ", " << iy << endl;
+// => result : 1, 2, 2
+bool LineLineIntersect(double x1, double y1, //Line 1 start
+	double x2, double y2, //Line 1 end
+	double x3, double y3, //Line 2 start
+	double x4, double y4, //Line 2 end
+	double &ixOut, double &iyOut) //Output 
+{
+	double detL1 = Det(x1, y1, x2, y2);
+	double detL2 = Det(x3, y3, x4, y4);
+	double x1mx2 = x1 - x2;
+	double x3mx4 = x3 - x4;
+	double y1my2 = y1 - y2;
+	double y3my4 = y3 - y4;
+ 
+	double xnom = Det(detL1, x1mx2, detL2, x3mx4);
+	double ynom = Det(detL1, y1my2, detL2, y3my4);
+	double denom = Det(x1mx2, y1my2, x3mx4, y3my4);
+	if(denom == 0.0)//Lines don't seem to cross
+	{
+		ixOut = NAN;
+		iyOut = NAN;
+		return false;
+	} 
+	ixOut = xnom / denom;	
+	iyOut = ynom / denom;
+	if(!isfinite(ixOut) || !isfinite(iyOut)) //Probably a numerical issue
+		return false;
+ 	return true; //All OK
+}
+
+//------------ Compute where is a point wrt a line defined by two points --------------
+//	If the point is on the line, the output is 0.
+//	cout << which_side_this_point_is_on_of_line_with_two_points(2, 1, 0, 0, 4, 2) << endl;
+//	=> 0
+float which_side_this_point_is_on_of_line_with_two_points(float xx, float yy, float x1, float y1, float x2, float y2)
+{
+	//	line equation : (y1 - y2) * xx + (x2 - x1) * yt + (x1 - x2) * y1 + (y2 - y1) * x1 = 0
+	return (y1 - y2) * xx + (x2 - x1) * yt + (x1 - x2) * y1 + (y2 - y1) * x1	
+}	
+
+//------------ Check if a point is on a line defined by two points --------------
+//	cout << is_this_point_on_the_line_of_two_points(2, 1, 0, 0, 4, 2) << endl;
+//	=> true
+bool is_this_point_on_the_line_of_two_points(float xx, float yy, float x1, float y1, float x2, float y2)
+{
+	return std::abs(which_side_this_point_is_on_of_line_with_two_points(xx, yy, x1, y1, x2, y2)) < 0.000001	
+}
+
+
+//------------ Calculate angle between three points --------------
+//	cout << calc_angle_deg_three_points(0, 2, 0, 0, 3, 0) << endl;
+//	=> 90
+#define PI 3.14159265
+float calc_angle_deg_three_points(float ax, float ay, float bx, float by, float cx, float cy)
+{
+    float x_ab = bx - ax, y_ab = by - ay, x_cb = bx - cx, y_cb = by - cy;
+    float dot = x_ab * x_cb + y_ab * y_cb; // dot product
+    float cross = x_ab * y_cb - y_ab * x_cb); // cross product
+    float rad = atan2(cross, dot);
+    return rad * 180. / PI;
+}
+
+//------------ Calculate angle between two lines defined by end points --------------
+//	cout << compute_angle_deg_between_two_lines(0, 0, 1, 1, 3, 1, 1, 3) << endl;
+//	=> 90
+double compute_angle_deg_between_two_lines(double x1a, double y1a, double x2a, double y2a, double x1b, double y1b, double x2b, double y2b)
+{
+	double x_int, y_int;
+	bool are_they_not_parallel = LineLineIntersect(x1a, y1a, x2a, y2a, x1b, y1b, x2b, y2b, x_int, y_int);
+	if(are_they_not_parallel) return 0;
+	float side_1a = which_side_this_point_is_on_of_line_with_two_points(x1a, y1a, x1b, y1b, x2b, y2b),
+		side_2a = which_side_this_point_is_on_of_line_with_two_points(x2a, y2a, x1b, y1b, x2b, y2b),
+		side_1b = which_side_this_point_is_on_of_line_with_two_points(x1b, y1b, x1a, y1a, x2a, y2a),
+		side_2b = which_side_this_point_is_on_of_line_with_two_points(x2b, y2b, x1a, y1a, x2a, y2a);
+	bool is_a_crossing_b = side_1b * side_2b < 0, is_b_crossing_a = side_1a * side_2a < 0;
+	float xa = x1a, ya = y1a, xb = x1b, yb = y1b;
+	if(is_a_crossing_b)		
+	{
+		float d_1b_int = dist_two_points(x_int, y_int, x1b, y1b), d_2b_int = dist_two_points(x_int, y_int, x2b, y2b);
+		if(d_1b_int > d_2b_int) 
+		{
+			xb = x1b;	yb = y1b;
+		}
+		else
+		{
+			xb = x2b;	yb = y2b;			
+		}		
+	}
+	if(is_b_crossing_a)
+	{
+		float d_1a_int = dist_two_points(x_int, y_int, x1a, y1a), d_2a_int = dist_two_points(x_int, y_int, x2a, y2a);
+		if(d_1a_int > d_2a_int) 
+		{
+			xa = x1a;	ya = y1a;
+		}
+		else
+		{
+			xa = x2a;	ya = y2a;			
+		}		
+	}
+	return calc_angle_deg_three_points(xa, ya, x_int, y_int, xb, yb);	
+} //end-ComputeAngleBetweenTwoLines
+
+
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

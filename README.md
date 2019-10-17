@@ -26,8 +26,15 @@
 
   * rad2deg()
   * deg2rad()
+  * dist_two_points()
   * calc_area_triangle()
-  * calc_area_quadrangle
+  * calc_area_quadrangle()
+  * Det()
+  * LineLineIntersect()
+  * which_side_this_point_is_on_of_line_with_two_points()
+  * is_this_point_on_the_line_of_two_points()
+  * calc_angle_deg_three_points()
+  * compute_angle_deg_between_two_lines()
   
 #### OpenCV related  
 

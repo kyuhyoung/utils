@@ -90,6 +90,7 @@ void error(const char *s)
 //------------ Check if the string is number --------------  
 //	cout << is_only_number("001234");
 //	=> true
+#include <algorithm>
 bool is_only_number(const std::string& s)
 {
     return !s.empty() && std::find_if(s.begin(), 

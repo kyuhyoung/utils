@@ -24,6 +24,7 @@
   
 #### math related
 
+  * matlab_mod_equivalent()
   * rad2deg()
   * deg2rad()
   * dist_two_points()

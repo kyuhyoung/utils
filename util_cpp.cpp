@@ -305,6 +305,16 @@ vector<string> get_list_of_image_path_under_this_directory(const string& dir_img
 //   math related
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+//------------ C++ function equivalent to Matlab's mod function --------------  
+//	cout << matlab_mod_equivalent(-0.5, 10) << endl;
+//	=> 9.5
+#include <math.h>
+double matlab_mod_equivalent(double x, double y)
+{
+  double result = fmod(x, y);
+  return result >= 0 ? result : result + y;
+}
+
 //------------ Convert radians to degrees --------------  
 //	cout << rad2deg(PI) << endl;
 //	=> 180

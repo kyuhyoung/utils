@@ -1039,7 +1039,8 @@ bool are_all_seqs_gray(const vector<vector<string> >& li_li_path)
 
 
 //-----------------------------------------------------------------------------------------------------  
-// Non maxima suppreson on 2D mat 
+// Non maxima suppreson on 2D mat. 
+// The local maxima values of the returned matrix is '255' and else is '0'.   
 //	Mat mat_hist = (Mat_<float>(3, 4) << 1, 1, 2, 1, 2, 3, 0, 4, 2, 0, 1, 3);
 //	cout << mat_hist << endl;
 //	=> 	[1, 1, 2, 1;
@@ -1050,6 +1051,7 @@ bool are_all_seqs_gray(const vector<vector<string> >& li_li_path)
 //	=>	[0, 0, 0, 0;
 //		 0, 255, 0, 255;
 //		 0, 0, 0, 0]
+
 Mat non_maxima_suppression_on_mat(const cv::Mat& src, const bool remove_plateaus = true)
 {
 	Mat mask;
@@ -1070,6 +1072,7 @@ Mat non_maxima_suppression_on_mat(const cv::Mat& src, const bool remove_plateaus
 
 //-----------------------------------------------------------------------------------------------------  
 // function that finds the peaks of a given 2D hist image
+// The list of local maxima points which satisfy the threshold conditions are returned.
 //	Mat mat_hist = (Mat_<float>(3, 4) << 1, 1, 2, 1, 2, 3, 0, 4, 2, 0, 1, 3);
 //	cout << mat_hist << endl;
 //	=> 	[1, 1, 2, 1;

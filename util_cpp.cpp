@@ -1038,10 +1038,22 @@ bool are_all_seqs_gray(const vector<vector<string> >& li_li_path)
 }
 
 
-void non_maxima_suppression_on_mat(const cv::Mat& src, cv::Mat& mask, const bool remove_plateaus = true)
+//-----------------------------------------------------------------------------------------------------  
+// Non maxima suppreson on 2D mat 
+//	Mat mat_hist = (Mat_<float>(3, 4) << 1, 1, 2, 1, 2, 3, 0, 4, 2, 0, 1, 3);
+//	cout << mat_hist << endl;
+//	=> 	[1, 1, 2, 1;
+//		 2, 3, 0, 4;
+//		 2, 0, 1, 3]
+//	Mat mat_peak_255 = non_maxima_suppression_on_mat(mat_hist, true);
+//	cout << mat_peak_255 << endl;
+//	=>	[0, 0, 0, 0;
+//		 0, 255, 0, 255;
+//		 0, 0, 0, 0]
+Mat non_maxima_suppression_on_mat(const cv::Mat& src, const bool remove_plateaus = true)
 {
+	Mat mask;
 	// find pixels that are equal to the local neighborhood not maximum (including 'plateaus')
-    	double min_val, max_val; Point min_loc, max_loc; 
     	cv::dilate(src, mask, cv::Mat());    
     	cv::compare(src, mask, mask, cv::CMP_GE);
     	// optionally filter out pixels that are equal to the local minimum ('plateaus')
@@ -1052,20 +1064,40 @@ void non_maxima_suppression_on_mat(const cv::Mat& src, cv::Mat& mask, const bool
         	cv::compare(src, non_plateau_mask, non_plateau_mask, cv::CMP_GT);        
         	cv::bitwise_and(mask, non_plateau_mask, mask);
     	}
-	return;	
+	return mask;	
 }
 
 
-// function that finds the peaks of a given hist image
+//-----------------------------------------------------------------------------------------------------  
+// function that finds the peaks of a given 2D hist image
+//	Mat mat_hist = (Mat_<float>(3, 4) << 1, 1, 2, 1, 2, 3, 0, 4, 2, 0, 1, 3);
+//	cout << mat_hist << endl;
+//	=> 	[1, 1, 2, 1;
+//		 2, 3, 0, 4;
+//		 2, 0, 1, 3]
+//	vector<Point> li_peak_th_2 = find_peaks_on_mat(mat_hist, 2, -1, Size(1, 1), true);
+//	cout << li_peak_th_2 << endl;
+//	=>	[1, 1;
+//		 3, 1]
+//	vector<Point> li_peak_th_3 = find_peaks_on_mat(mat_hist, 3, -1, Size(1, 1), true);
+//	cout << li_peak_th_3 << endl;
+//	=>	[3, 1]
+
 //void findHistPeaks(InputArray _src, OutputArray _idx, const float scale = 0.2, const Size& ksize = Size(9, 9), const bool remove_plateus = true)
 vector<Point> find_peaks_on_mat(InputArray _src, const float thres, const float scale, const Size& ksize, const bool remove_plateus = true)
 {
     Mat hist = _src.getMat();
     // die if histogram image is not the correct type
     CV_Assert(hist.type() == CV_32F);
-    Mat mask;    
-    GaussianBlur(hist, hist, ksize, 0); // smooth a bit in order to obtain better result  
-    non_maxima_suppression_on_mat(hist, mask, remove_plateus); // extract local maxima    
+    
+    // find the min and max values of the hist image
+    double min_val, max_val; Point min_loc, max_loc;
+    minMaxLoc(hist, &min_val, &max_val, &min_loc, &max_loc);
+	
+    //Mat mask; 
+    if(ksize.width * ksize.height > 1) GaussianBlur(hist, hist, ksize, 0); // smooth a bit in order to obtain better result  
+    //non_maxima_suppression_on_mat(hist, mask, remove_plateus); // extract local maxima    
+    Mat mask = non_maxima_suppression_on_mat(hist, remove_plateus); // extract local maxima    
     vector<Point> maxima;   // output, locations of non-zero pixels    
     cv::findNonZero(mask, maxima);    
     for(vector<Point>::iterator it = maxima.begin(); it != maxima.end();)

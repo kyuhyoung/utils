@@ -58,10 +58,9 @@
   * compute_size_smaller_than()
   * resize_image()
   * are_all_seqs_gray()
-
-  
-
-  
+  * non_maxima_suppression_on_mat()
+  * find_peaks_on_mat()
+    
   
 ## util_python.py : python utility functions.
 

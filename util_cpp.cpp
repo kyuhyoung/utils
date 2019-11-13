@@ -1037,6 +1037,50 @@ bool are_all_seqs_gray(const vector<vector<string> >& li_li_path)
 	return is_all_gray;
 }
 
+
+void non_maxima_suppression_on_mat(const cv::Mat& src, cv::Mat& mask, const bool remove_plateaus = true)
+{
+	// find pixels that are equal to the local neighborhood not maximum (including 'plateaus')
+    	double min_val, max_val; Point min_loc, max_loc; 
+    	cv::dilate(src, mask, cv::Mat());    
+    	cv::compare(src, mask, mask, cv::CMP_GE);
+    	// optionally filter out pixels that are equal to the local minimum ('plateaus')
+    	if (remove_plateaus) 
+    	{    
+        	cv::Mat non_plateau_mask;        
+        	cv::erode(src, non_plateau_mask, cv::Mat());        
+        	cv::compare(src, non_plateau_mask, non_plateau_mask, cv::CMP_GT);        
+        	cv::bitwise_and(mask, non_plateau_mask, mask);
+    	}
+	return;	
+}
+
+
+// function that finds the peaks of a given hist image
+//void findHistPeaks(InputArray _src, OutputArray _idx, const float scale = 0.2, const Size& ksize = Size(9, 9), const bool remove_plateus = true)
+vector<Point> find_peaks_on_mat(InputArray _src, const float thres, const float scale, const Size& ksize, const bool remove_plateus = true)
+{
+    Mat hist = _src.getMat();
+    // die if histogram image is not the correct type
+    CV_Assert(hist.type() == CV_32F);
+    Mat mask;    
+    GaussianBlur(hist, hist, ksize, 0); // smooth a bit in order to obtain better result  
+    non_maxima_suppression_on_mat(hist, mask, remove_plateus); // extract local maxima    
+    vector<Point> maxima;   // output, locations of non-zero pixels    
+    cv::findNonZero(mask, maxima);    
+    for(vector<Point>::iterator it = maxima.begin(); it != maxima.end();)
+    {
+        Point pnt = *it;
+        float val = hist.at<float>(pnt.y, pnt.x);
+        bool is_satisfying_threshold = (thres < 0) || (thres >= 0 && val > thres);
+        bool is_satisfying_scale = (scale <= 0) || (scale > 0 && val > max_val * scale); 
+        if(is_satisfying_threshold && is_satisfying_scale) ++it;
+	else it = maxima.erase(it);
+    }                                                                                      
+    return maxima;
+}
+
+
 	
 		
 

@@ -52,6 +52,7 @@
   * draw_match()
   * detect_keypoint()
   * compute_descriptor()
+  * match_intra()  
   * get_boundary_point_of_1st_radiated_from_2nd()
   * pad_image()
   * draw_rect_with_padding() 

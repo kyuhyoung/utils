@@ -528,6 +528,26 @@ vector<KeyPoint> detect_keypoint(const Mat& im_gray, const Ptr<FeatureDetector>&
     return li_kp;
 }
 
+
+//------------ compute feature descriptor the list of given key points --------------
+//	using namespace cv;
+//	Mat im_gray = imread("img.bmp", CV_LOAD_IMAGE_GRAYSCALE);
+//	Ptr<FeatureDetector> detector = ORB::create();
+//	vector<KeyPoint> li_kp = detect_keypoint(im_gray, detector);
+//	Ptr<DescriptorExtractor> desc = ORB::create();
+//	Mat mat_feature = compute_descriptor(im_gray, li_kp, desc);
+//	cout << "li_kp.size() : " << li_kp.size << endl; 
+//	=> 80
+//	cout << "mat_feature.size() : " << mat_feature.size() << endl; 
+//	=> [80, 128]
+Mat compute_descriptor(const Mat& im_gray, vector<KeyPoint>& li_kp, const Ptr<DescriptorExtractor>& desc)
+{
+    Mat mat_desc;
+    desc->compute(im_gray, li_kp, mat_desc);
+    return mat_desc; 
+}
+
+
 //------------ find the position where a line radiatated from 2nd point and passing thru 1st point intersect the image boundary -------------- 
 //	Point2f p_boundary, p1, p2;
 //	int width = 600, height = 400;

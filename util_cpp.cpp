@@ -514,6 +514,20 @@ double compute_angle_deg_between_two_lines(double x1a, double y1a, double x2a, d
 //   OpenCV related
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+//------------ detect key points from gray image --------------
+//	using namespace cv;
+//	Mat im_gray = imread("img.bmp", CV_LOAD_IMAGE_GRAYSCALE);
+//	Ptr<FeatureDetector> detector = ORB::create()
+//	vector<KeyPoint> li_kp = detect_keypoint(im_gray, detector);
+//	for(int iK = 0; iK < li_kp.size(); iK++) cout << li_kp[iK].pt << ", "; cout << endl;
+//	=> [x1, y1], [x2, y2], ....... , [xn, yn]
+vector<KeyPoint> detect_keypoint(const Mat& im_gray, const Ptr<FeatureDetector>& detector)
+{
+    vector<KeyPoint> li_kp;
+    detector->detect(im_gray, li_kp);
+    return li_kp;
+}
+
 //------------ find the position where a line radiatated from 2nd point and passing thru 1st point intersect the image boundary -------------- 
 //	Point2f p_boundary, p1, p2;
 //	int width = 600, height = 400;

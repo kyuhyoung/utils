@@ -330,8 +330,42 @@ double rad2deg(double radian)
 #define PI 3.14159265
 double deg2rad(double degree)
 {
-    return degree*PI/180;
+    return degree * PI / 180;
 }
+
+
+
+//------------ Normalize to [-180,180) --------------
+#define     M_PI   3.1415926535897932384626433832795
+#define     M_2PI  M_PI * 2.0
+inline double constrainAngle(double ang_rad)
+{
+    ang_rad = fmod(ang_rad + M_PI, M_2PI);
+    if(ang_rad < 0) ang_rad += M_2PI;
+    return ang_rad - M_PI;
+}
+                   
+
+//------------ convert to [-360, 360] --------------                    
+inline double angleConv(double ang_rad)
+{ 
+    return fmod(constrainAngle(ang_rad), M_2PI);    
+}
+
+inline double angleDiff(double a_rad, double b_rad)
+{
+    double dif_rad = fmod(b_rad - a_rad + M_PI, M_2PI);
+    if (dif_rad < 0) dif_rad += M_2PI;
+    return dif_rad - M_PI;
+}
+
+inline double unwrap(double ang_rad_pre, double ang_rad_new)
+{
+    return ang_rad_pre - angleDiff(ang_rad_new, angleConv(ang_rad_pre));
+}
+
+
+
 
 //------------ Distribute weights among the four neighbors a point according to the distance --------------  
 //	float px, py, w_x0_y0, w_x1_y0, w_x0_y1, w_x1_y1;

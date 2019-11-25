@@ -44,6 +44,7 @@
   
 #### OpenCV related  
 
+  * draw_arc()
   * rotate_1st_around_2nd_by_3rd_radian()
   * draw_rotation_pencil()
   * draw_match()

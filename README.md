@@ -27,6 +27,7 @@
   * matlab_mod_equivalent()
   * rad2deg()
   * deg2rad()
+  * compute_bilnear_weight()
   * dist_two_points()
   * calc_area_triangle()
   * calc_area_quadrangle()

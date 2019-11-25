@@ -27,6 +27,7 @@
   * matlab_mod_equivalent()
   * rad2deg()
   * deg2rad()
+  * compute_list_of_possible_rotation_degree()
   * random_number_in_between()
   * constrainAngle()
   * angleConv()

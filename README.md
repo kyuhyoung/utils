@@ -40,6 +40,12 @@
   
 #### OpenCV related  
 
+  * rotate_1st_around_2nd_by_3rd_radian()
+  * draw_rotation_pencil()
+  * non_maxima_suppression()
+  * findHistPeaks()
+  * find_peaks_2D()
+  * draw_match()
   * detect_keypoint()
   * compute_descriptor()
   * get_boundary_point_of_1st_radiated_from_2nd()

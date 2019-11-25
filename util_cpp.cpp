@@ -597,24 +597,6 @@ void draw_rotation_pencil(Mat& im_bgr, const Point& p_rot_center, const Point2f&
     return;
 }
 
-//------------ Find peaks on a 2D mat. -------------- 
-vector<Point> find_peaks_2D(const vector<Point2f>& li_center, const Size& sz_im, float th_hist)
-{
-    Mat im_hist = Mat::zeros(sz_im, CV_32FC1);   
-    int iC, n_center = li_center.size();
-    for(iC = 0; iC < n_center; iC++)
-    {
-        int x0 = li_center[iC].x, y0 = li_center[iC].y;
-        int x1 = x0 + 1, y1 = y0 + 1;
-        float w_x0_y0, w_x1_y0, w_x0_y1, w_x1_y1;
-        compute_bilnear_weight(w_x0_y0, w_x1_y0, w_x0_y1, w_x1_y1, li_center[iC].x, li_center[iC].y);
-        im_hist.at<float>(y0, x0) += w_x0_y0;   im_hist.at<float>(y0, x1) += w_x1_y0;
-        im_hist.at<float>(y1, x0) += w_x0_y1;   im_hist.at<float>(y1, x1) += w_x1_y1;
-    }
-    vector<Point> li_center_max = findHistPeaks(im_hist, th_hist, -1, Size(15, 15), true);
-    return li_center_max;        
-}
-
 
 //------------ draw key point match --------------
 void draw_match(const Mat& im_gray, const vector<KeyPoint>& li_kp, const vector<DMatch>& li_match)
@@ -1344,6 +1326,26 @@ vector<Point> find_peaks_on_mat(InputArray _src, const float thres, const float 
     }                                                                                      
     return maxima;
 }
+
+//------------ Find peaks on a 2D mat. -------------- 
+vector<Point> find_peaks_2D(const vector<Point2f>& li_center, const Size& sz_im, float th_hist)
+{
+    Mat im_hist = Mat::zeros(sz_im, CV_32FC1);   
+    int iC, n_center = li_center.size();
+    for(iC = 0; iC < n_center; iC++)
+    {
+        int x0 = li_center[iC].x, y0 = li_center[iC].y;
+        int x1 = x0 + 1, y1 = y0 + 1;
+        float w_x0_y0, w_x1_y0, w_x0_y1, w_x1_y1;
+        compute_bilnear_weight(w_x0_y0, w_x1_y0, w_x0_y1, w_x1_y1, li_center[iC].x, li_center[iC].y);
+        im_hist.at<float>(y0, x0) += w_x0_y0;   im_hist.at<float>(y0, x1) += w_x1_y0;
+        im_hist.at<float>(y1, x0) += w_x0_y1;   im_hist.at<float>(y1, x1) += w_x1_y1;
+    }
+    vector<Point> li_center_max = find_peaks_on_mat(im_hist, th_hist, -1, Size(15, 15), true);
+    return li_center_max;        
+}
+
+
 
 
 	

@@ -333,6 +333,33 @@ double deg2rad(double degree)
     return degree*PI/180;
 }
 
+
+//------------ Distribute weights among the four neighbors a point according to the distance --------------  
+//	float px, py, w_x0_y0, w_x1_y0, w_x0_y1, w_x1_y1;
+//	px = 10.5;	py = 20.5;
+//	compute_bilnear_weight(w_x0_y0, w_x1_y0, w_x0_y1, w_x1_y1, px, py);
+//	cout << "(" << int(px) + 0 << ", " << int(py) + 0 << ") : " << w_x0_y0 << ",\t(" << int(px) + 1 << ", " << int(py) + 0 << ") : " << w_x1_y0 << endl;
+//	cout << "(" << int(px) + 0 << ", " << int(py) + 1 << ") : " << w_x0_y1 << ",\t(" << int(px) + 1 << ", " << int(py) + 1 << ") : " << w_x1_y1 << endl;
+//	=> (10, 20) : 0.25,	(11, 20) : 0.25
+//	   (10, 21) : 0.25,	(11, 21) : 0.25
+//	px = 30.5;	py = 40.0;
+//	compute_bilnear_weight(w_x0_y0, w_x1_y0, w_x0_y1, w_x1_y1, px, py);
+//	cout << "(" << int(px) + 0 << ", " << int(py) + 0 << ") : " << w_x0_y0 << ",\t(" << int(px) + 1 << ", " << int(py) + 0 << ") : " << w_x1_y0 << endl;
+//	cout << "(" << int(px) + 0 << ", " << int(py) + 1 << ") : " << w_x0_y1 << ",\t(" << int(px) + 1 << ", " << int(py) + 1 << ") : " << w_x1_y1 << endl;
+//	=> (30, 40) : 0.5,	(31, 40) : 0.5
+//	   (30, 41) : 0,	(31, 41) : 0
+void compute_bilnear_weight(float& w_x0_y0, float& w_x1_y0, float& w_x0_y1, float& w_x1_y1, float px, float py)
+{
+    int x0 = int(px), y0 = int(py);
+    float dx0 = px - (float)x0, dy0 = py - (float)y0;
+    float dx1 = 1.0 - dx0, dy1 = 1.0 - dy0;
+    w_x1_y1 = dx0 * dy0;
+    w_x0_y0 = dx1 * dy1;
+    w_x0_y1 = dx1 * dy0;
+    w_x1_y0 = dx0 * dy1;
+    return;   
+}
+
 //------------ Calculate distance between two 2D points --------------  
 //	cout << dist_two_points(0, 0, 2, 0) << endl;
 //	=> 2

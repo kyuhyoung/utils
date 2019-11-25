@@ -46,9 +46,6 @@
 
   * rotate_1st_around_2nd_by_3rd_radian()
   * draw_rotation_pencil()
-  * non_maxima_suppression()
-  * findHistPeaks()
-  * find_peaks_2D()
   * draw_match()
   * detect_keypoint()
   * compute_descriptor()
@@ -74,6 +71,7 @@
   * are_all_seqs_gray()
   * non_maxima_suppression_on_mat()
   * find_peaks_on_mat()
+  * find_peaks_2D()
     
   
 ## util_python.py : python utility functions.

@@ -334,6 +334,12 @@ double deg2rad(double degree)
 }
 
 
+//------------ Generate a random number between 'minV' and 'maxV' --------------
+//srand(time(NULL)); // Seed the time
+inline int random_number_in_between(int minV, int maxV)
+{
+    return rand() % (maxV - minV + 1) + minV;
+}    
 
 //------------ Normalize to [-180,180) --------------
 #define     M_PI   3.1415926535897932384626433832795

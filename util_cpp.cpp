@@ -547,6 +547,30 @@ double compute_angle_deg_between_two_lines(double x1a, double y1a, double x2a, d
 //   OpenCV related
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+//------------ draw (circular) arc around 'p_center' and from 'p_1' to 'p_2' --------------
+float draw_arc(Mat& im_bgr, const Point2f& p_center, const Point2f& p_1, const Point2f& p_2, const Scalar& kolor)
+{
+    float rad1 = norm(p_center - p_1), rad2 = norm(p_center - p_2);
+    float radius = 0.5 * (rad1 + rad2);
+    float x_dif_1 = p_1.x - p_center.x, y_dif_1 = p_1.y - p_center.y, x_dif_2 = p_2.x - p_center.x, y_dif_2 = p_2.y - p_center.y;
+    float ang_rad_start, ang_rad_end, ang_rad_1 = atan2(y_dif_1, x_dif_1), ang_rad_2 = atan2(y_dif_2, x_dif_2);
+    if(ang_rad_1 < ang_rad_2)
+    {
+        ang_rad_start = ang_rad_1;  ang_rad_end = ang_rad_2;
+    }
+    else
+    {
+        ang_rad_end = ang_rad_1;  ang_rad_start = ang_rad_2;
+    }     
+    ang_rad_end = unwrap(ang_rad_start, ang_rad_end);
+    float ang_rad = ang_rad_end - ang_rad_start;
+    float ang_deg = rad2deg(ang_rad);  
+    ellipse(im_bgr, p_center, Size(radius, radius), 0, rad2deg(ang_rad_start), rad2deg(ang_rad_end), kolor); 
+    circle(im_bgr, p_1, 1, CV_RGB(255, 0, 0), 2);   circle(im_bgr, p_2, 1, CV_RGB(0, 255, 0), 2); 
+    //namedWindow("arc", WINDOW_NORMAL);  imshow("arc", im_bgr);  waitKey(1);  //exit(0); 
+    return ang_deg;  
+}
+
 //------------ rotate 1st point around 2nd point by 3rd radian --------------
 //	Point2f p_rotated, p1, p2, deg;
 //	p1.x = 100;	p1.y = 100;	p2.x = 200;	p2.y = 100;	deg = 90;

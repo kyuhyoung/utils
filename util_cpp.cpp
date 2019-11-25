@@ -333,7 +333,6 @@ double deg2rad(double degree)
     return degree*PI/180;
 }
 
-
 //------------ Distribute weights among the four neighbors a point according to the distance --------------  
 //	float px, py, w_x0_y0, w_x1_y0, w_x0_y1, w_x1_y1;
 //	px = 10.5;	py = 20.5;
@@ -513,6 +512,153 @@ double compute_angle_deg_between_two_lines(double x1a, double y1a, double x2a, d
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //   OpenCV related
 /////////////////////////////////////////////////////////////////////////////////////////////////
+
+//------------ rotate 1st point around 2nd point by 3rd radian --------------
+//	Point2f p_rotated, p1, p2, deg;
+//	p1.x = 100;	p1.y = 100;	p2.x = 200;	p2.y = 100;	deg = 90;
+//	p_rotated = rotate_1st_around_2nd_by_3rd_radian(p1, p2, deg2rad(deg));
+//	cout << p1 << " -> " << deg << " deg -> " << p_rotated << endl;
+//	=> [100, 100] -> 90 deg -> [200, 0]
+//	p1.x = 100;	p1.y = 100;	p2.x = 200;	p2.y = 100;	deg = 180;
+//	p_rotated = rotate_1st_around_2nd_by_3rd_radian(p1, p2, deg2rad(deg));
+//	cout << p1 << " -> " << deg << " deg -> " << p_rotated << endl;
+//	=> [100, 100] -> 180 deg -> [300, 100] 
+#include <complex>
+Point2f rotate_1st_around_2nd_by_3rd_radian(const Point2f& p1, const Point2f& p2, float rad)
+{
+    complex<float> P_rotated, P(p1.x, p1.y), Q(p2.x, p2.y);
+    P_rotated = (P - Q) * polar(float(1), rad) + Q;
+    return Point2f(P_rotated.real(), P_rotated.imag());
+}
+
+
+
+//------------ draw pencils of lines radiating from 'p_rot_center' and passing thru 'p_one_of_pencil'. -------------- 
+//------------ The lines form a rotation symmetry of angle 'deg'. --------------
+//	Mat im_bgr;
+//	Point p_rot_center(100, 100), p_one_of_pencil(100, 200);
+//	float deg = 72;
+//	draw_rotation_pencil(im_bgr, p_rot_center, p_one_of_pencil, deg)
+//	=> 5 lines radiating from (100, 100) and 77 deg rotated from each other are added to 'im_bgr'. 
+void draw_rotation_pencil(Mat& im_bgr, const Point& p_rot_center, const Point2f& p_one_of_pencil, float deg,
+    const Scalar& color_start, const Scalar& color_others)
+{
+    int iR, n_rot = cvRound(360.0 / deg);
+    for(iR = 0; iR < n_rot; iR++)
+    {
+        Point2f p_rotated;
+        if(iR)
+        {
+            float rad = deg2rad(deg * float(iR));
+            p_rotated = rotate_1st_around_2nd_by_3rd_radian(p_one_of_pencil, p_rot_center, rad);
+        }
+        else
+        {
+            p_rotated = p_one_of_pencil;
+        }
+       
+        Point2f p_boundary = get_boundary_point_of_1st_radiated_from_2nd(p_rotated, p_rot_center, im_bgr.cols, im_bgr.rows);
+        line(im_bgr, p_rot_center, p_boundary, iR ? color_others : color_start, 1); 
+    }
+    return;
+}
+
+
+//------------ Non maxima suppression on a 2D mat. -------------- 
+Mat non_maxima_suppression(const cv::Mat& src, const bool remove_plateaus)
+{
+    Mat mask;
+    // find pixels that are equal to the local neighborhood maximum (including 'plateaus')
+    //double min_val, max_val; Point min_loc, max_loc;   
+    //minMaxLoc(src, &min_val, &max_val, &min_loc, &max_loc); 
+    cv::dilate(src, mask, cv::Mat());   
+    //minMaxLoc(mask, &min_val, &max_val, &min_loc, &max_loc);    
+    cv::compare(src, mask, mask, cv::CMP_GE);
+    //minMaxLoc(mask, &min_val, &max_val, &min_loc, &max_loc);
+    //imwrite("mask_b4.bmp", mask); 
+    //int n_nz = countNonZero(mask);
+    //cout << "n_nz : " << n_nz << endl;
+    // optionally filter out pixels that are equal to the local minimum ('plateaus')    
+    if (remove_plateaus) {    
+        cv::Mat non_plateau_mask;        
+        cv::erode(src, non_plateau_mask, cv::Mat());        
+        cv::compare(src, non_plateau_mask, non_plateau_mask, cv::CMP_GT);        
+        cv::bitwise_and(mask, non_plateau_mask, mask);
+        //minMaxLoc(mask, &min_val, &max_val, &min_loc, &max_loc);
+    }
+    //imwrite("mask_after.bmp", mask); 
+    return mask;
+}
+
+//------------ Find peaks on a 2D mat. -------------- 
+vector<Point> findHistPeaks(InputArray _src, const float thres, const float scale, const Size& ksize, const bool remove_plateus)
+{
+    Mat hist = _src.getMat();
+    // die if histogram image is not the correct type
+    CV_Assert(hist.type() == CV_32F);
+    // find the min and max values of the hist image
+    //double min_val, max_val; Point min_loc, max_loc;
+    //minMaxLoc(hist, &min_val, &max_val, &min_loc, &max_loc);
+    if(ksize.width * ksize.height > 1) GaussianBlur(hist, hist, ksize, 0); // smooth a bit in order to obtain better result   
+    //minMaxLoc(hist, &min_val, &max_val, &min_loc, &max_loc);   
+    //namedWindow("hist", WINDOW_NORMAL);  imshow("hist", hist * 100);  waitKey(1); 
+    Mat mask = non_maxima_suppression(hist, remove_plateus); // extract local maxima    
+    vector<Point> maxima;   // output, locations of non-zero pixels    
+    cv::findNonZero(mask, maxima); 
+    //minMaxLoc(hist, &min_val, &max_val, &min_loc, &max_loc);    
+    for(vector<Point>::iterator it = maxima.begin(); it != maxima.end();)
+    {
+        Point pnt = *it;
+        float val_0_0 = hist.at<float>(pnt.y + 0, pnt.x + 0);
+        bool is_satisfying_threshold = (thres < 0) || (thres >= 0 && val_0_0 > thres);
+        bool is_satisfying_scale = (scale <= 0) || (scale > 0 && val_0_0 > max_val * scale); 
+        if(is_satisfying_threshold && is_satisfying_scale) ++it;
+        else it = maxima.erase(it);
+    }
+    return maxima;     
+}
+
+//------------ Find peaks on a 2D mat. -------------- 
+vector<Point> find_peaks_2D(const vector<Point2f>& li_center, const Size& sz_im, float th_hist)
+{
+    Mat im_hist = Mat::zeros(sz_im, CV_32FC1);   
+    int iC, n_center = li_center.size();
+    for(iC = 0; iC < n_center; iC++)
+    {
+        int x0 = li_center[iC].x, y0 = li_center[iC].y;
+        int x1 = x0 + 1, y1 = y0 + 1;
+        float w_x0_y0, w_x1_y0, w_x0_y1, w_x1_y1;
+        compute_bilnear_weight(w_x0_y0, w_x1_y0, w_x0_y1, w_x1_y1, li_center[iC].x, li_center[iC].y);
+        im_hist.at<float>(y0, x0) += w_x0_y0;   im_hist.at<float>(y0, x1) += w_x1_y0;
+        im_hist.at<float>(y1, x0) += w_x0_y1;   im_hist.at<float>(y1, x1) += w_x1_y1;
+    }
+    vector<Point> li_center_max = findHistPeaks(im_hist, th_hist, -1, Size(15, 15), true);
+    return li_center_max;        
+}
+
+
+//------------ draw key point match --------------
+void draw_match(const Mat& im_gray, const vector<KeyPoint>& li_kp, const vector<DMatch>& li_match)
+{
+    Mat im_bgr_match;
+    int n_match = li_match.size(), n_kp = li_kp.size(), iP, iM;
+    for(iP = 0; iP < n_kp; iP++)
+    {
+        vector<DMatch> li_match_each;
+        for(iM = 0; iM < n_match; iM++)
+        {
+            int idx = li_match[iM].queryIdx;
+            if(iP == idx) li_match_each.push_back(li_match[iM]);
+        }
+        int n_match_each = li_match_each.size();
+        if(n_match_each)
+        {
+            drawMatches(im_gray, li_kp, im_gray, li_kp, li_match_each, im_bgr_match);
+            //namedWindow(to_string(iP), WINDOW_NORMAL); imshow(to_string(iP), im_bgr_match);   waitKey(1);
+        }     
+    }
+    return;
+}    
 
 //------------ detect key points from gray image --------------
 //	using namespace cv;

@@ -334,6 +334,24 @@ double deg2rad(double degree)
 }
 
 
+//------------ Generate a list of possible rotation angles(degree) larger than 'min_deg' --------------
+//	vector<float> li_deg = compute_list_of_possible_rotation_degree(70);
+//	for(int iD = 0; iD < li_deg.size(); iD++) cout << li_deg[iD] << ", "; cout << endl;
+//	=> 180, 120, 90, 72
+vector<float> compute_list_of_possible_rotation_degree(float min_deg)
+{
+    vector<float> li_deg_possible;
+    int divider = 1;
+    float deg = 360.0 / float(++divider);
+    while(deg > min_deg)
+    {
+        li_deg_possible.push_back(deg);
+        deg = 360.0 / float(++divider);
+    }
+    sort(li_deg_possible.begin(), li_deg_possible.end());
+    return li_deg_possible;
+}
+
 //------------ Generate a random number between 'minV' and 'maxV' --------------
 //srand(time(NULL)); // Seed the time
 inline int random_number_in_between(int minV, int maxV)

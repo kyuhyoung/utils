@@ -703,6 +703,40 @@ Mat compute_descriptor(const Mat& im_gray, vector<KeyPoint>& li_kp, const Ptr<De
 }
 
 
+
+
+//------------ find match between the intra members of the key point list.  Of course, the match to the self is not allowed.
+vector<DMatch> match_intra(const Mat& desc, const vector<KeyPoint>& li_kp, const Ptr<DescriptorMatcher>& matcher, 
+    int n_naver, unsigned int kMaxMatchingSize, float th_dist_match, float th_dist_pxl) 
+{
+    vector<DMatch> li_match;  
+    vector< vector<DMatch> > vmatches;
+    matcher->knnMatch(desc, desc, vmatches, n_naver);
+    for (int i = 0; i < static_cast<int>(vmatches.size()); ++i) 
+    {
+        int iM, n_match = vmatches[i].size(); 
+        for(iM = 0; iM < n_match; iM++)
+        {
+            int idx1 = vmatches[i][iM].trainIdx, idx2 = vmatches[i][iM].queryIdx;
+            if(idx1 <= idx2) continue;
+            float dist = cv::norm(li_kp[idx1].pt - li_kp[idx2].pt);
+            if(dist < th_dist_pxl) continue;
+            li_match.push_back(vmatches[i][iM]);
+        }     
+    }
+    std::sort(li_match.begin(), li_match.end());
+    while (th_dist_match < li_match.back().distance) {
+        li_match.pop_back();
+    }
+    while (li_match.size() > kMaxMatchingSize) {
+        li_match.pop_back();
+    }
+    return li_match;
+}
+
+
+
+
 //------------ find the position where a line radiatated from 2nd point and passing thru 1st point intersect the image boundary -------------- 
 //	Point2f p_boundary, p1, p2;
 //	int width = 600, height = 400;

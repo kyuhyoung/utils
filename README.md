@@ -40,6 +40,7 @@
   
 #### OpenCV related  
 
+  * get_boundary_point_of_1st_radiated_from_2nd()
   * pad_image()
   * draw_rect_with_padding() 
   * init_from_cam_or_video_or_directory()

@@ -27,6 +27,7 @@
   * matlab_mod_equivalent()
   * rad2deg()
   * deg2rad()
+  * random_number_in_between()
   * constrainAngle()
   * angleConv()
   * angleDiff()

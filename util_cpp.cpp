@@ -514,6 +514,50 @@ double compute_angle_deg_between_two_lines(double x1a, double y1a, double x2a, d
 //   OpenCV related
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+//------------ find the position where a line radiatated from 2nd point and passing thru 1st point intersect the image boundary -------------- 
+//	Point2f p_boundary, p1, p2;
+//	int width = 600, height = 400;
+//	p1.x = 150;	p1.y = 100;	p2.x = 300;	p2.y = 200;
+//	p_boundary = get_boundary_point_of_1st_radiated_from_2nd(p1, p2, width, height);
+//	cout << p_boundary << endl;
+//	=> [0, 0]
+//	p1.x = 400;	p1.y = 300;	p2.x = 100;	p2.y = 100;
+//	p_boundary = get_boundary_point_of_1st_radiated_from_2nd(p1, p2, width, height);
+//	cout << p_boundary << endl;
+//	=> [550, 400]
+Point2f get_boundary_point_of_1st_radiated_from_2nd(const Point2f& p1, const Point2f& p2, int width, int height)
+{
+    Point2f p_boundary(-1, -1);
+    float dx = p1.x - p2.x, dy = p1.y - p2.y;
+    if(0 == dx && 0 == dy) return p_boundary;
+    float dx_boundary = dx > 0 ? float(width) - p2.x : (0 > dx ? -p2.x : 0.0),
+        dy_boundary = dy > 0 ? float(height) - p2.y : (0 > dy ? -p2.y : 0.0);
+    cout << "dx : " << dx << ", dy : " << dy << endl;  // exit(0);
+    cout << "dx_boundary : " << dx_boundary << ", dy_boundary : " << dy_boundary << endl;   //exit(0);
+    if(0 == dx)
+    {
+        p_boundary.x = p2.x;    p_boundary.y = dy > 0 ? float(height) : 0.0;
+    }
+    else if(0 == dy)
+    {
+        p_boundary.y = p2.y;    p_boundary.x = dx > 0 ? float(width) : 0.0;
+    }
+    else
+    {
+        float ratio_x = dx_boundary / dx, ratio_y = dy_boundary / dy;
+        if(ratio_x > ratio_y)
+        {
+            p_boundary.x = ratio_y * dx + p2.x; p_boundary.y = dy > 0 ? height : 0;
+        }
+        else
+        {
+            p_boundary.y = ratio_x * dy + p2.y; p_boundary.x = dx > 0 ? width : 0;
+        }
+    }
+    return p_boundary;
+}
+
+
 //------------ pad_image  -------------- 
 Mat pad_image(const Mat& im_ori, int pad_l, int pad_r, int pad_t, int pad_b)
 {

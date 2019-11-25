@@ -597,61 +597,6 @@ void draw_rotation_pencil(Mat& im_bgr, const Point& p_rot_center, const Point2f&
     return;
 }
 
-
-//------------ Non maxima suppression on a 2D mat. -------------- 
-Mat non_maxima_suppression(const cv::Mat& src, const bool remove_plateaus)
-{
-    Mat mask;
-    // find pixels that are equal to the local neighborhood maximum (including 'plateaus')
-    //double min_val, max_val; Point min_loc, max_loc;   
-    //minMaxLoc(src, &min_val, &max_val, &min_loc, &max_loc); 
-    cv::dilate(src, mask, cv::Mat());   
-    //minMaxLoc(mask, &min_val, &max_val, &min_loc, &max_loc);    
-    cv::compare(src, mask, mask, cv::CMP_GE);
-    //minMaxLoc(mask, &min_val, &max_val, &min_loc, &max_loc);
-    //imwrite("mask_b4.bmp", mask); 
-    //int n_nz = countNonZero(mask);
-    //cout << "n_nz : " << n_nz << endl;
-    // optionally filter out pixels that are equal to the local minimum ('plateaus')    
-    if (remove_plateaus) {    
-        cv::Mat non_plateau_mask;        
-        cv::erode(src, non_plateau_mask, cv::Mat());        
-        cv::compare(src, non_plateau_mask, non_plateau_mask, cv::CMP_GT);        
-        cv::bitwise_and(mask, non_plateau_mask, mask);
-        //minMaxLoc(mask, &min_val, &max_val, &min_loc, &max_loc);
-    }
-    //imwrite("mask_after.bmp", mask); 
-    return mask;
-}
-
-//------------ Find peaks on a 2D mat. -------------- 
-vector<Point> findHistPeaks(InputArray _src, const float thres, const float scale, const Size& ksize, const bool remove_plateus)
-{
-    Mat hist = _src.getMat();
-    // die if histogram image is not the correct type
-    CV_Assert(hist.type() == CV_32F);
-    // find the min and max values of the hist image
-    //double min_val, max_val; Point min_loc, max_loc;
-    //minMaxLoc(hist, &min_val, &max_val, &min_loc, &max_loc);
-    if(ksize.width * ksize.height > 1) GaussianBlur(hist, hist, ksize, 0); // smooth a bit in order to obtain better result   
-    //minMaxLoc(hist, &min_val, &max_val, &min_loc, &max_loc);   
-    //namedWindow("hist", WINDOW_NORMAL);  imshow("hist", hist * 100);  waitKey(1); 
-    Mat mask = non_maxima_suppression(hist, remove_plateus); // extract local maxima    
-    vector<Point> maxima;   // output, locations of non-zero pixels    
-    cv::findNonZero(mask, maxima); 
-    //minMaxLoc(hist, &min_val, &max_val, &min_loc, &max_loc);    
-    for(vector<Point>::iterator it = maxima.begin(); it != maxima.end();)
-    {
-        Point pnt = *it;
-        float val_0_0 = hist.at<float>(pnt.y + 0, pnt.x + 0);
-        bool is_satisfying_threshold = (thres < 0) || (thres >= 0 && val_0_0 > thres);
-        bool is_satisfying_scale = (scale <= 0) || (scale > 0 && val_0_0 > max_val * scale); 
-        if(is_satisfying_threshold && is_satisfying_scale) ++it;
-        else it = maxima.erase(it);
-    }
-    return maxima;     
-}
-
 //------------ Find peaks on a 2D mat. -------------- 
 vector<Point> find_peaks_2D(const vector<Point2f>& li_center, const Size& sz_im, float th_hist)
 {

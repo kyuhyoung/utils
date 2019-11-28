@@ -31,7 +31,7 @@ double what_time_in_seconds_is_it_now()
 
 //------------ Check if the given directory is the existing one --------------  
 #include <sys/stat.h>
-bool is_this_existing_directory(const char *direc)
+bool is_this_directory_existing(const char *direc)
 {
     bool is_folder_exist = false;
     struct stat st;
@@ -44,6 +44,13 @@ bool is_this_existing_directory(const char *direc)
         } 
     }
     return is_folder_exist;	
+}
+
+//------------ Check if the given file is the existing one --------------  
+bool is_this_file_existing(const char *fileName)
+{
+    std::ifstream infile(fileName);
+    return infile.good();
 }
 
 //------------ Create a directory if it does not exist --------------  

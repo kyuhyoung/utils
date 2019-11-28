@@ -77,7 +77,7 @@ bool mkdir_if_not_exist(const char *direc)
 }
 */
 
-int mkdirs(const char *path, mode_t mode) 
+int mkdirs(const char *path, mode_t mode = 0733)	// another candidate : 0766  
 { 
 	char tmp_path[2048]; 
 	const char *tmp = path; 

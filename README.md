@@ -5,7 +5,8 @@
 
   * python_join_equivalent()
   * what_time_in_seconds_is_it_now()    
-  * is_this_existing_directory()
+  * is_this_directory_existing()
+  * is_this_file_existing()
   * mkdirs()
   * error()
   * is_only_number()

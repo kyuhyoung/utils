@@ -49,6 +49,7 @@ bool is_this_existing_directory(const char *direc)
 //------------ Create a directory if it does not exist --------------  
 #include <sys/stat.h>
 #include <stdio.h>
+/*
 bool mkdir_if_not_exist(const char *direc)
 {
     bool is_folder_exist = is_this_existing_directory(direc);
@@ -73,6 +74,27 @@ bool mkdir_if_not_exist(const char *direc)
         }
     }
     return is_folder_exist;
+}
+*/
+int mkdirs(const char *path, mode_t mode) 
+{ 
+	char tmp_path[2048]; 
+	const char *tmp = path; 
+	int len = 0, ret; 
+	if(path == NULL || strlen(path) >= 2048) return -1; 
+	while((tmp = strchr(tmp, '/')) != NULL) 
+	{ 
+		len = tmp - path; 
+		tmp++; 
+		if(len == 0) continue; 
+		strncpy(tmp_path, path, len); 
+		tmp_path[len] = 0x00; 
+		if((ret = mkdir(tmp_path, mode)) == -1) 
+		{ 
+			if(errno != EEXIST) return -1; 
+		} 
+	} 
+	return mkdir(path, mode); 
 }
 
 //------------ Display error message and die --------------  

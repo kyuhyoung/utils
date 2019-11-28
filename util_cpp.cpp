@@ -76,6 +76,7 @@ bool mkdir_if_not_exist(const char *direc)
     return is_folder_exist;
 }
 */
+
 int mkdirs(const char *path, mode_t mode) 
 { 
 	char tmp_path[2048]; 

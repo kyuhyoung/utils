@@ -6,7 +6,7 @@
   * python_join_equivalent()
   * what_time_in_seconds_is_it_now()    
   * is_this_existing_directory()
-  * mkdir_if_not_exist()
+  * mkdirs()
   * error()
   * is_only_number()
   * is_this_camera_index()

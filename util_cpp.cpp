@@ -1278,15 +1278,15 @@ Size compute_size_smaller_than(const Size& size_src, const Size& size_tgt)
         {
             if(shall_shrink)
             {
-                if(is_first_a_factor_of_second(iS, size_src.width) && is_first_a_factor_of_second(iS, size_src.height))
-                {
+                //if(is_first_a_factor_of_second(iS, size_src.width) && is_first_a_factor_of_second(iS, size_src.height))
+                //{
                     int wid = size_src.width / iS, hei = size_src.height / iS;
                     if(wid <= size_tgt.width || hei <= size_tgt.height)
                     {
                         size_smaller_than.width = wid;  size_smaller_than.height = hei;
                         break;
                     }
-                }       
+                //}       
             }
             else
             {

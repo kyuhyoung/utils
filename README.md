@@ -48,6 +48,7 @@
   
 #### OpenCV related  
 
+  * compute_offset_for_puttext()
   * draw_arc()
   * rotate_1st_around_2nd_by_3rd_radian()
   * draw_rotation_pencil()

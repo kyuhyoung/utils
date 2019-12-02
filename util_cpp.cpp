@@ -644,6 +644,25 @@ double compute_angle_deg_between_two_lines(double x1a, double y1a, double x2a, d
 //   OpenCV related
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+//	Point2f p0(10, 20), p1(20, 20), p2(20, 10);
+//	Point2f d_01 = p0 - p1, d_21 = p2 - p1;
+//	float deg_01 = rad2deg(atan2(d_01.y, d_01.x)), deg_21 = rad2deg(atan2(d_21.y, d_21.x));
+//	float x_01 = -compute_offset_for_puttext(deg_01, 180, 0, MAX_OFFSET_X, 0), 
+//		y_01 = compute_offset_for_puttext(deg_01, 90, -90, MAX_OFFSET_Y, 0),
+//		x_21 = -compute_offset_for_puttext(deg_21, 180, 0, MAX_OFFSET_X, 0), 
+//		y_21 = compute_offset_for_puttext(deg_21, 90, -90, MAX_OFFSET_Y, 0);
+//	p0.x += x_01;	p0.y += y_01;	p2.x += x_21;	p2.y += y_21;
+float compute_offset_for_puttext(float deg, float max_deg, float min_deg, float max_offset, float min_offset)
+{
+     float dif_deg = fabs(min_deg - max_deg), scale_output = 0.5 * (max_offset - min_offset);
+     float scale_input = 180.0 / dif_deg;
+     float deg_modified = scale_input * (deg - max_deg);
+     float rad_modified = deg_modified * CV_PI / 180.0 ;
+     return scale_output * (1.0 + cos(rad_modified)) + min_offset;
+}
+
+
+
 //------------ draw (circular) arc around 'p_center' and from 'p_1' to 'p_2' --------------
 float draw_arc(Mat& im_bgr, const Point2f& p_center, const Point2f& p_1, const Point2f& p_2, const Scalar& kolor)
 {

@@ -389,6 +389,49 @@ inline int random_number_in_between(int minV, int maxV)
     return rand() % (maxV - minV + 1) + minV;
 }    
 
+
+
+vector<Scalar> generate_random_color_list(unsigned int n_color)
+{
+    vector<Scalar> li_color;
+    li_color.push_back(Scalar(255, 0, 0));
+    li_color.push_back(Scalar(0, 255, 0));
+    li_color.push_back(Scalar(0, 0, 255));
+    if(li_color.size() < n_color)
+    {
+        li_color.push_back(Scalar(255, 255, 0));
+        li_color.push_back(Scalar(0, 255, 255));
+        li_color.push_back(Scalar(255, 0, 255));
+        if(li_color.size() < n_color)
+        {
+            li_color.push_back(Scalar(255, 128, 0));
+            li_color.push_back(Scalar(0, 255, 128));
+            li_color.push_back(Scalar(128, 0, 255));
+            if(li_color.size() < n_color)
+            {
+                li_color.push_back(Scalar(128, 255, 0));
+                li_color.push_back(Scalar(0, 128, 255));
+                li_color.push_back(Scalar(255, 0, 128));
+                if(li_color.size() < n_color)
+                {
+                    li_color.push_back(Scalar(128, 128, 0));
+                    li_color.push_back(Scalar(0, 128, 128));
+                    li_color.push_back(Scalar(128, 0, 128));
+                    
+                    while(li_color.size() < n_color)
+                    {
+                        li_color.push_back(Scalar(
+                            random_number_in_between(100, 255),
+                            random_number_in_between(100, 255),
+                            random_number_in_between(100, 255)));
+                    }
+                }
+            }
+        }
+    }
+    return li_color;
+}
+
 //------------ Normalize to [-180,180) --------------
 #define     M_PI   3.1415926535897932384626433832795
 #define     M_2PI  M_PI * 2.0

@@ -30,6 +30,7 @@
   * deg2rad()
   * compute_list_of_possible_rotation_degree()
   * random_number_in_between()
+  * generate_random_color_list()
   * constrainAngle()
   * angleConv()
   * angleDiff()

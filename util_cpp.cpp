@@ -662,6 +662,10 @@ float compute_offset_for_puttext(float deg, float max_deg, float min_deg, float 
 }
 
 
+float dist_two_points(const Point2f& p1, const Point2f& p2)
+{
+	return cv::norm(p1 - p2);
+}
 
 //------------ draw (circular) arc around 'p_center' and from 'p_1' to 'p_2' --------------
 float draw_arc(Mat& im_bgr, const Point2f& p_center, const Point2f& p_1, const Point2f& p_2, const Scalar& kolor)

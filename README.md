@@ -3,6 +3,7 @@
 
 #### system related  
 
+  * cout_indented()
   * python_join_equivalent()
   * what_time_in_seconds_is_it_now()    
   * is_this_directory_existing()

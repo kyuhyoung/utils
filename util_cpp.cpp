@@ -1,3 +1,15 @@
+//------------ print something with indent --------------  
+//	std::stringstream ss;
+//	ss << "I am " << 5 << " years old.";
+//	cout_indented(2, ss.str());
+//	=>   I am 5 years old.
+
+void cout_indented(int n_space, const string& str)
+{
+    std::cout << std::string(n_space, ' ') << str << std::endl;
+}
+
+
 //------------ c++ counterpart of python function "join" -------------- 
 //	experimental::filesystem linker error 시
 //	Makefile에 -lstdc++fs 옵션을 주어야 함.

@@ -49,6 +49,9 @@
   
 #### OpenCV related  
 
+  * mat_type_2_str() 
+  * print_mat_type()
+  * print_matrix_min_max()
   * compute_offset_for_puttext()
   * dist_two_points()
   * draw_arc()

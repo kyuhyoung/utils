@@ -656,6 +656,54 @@ double compute_angle_deg_between_two_lines(double x1a, double y1a, double x2a, d
 //   OpenCV related
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+string mat_type_2_str(int type, int n_sp) 
+{
+	cout_indented(n_sp, "mat_type_2_str");
+  	string r;
+  	uchar depth = type & CV_MAT_DEPTH_MASK;
+  	uchar chans = 1 + (type >> CV_CN_SHIFT);
+  	switch ( depth ) {
+    	case CV_8U:  r = "8U"; break;
+    	case CV_8S:  r = "8S"; break;
+    	case CV_16U: r = "16U"; break;
+    	case CV_16S: r = "16S"; break;
+    	case CV_32S: r = "32S"; break;
+    	case CV_32F: r = "32F"; break;
+    	case CV_64F: r = "64F"; break;
+    	default:     r = "User"; break;
+  	}
+  	r += "C";
+  	r += (chans + '0');
+  	return r;
+}
+
+
+void print_mat_type(const Mat& mat, int n_sp)
+{
+	cout_indented(n_sp, "print_mat_type");
+	cout_indented(n_sp + 1, "mat type : " + mat_type_2_str(mat.type(), n_sp + 1)); 		
+}
+	
+void print_matrix_min_max(const Mat& mat, bool with_loc, int n_sp)
+{
+	cout_indented(n_sp, "print_matrix_min_max");
+	double minVal, maxVal;
+	stringstream ss;
+	if(with_loc) 
+	{
+		Point minLoc, maxLoc;
+		minMaxLoc(mat, &minVal, &maxVal, &minLoc, &maxLoc);
+		ss << "min : " << minVal << "at (" << minLoc.x << ", " << minLoc.y << ")\tmax : " << maxVal << "at (" << maxLoc.x << ", " << maxLoc.y << ")";
+	}
+	else
+	{
+		minMaxLoc(mat, &minVal, &maxVal);
+		ss << "min : " << minVal << "\tmax : " << maxVal;
+	}
+	cout_indented(n_sp + 1, ss.str());					
+}
+
 //	Point2f p0(10, 20), p1(20, 20), p2(20, 10);
 //	Point2f d_01 = p0 - p1, d_21 = p2 - p1;
 //	float deg_01 = rad2deg(atan2(d_01.y, d_01.x)), deg_21 = rad2deg(atan2(d_21.y, d_21.x));

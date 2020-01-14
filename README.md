@@ -46,6 +46,8 @@
   * is_this_point_on_the_line_of_two_points()
   * calc_angle_deg_three_points()
   * compute_angle_deg_between_two_lines()
+  * hls_01_2_color_name()
+
   
 #### OpenCV related  
 

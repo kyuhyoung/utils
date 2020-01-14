@@ -650,6 +650,62 @@ double compute_angle_deg_between_two_lines(double x1a, double y1a, double x2a, d
 } //end-ComputeAngleBetweenTwoLines
 
 
+// refernce site : https://www.december.com/html/spec/colorhsl.html
+//	float hue_0360 = 357, sat_0100 = 50, lig_0100 = 50;
+//	cout << hls_01_to_color_name(hue_0360 / 360, lig_0100 / 100, sat_0100 / 100) << endl;	
+//	=> red
+//	hue_0360 = 95;	sat_0100 = 50, lig_0100 = 50;
+//	cout << hls_01_to_color_name(hue_0360 / 360, lig_0100 / 100, sat_0100 / 100) << endl;	
+//	=> green
+string hls_01_2_color_name(float hue_01, float lig_01, float sat_01)
+{
+	string color_name = "some";
+	if(0.000 <= hue_01 && hue_01 <= 1.000 && 0.000 <= lig_01 && lig_01 <= 0.100 && 0.000 <= sat_01 <= 1.000)
+	{
+		color_name = "black"
+	}
+	else if(0.000 <= hue_01 && hue_01 <= 1.000 && 0.850 <= lig_01 && lig_01 <= 1.000 && 0.000 <= sat_01 <= 1.000)
+	{
+		color_name = "white"
+	}
+	else if(0.970 <= hue_01 || hue_01 <= 0.030 && 0.400 <= lig_01 && lig_01 <= 0.600 && 0.450 <= sat_01 <= 1.000)
+	{	//	Note hue value of red is between minus something to plus something. So it is not "&&" but "||".
+		color_name = "red"
+	}
+	else if(0.250 <= hue_01 && hue_01 <= 0.437 && 0.200 <= lig_01 && lig_01 <= 0.550 && 0.450 <= sat_01 <= 1.000)
+	{
+		color_name = "green"
+	}
+	else if(0.527 <= hue_01 && hue_01 <= 0.708 && 0.280 <= lig_01 && lig_01 <= 0.650 && 0.550 <= sat_01 <= 1.000)
+	{
+		color_name = "blue"
+	}
+	else if(0.133 <= hue_01 && hue_01 <= 0.167 && 0.450 <= lig_01 && lig_01 <= 0.700 && 0.800 <= sat_01 <= 1.000)
+	{
+		color_name = "yellow"
+	}
+	else if(0.495 <= hue_01 && hue_01 <= 0.505 && 0.450 <= lig_01 && lig_01 <= 0.700 && 0.750 <= sat_01 <= 1.000)
+	{
+		color_name = "cyan"
+	}
+	else if(0.820 <= hue_01 && hue_01 <= 0.845 && 0.450 <= lig_01 && lig_01 <= 0.700 && 0.800 <= sat_01 <= 1.000)
+	{
+		color_name = "magenta"
+	}
+	else if(0.889 <= hue_01 && hue_01 <= 0.986 && 0.700 <= lig_01 && lig_01 <= 1.000 && 0.650 <= sat_01 <= 1.000)
+	{
+		color_name = "pink"
+	}
+	else if(0.055 <= hue_01 && hue_01 <= 0.111 && 0.450 <= lig_01 && lig_01 <= 0.600 && 0.800 <= sat_01 <= 1.000)
+	{
+		color_name = "orange"
+	}
+	else if(0.000 <= hue_01 && hue_01 <= 0.072 && 0.200 <= lig_01 && lig_01 <= 0.400 && 0.550 <= sat_01 <= 1.000)
+	{
+		color_name = "brown"
+	}
+	return color_name;
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

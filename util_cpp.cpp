@@ -830,6 +830,9 @@ string contour_2_shape_name(const vector<Point>& li_pt, const Mat& im_mask, int 
 }
 
 
+//	Mat mat = Mat::zeros(100, 10, CV_8UC3);
+//	cout << mat_type_2_str(mat.type(), -100) << endl;
+//	=> 8UC3	
 
 string mat_type_2_str(int type, int n_sp) 
 {
@@ -853,12 +856,23 @@ string mat_type_2_str(int type, int n_sp)
 }
 
 
+//	Mat mat = Mat::zeros(100, 10, CV_8UC3);
+//	print_mat_type(mat, 0);
+//	=> mat type : 8UC3	
+
 void print_mat_type(const Mat& mat, int n_sp)
 {
 	cout_indented(n_sp, "print_mat_type");
 	cout_indented(n_sp + 1, "mat type : " + mat_type_2_str(mat.type(), n_sp + 1)); 		
 }
-	
+
+//	Mat mat = Mat::zeros(100, 10, CV_8UC1);
+//	mat.at<uchar>(10, 20) = 150;
+//	print_matrix_min_max(mat, true, 0);
+//	=> min : 0 at (0, 0),	max : 150 at (20, 10)
+//	print_matrix_min_max(mat, false, 0);
+//	=> min : 0,	max : 150
+
 void print_matrix_min_max(const Mat& mat, bool with_loc, int n_sp)
 {
 	cout_indented(n_sp, "print_matrix_min_max");
@@ -868,12 +882,12 @@ void print_matrix_min_max(const Mat& mat, bool with_loc, int n_sp)
 	{
 		Point minLoc, maxLoc;
 		minMaxLoc(mat, &minVal, &maxVal, &minLoc, &maxLoc);
-		ss << "min : " << minVal << "at (" << minLoc.x << ", " << minLoc.y << ")\tmax : " << maxVal << "at (" << maxLoc.x << ", " << maxLoc.y << ")";
+		ss << "min : " << minVal << "at (" << minLoc.x << ", " << minLoc.y << "),\tmax : " << maxVal << "at (" << maxLoc.x << ", " << maxLoc.y << ")";
 	}
 	else
 	{
 		minMaxLoc(mat, &minVal, &maxVal);
-		ss << "min : " << minVal << "\tmax : " << maxVal;
+		ss << "min : " << minVal << ",\tmax : " << maxVal;
 	}
 	cout_indented(n_sp + 1, ss.str());					
 }

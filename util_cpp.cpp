@@ -657,8 +657,9 @@ double compute_angle_deg_between_two_lines(double x1a, double y1a, double x2a, d
 //	hue_0360 = 95;	sat_0100 = 50, lig_0100 = 50;
 //	cout << hls_01_to_color_name(hue_0360 / 360, lig_0100 / 100, sat_0100 / 100) << endl;	
 //	=> green
-string hls_01_2_color_name(float hue_01, float lig_01, float sat_01)
+string hls_01_2_color_name(float hue_01, float lig_01, float sat_01, int n_sp)
 {
+	cout_indented(n_sp, "hls_01_2_color_name");
 	string color_name = "some";
 	if(0.000 <= hue_01 && hue_01 <= 1.000 && 0.000 <= lig_01 && lig_01 <= 0.100 && 0.000 <= sat_01 <= 1.000)
 	{
@@ -704,6 +705,7 @@ string hls_01_2_color_name(float hue_01, float lig_01, float sat_01)
 	{
 		color_name = "brown"
 	}
+	cout_indented(n_sp + 1, color_name);
 	return color_name;
 }
 
@@ -711,6 +713,122 @@ string hls_01_2_color_name(float hue_01, float lig_01, float sat_01)
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //   OpenCV related
 /////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//	vector<Point> li_pt(4);
+//	li_pt[0] = Point(0, 0);	li_pt[1] = Point(100, 0);	li_pt[2] = Point(100, 100);	li_pt[3] = Point(0, 1000);
+//	cout << contour_2_shape_name(li_pt, Mat(), -100) << endl;
+//	=> square	
+
+#define TH_RATIO_RADIUS_DIF     0.12
+#define RATIO_RADIUS_PENTA      1.0 / cos(36.0 / 180.0 * CV_PI) 
+#define MIN_RATIO_RADIUS_PENTA  RATIO_RADIUS_PENTA * 1.0 
+#define MAX_RATIO_RADIUS_PENTA  RATIO_RADIUS_PENTA * 1.15
+#define SQUARENESS_MIN          0.95
+#define SQUARENESS_MAX          1.10
+#define RECTNESS_MIN            0.95
+#define RECTNESS_MAX            1.1
+#define ELLIPSENESS_MIN         0.95
+#define ELLIPSENESS_MAX         1.16
+#define TH_RATIO_ISOSCLES_TRIANGLE 1.1
+#define TH_RATIO_EQUILATERAL_TRIANGLE 1.1
+
+string contour_2_shape_name(const vector<Point>& li_pt, const Mat& im_mask, int n_sp)
+{
+	cout_indented(n_sp, "contour_2_shape_name");
+	string shape_name = "some";	
+    Moments mom = im_mask.empty() ? moments(li_pt) : moments(im_mask, true);
+    float area = im_mask.empty() ? contourArea(li_pt) : countNonZero(im_mask), 
+    Point p_center(cvRound(mom.m10 / mom.m00), cvRound(mom.m01 / mom.m00));  
+    float epsilon = arcLength(li_pt, true) * 0.02;
+    vector<Point> li_pt_approx;
+    approxPolyDP(li_pt, li_pt_approx, epsilon, true);
+    int iP, n_pt = li_pt.size(), n_pt_approx = li_pt_approx.size();
+    vector<float> li_d_center_boundary(n_pt);
+    float rad_max = -1, rad_min = 100000000000000;
+    for(iP = 0; iP < n_pt; iP++)
+    {
+        float dist = cv::norm(p_center - li_pt[iP]);
+        li_d_center_boundary[iP] = dist;
+        if(dist > rad_max) rad_max = dist;
+        if(dist < rad_min) rad_min = dist;
+    }
+    cout_indented(n_sp + 1, "n_pt_approx : " + to_string(n_pt_approx) + "\trad_max : " + to_string(rad_max) + "\trad_min : " + to_string(rad_min));
+    float rad_dif = rad_max - rad_min, 
+		area_penta_rad_min = 5 * cos(deg2rad(54)) * rad_min * rad_min,
+        area_penta_rad_max = 5 / tan(deg2rad(54)) * rad_max * rad_max;
+    float ratio_rad_dif = rad_dif / rad_max, ratio_rad = rad_max / rad_min, 
+		area_penta_max = MAX(area_penta_rad_min, area_penta_rad_max),
+        area_penta_min = MIN(area_penta_rad_min, area_penta_rad_max), 
+		squareness = area / (4.0 * rad_min * rad_min),
+        rectness = area / (4.0 * rad_min * sqrt(rad_max * rad_max - rad_min * rad_min)),
+        equilateral_triangleness = (area * sqrt(3)) / ((rad_max + rad_min) * (rad_max + rad_min)), 
+        diamondness = (area * sqrt(rad_max * rad_max - rad_min * rad_min)) / (2.0 * rad_max * rad_max * rad_min),
+        ellipseness = area / (rad_max * rad_min * CV_PI);
+    cout_indented(n_sp + 1, "ratio_rad_dif : " + to_string(ratio_rad_dif) + " / " + to_string(TH_RATIO_RADIUS_DIF));
+    cout_indented(n_sp + 1, "min penta : " + to_string(MIN_RATIO_RADIUS_PENTA) + " / ratio_rad : " + to_string(ratio_rad) + " / max penta : " + to_string(MAX_RATIO_RADIUS_PENTA));
+    cout_indented(n_sp + 1, "min : " + to_string(ELLIPSENESS_MIN) + " / ellipseness : " + to_string(ellipseness) + " / max : " + to_string(ELLIPSENESS_MAX));
+    cout_indented(n_sp + 1, "min : " + to_string(SQUARENESS_MIN) + " / squareness : " + to_string(squareness) + " / max : " + to_string(SQUARENESS_MAX));
+    cout_indented(n_sp + 1, "min : " + to_string(RECTNESS_MIN) + " / rectness : " + to_string(rectness) + " / max : " + to_string(RECTNESS_MAX));
+    if(3 == n_pt_approx)
+    {
+        float d01 = norm(li_pt_approx[0] - li_pt_approx[1]), d12 = norm(li_pt_approx[1] - li_pt_approx[2]),
+            d20 = norm(li_pt_approx[2] - li_pt_approx[0]);
+        float d_max = MAX(d01, MAX(d12, d20)), d_min = MIN(d01, MIN(d12, d20));
+        float ratio_max_min = d_max / d_min;
+        cout_indented(n_sp + 1, "ratio_max_min : " + to_string(ratio_max_min) + " / " + to_string(TH_RATIO_EQUILATERAL_TRIANGLE));
+        if(ratio_max_min < TH_RATIO_EQUILATERAL_TRIANGLE)
+        {
+			shape_name = "triangle_equilateral";
+        }
+        else
+        {
+            float r_01_12 = MAX(d01, d12) / MIN(d01, d12), r_12_20 = MAX(d12, d20) / MIN(d12, d20), r_20_01 = MAX(d20, d01) / MIN(d20, d01);
+            cout_indented(n_sp + 1, "r_01_12 : " + to_string(r_01_12) + ", r_12_20 : " + to_string(r_12_20) + ", r_20_01 : " + to_string(r_20_01) + " / " + to_string(TH_RATIO_EQUILATERAL_TRIANGLE));
+            if(r_01_12 < TH_RATIO_ISOSCLES_TRIANGLE || r_12_20 < TH_RATIO_ISOSCLES_TRIANGLE || r_20_01 < TH_RATIO_ISOSCLES_TRIANGLE)
+            {
+				shape_name = "triangle_isosceles";
+            }
+        }
+    }
+    else if(4 == n_pt_approx)
+    {
+        if(SQUARENESS_MIN < squareness && squareness < SQUARENESS_MAX)	
+        {
+			shape_name = "square";
+        }
+        else if(RECTNESS_MIN < rectness && rectness < RECTNESS_MAX)
+        {
+			shape_name = "rectangle";
+        }
+		else if(DIAMONDNESS_MIN < diamondness && diamondness < DIAMONDNESS_MAX)
+        //else if(0.95 < diamondness && diamondness < 1.05)
+        {
+			shape_name = "diamond";
+        }
+    }          
+    else if(5 == n_pt_approx)
+    {
+        if(MIN_RATIO_RADIUS_PENTA < ratio_rad && ratio_rad < MAX_RATIO_RADIUS_PENTA)
+        {
+			shape_name = "pentagon";
+        }
+    }
+    else if(n_pt_approx > 7)
+    {
+        if(ratio_rad_dif < TH_RATIO_RADIUS_DIF)
+        {
+			shape_name = "circle";
+        }
+        else if(ELLIPSENESS_MIN < ellipseness && ellipseness < ELLIPSENESS_MAX)
+        {
+			shape_name = "ellipse";
+        }
+    }      
+    cout_indented(n_sp + 1, shape_name);
+    return shape_name;
+}
+
 
 
 string mat_type_2_str(int type, int n_sp) 

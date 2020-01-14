@@ -52,6 +52,10 @@
 #### OpenCV related  
 
   * contour_2_shape_name()
+  * merge_mask()
+  * get_hsv_histogram()
+  * get_hls_histogram()
+  * get_histogram()   
   * mat_type_2_str() 
   * print_mat_type()
   * print_matrix_min_max()

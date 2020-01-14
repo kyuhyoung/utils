@@ -51,6 +51,7 @@
   
 #### OpenCV related  
 
+  * contour_2_shape_name()
   * mat_type_2_str() 
   * print_mat_type()
   * print_matrix_min_max()

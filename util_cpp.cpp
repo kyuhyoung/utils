@@ -344,7 +344,9 @@ vector<string> get_list_of_image_path_under_this_directory(const string& dir_img
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
 //   math related
+/////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 //------------ C++ function equivalent to Matlab's mod function --------------  
@@ -711,7 +713,9 @@ string hls_01_2_color_name(float hue_01, float lig_01, float sat_01, int n_sp)
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
 //   OpenCV related
+/////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -827,6 +831,63 @@ string contour_2_shape_name(const vector<Point>& li_pt, const Mat& im_mask, int 
     }      
     cout_indented(n_sp + 1, shape_name);
     return shape_name;
+}
+
+
+
+
+Mat merge_mask(const vector<Mat>& li_mask, vector<int> li_idx, int n_sp)
+{
+    cout_indented(n_sp, "merge_mask");
+    Mat im_mask;
+    int iM, n_mask = li_idx.size();
+    for(iM = 0; iM < n_mask; iM++)
+    {
+        int idx = li_idx[iM];
+        if(0 == iM) im_mask = li_mask[idx];
+        else bitwise_or(im_mask, li_mask[idx], im_mask); 
+        //cout_indented(n_sp + 1, "idx : " + to_string(idx));
+        //cout_indented(n_sp + 2, "countNonZero(li_mask[idx]) : " + to_string(countNonZero(li_mask[idx])));
+        //cout_indented(n_sp + 2, "countNonZero(im_mask) : " + to_string(countNonZero(im_mask)));
+    }
+    return im_mask;
+}
+
+Mat get_hsv_histogram(const Mat& im_hsv, const Mat& im_mask, int n_sp)
+{
+    cout_indented(n_sp, "get_hsv_histogram");
+    Mat hist_hsv;
+    int hbins = 50, sbins = 32, vbins = 10, channels[] = {0,  1, 2};
+    int histSize[] = {hbins, sbins, vbins}; 
+    float hranges[] = { 0, 180 }, sranges[] = { 0, 255 }, vranges[] = {0, 255};
+    const float* ranges[] = { hranges, sranges, vranges}; 
+    //cout_indented(n_sp + 1, "countNonZero(im_mask) : " + to_string(countNonZero(im_mask)));
+    calcHist(&im_hsv, 1, channels, im_mask, hist_hsv, 3, histSize, ranges, true, false);
+    //cout_indented(n_sp + 1, "b4 countNonZero(hist_hsv) : " + to_string(countNonZero(hist_hsv)));
+    normalize(hist_hsv, hist_hsv, 1, 0, cv::NORM_L1);
+    //cout_indented(n_sp + 1, "after countNonZero(hist_hsv) : " + to_string(countNonZero(hist_hsv)));
+    return hist_hsv;
+}
+
+Mat get_hls_histogram(const Mat& im_hls, const Mat& im_mask, int n_sp)
+{
+    cout_indented(n_sp, "get_hls_histogram");
+    Mat hist_hls;
+    int hbins = 50, lbins = 10, sbins = 32, channels[] = {0, 1, 2};
+    int histSize[] = {hbins, lbins, sbins}; 
+    float hranges[] = { 0, 180 }, sranges[] = { 0, 255 }, lranges[] = {0, 255};
+    const float* ranges[] = { hranges, lranges, sranges}; 
+    //cout_indented(n_sp + 1, "countNonZero(im_mask) : " + to_string(countNonZero(im_mask)));
+    calcHist(&im_hls, 1, channels, im_mask, hist_hls, 3, histSize, ranges, true, false);
+    //cout_indented(n_sp + 1, "b4 countNonZero(hist_hls) : " + to_string(countNonZero(hist_hls)));
+    normalize(hist_hls, hist_hls, 1, 0, cv::NORM_L1);
+    //cout_indented(n_sp + 1, "after countNonZero(hist_hls) : " + to_string(countNonZero(hist_hls)));
+    return hist_hls;
+}
+
+Mat get_histogram(const Mat& im_hsv_or_hls, const Mat& im_mask, bool is_hsv, int n_sp)
+{
+    return is_hsv ? get_hsv_histogram(im_hsv_or_hls, im_mask, n_sp) : get_hls_histogram(im_hsv_or_hls, im_mask, n_sp);
 }
 
 

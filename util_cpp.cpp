@@ -671,7 +671,7 @@ string hls_01_2_color_name(float hue_01, float lig_01, float sat_01, int n_sp)
 	{
 		color_name = "white"
 	}
-	else if((1.0 - 0.30) <= hue_01 || hue_01 <= 0.180 && 0.400 <= lig_01 && lig_01 <= 0.600 && 0.450 <= sat_01 <= 1.000)
+	else if((1.0 - 0.03) <= hue_01 || hue_01 <= 0.180 && 0.400 <= lig_01 && lig_01 <= 0.600 && 0.450 <= sat_01 <= 1.000)
 	{	//	Note hue value of red is between minus something to plus something. So it is not "&&" but "||".
 		color_name = "red"
 	}

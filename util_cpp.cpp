@@ -691,7 +691,7 @@ string hls_01_2_color_name(float hue_01, float lig_01, float sat_01, int n_sp)
 	{
 		color_name = "cyan"
 	}
-	else if(0.820 <= hue_01 && hue_01 <= 0.845 && 0.450 <= lig_01 && lig_01 <= 0.700 && 0.800 <= sat_01 <= 1.000)
+	else if(0.820 <= hue_01 && hue_01 <= 0.920 && 0.450 <= lig_01 && lig_01 <= 0.700 && 0.460 <= sat_01 <= 1.000)
 	{
 		color_name = "magenta"
 	}

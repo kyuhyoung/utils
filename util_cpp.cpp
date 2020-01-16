@@ -724,7 +724,8 @@ string hls_01_2_color_name(float hue_01, float lig_01, float sat_01, int n_sp)
 //	cout << contour_2_shape_name(li_pt, Mat(), -100) << endl;
 //	=> square	
 
-#define TH_RATIO_RADIUS_DIF     0.12
+//#define TH_RATIO_RADIUS_DIF     0.12
+#define TH_RATIO_RADIUS_CIRCLE	1.1
 #define RATIO_RADIUS_PENTA      1.0 / cos(36.0 / 180.0 * CV_PI) 
 #define MIN_RATIO_RADIUS_PENTA  RATIO_RADIUS_PENTA * 1.0 
 #define MAX_RATIO_RADIUS_PENTA  RATIO_RADIUS_PENTA * 1.15
@@ -732,17 +733,17 @@ string hls_01_2_color_name(float hue_01, float lig_01, float sat_01, int n_sp)
 #define SQUARENESS_MAX          1.10
 #define RECTNESS_MIN            0.95
 #define RECTNESS_MAX            1.1
-#define ELLIPSENESS_MIN         0.95
-#define ELLIPSENESS_MAX         1.16
+//#define ELLIPSENESS_MIN         0.95
+//#define ELLIPSENESS_MAX         1.16
 #define TH_RATIO_ISOSCLES_TRIANGLE 1.1
 #define TH_RATIO_EQUILATERAL_TRIANGLE 1.1
 
-string contour_2_shape_name(const vector<Point>& li_pt, const Mat& im_mask, int n_sp)
+string contour_2_shape_name(const vector<Point>& li_pt, const Size& sz, const Mat *im_mask, int n_sp)
 {
 	cout_indented(n_sp, "contour_2_shape_name");
 	string shape_name = "some";	
-    Moments mom = im_mask.empty() ? moments(li_pt) : moments(im_mask, true);
-    float area = im_mask.empty() ? contourArea(li_pt) : countNonZero(im_mask), 
+    Moments mom = NULL == im_mask ? moments(li_pt) : moments(*im_mask, true);
+    float area = NULL == im_mask ? contourArea(li_pt) : countNonZero(*im_mask), 
     Point p_center(cvRound(mom.m10 / mom.m00), cvRound(mom.m01 / mom.m00));  
     float epsilon = arcLength(li_pt, true) * 0.02;
     vector<Point> li_pt_approx;
@@ -758,17 +759,18 @@ string contour_2_shape_name(const vector<Point>& li_pt, const Mat& im_mask, int 
         if(dist < rad_min) rad_min = dist;
     }
     cout_indented(n_sp + 1, "n_pt_approx : " + to_string(n_pt_approx) + "\trad_max : " + to_string(rad_max) + "\trad_min : " + to_string(rad_min));
-    float rad_dif = rad_max - rad_min, 
+    float //rad_dif = rad_max - rad_min, 
 		area_penta_rad_min = 5 * cos(deg2rad(54)) * rad_min * rad_min,
         area_penta_rad_max = 5 / tan(deg2rad(54)) * rad_max * rad_max;
-    float ratio_rad_dif = rad_dif / rad_max, ratio_rad = rad_max / rad_min, 
+    float //ratio_rad_dif = rad_dif / rad_max, 
+		ratio_rad = rad_max / rad_min, 
 		area_penta_max = MAX(area_penta_rad_min, area_penta_rad_max),
         area_penta_min = MIN(area_penta_rad_min, area_penta_rad_max), 
 		squareness = area / (4.0 * rad_min * rad_min),
         rectness = area / (4.0 * rad_min * sqrt(rad_max * rad_max - rad_min * rad_min)),
         equilateral_triangleness = (area * sqrt(3)) / ((rad_max + rad_min) * (rad_max + rad_min)), 
-        diamondness = (area * sqrt(rad_max * rad_max - rad_min * rad_min)) / (2.0 * rad_max * rad_max * rad_min),
-        ellipseness = area / (rad_max * rad_min * CV_PI);
+        //ellipseness = area / (rad_max * rad_min * CV_PI),
+        diamondness = (area * sqrt(rad_max * rad_max - rad_min * rad_min)) / (2.0 * rad_max * rad_max * rad_min);
     cout_indented(n_sp + 1, "ratio_rad_dif : " + to_string(ratio_rad_dif) + " / " + to_string(TH_RATIO_RADIUS_DIF));
     cout_indented(n_sp + 1, "min penta : " + to_string(MIN_RATIO_RADIUS_PENTA) + " / ratio_rad : " + to_string(ratio_rad) + " / max penta : " + to_string(MAX_RATIO_RADIUS_PENTA));
     cout_indented(n_sp + 1, "min : " + to_string(ELLIPSENESS_MIN) + " / ellipseness : " + to_string(ellipseness) + " / max : " + to_string(ELLIPSENESS_MAX));
@@ -818,13 +820,16 @@ string contour_2_shape_name(const vector<Point>& li_pt, const Mat& im_mask, int 
 			shape_name = "pentagon";
         }
     }
-    else if(n_pt_approx > 7)
+    else// if(n_pt_approx > 7)
     {
-        if(ratio_rad_dif < TH_RATIO_RADIUS_DIF)
+		RoatatedRect rbox;
+        //if(ratio_rad_dif < TH_RATIO_RADIUS_DIF)
+        if(ratio_rad < TH_RATIO_RADIUS_CIRCLE)
         {
 			shape_name = "circle";
         }
-        else if(ELLIPSENESS_MIN < ellipseness && ellipseness < ELLIPSENESS_MAX)
+        //else if(ELLIPSENESS_MIN < ellipseness && ellipseness < ELLIPSENESS_MAX)
+        else if(is_this_contour_circle_or_ellipse(rbox, li_pt, sz, th_d_center_ellipse, th_d_boundary_ellipse, &p_center, area, n_sp + 1))
         {
 			shape_name = "ellipse";
         }

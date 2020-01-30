@@ -88,6 +88,7 @@
   * get_next_index()
   * concatenate_images_from_seqeunces_into_video_or_sequence()
   * save_one_image_under_directory()
+  * init_video_writer()
   * write_one_frame_to_video()
   * compute_size_smaller_than()
   * resize_image()

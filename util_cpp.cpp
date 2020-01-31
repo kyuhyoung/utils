@@ -10,6 +10,17 @@ void cout_indented(int n_space, const string& str)
 }
 
 
+//	cout << IsExp2(4) << endl;
+//	=> 1
+//	cout << IsExp2(3) << endl;
+//	=> 0
+
+static bool IsExp2(unsigned int value)
+{
+    return (value > 0 && (value & (value - 1)) == 0);
+}
+
+
 //------------ c++ counterpart of python function "join" -------------- 
 //	experimental::filesystem linker error 시
 //	Makefile에 -lstdc++fs 옵션을 주어야 함.
@@ -717,6 +728,224 @@ string hls_01_2_color_name(float hue_01, float lig_01, float sat_01, int n_sp)
 //   OpenCV related
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
+
+// 	#define WDIBIXEL uint8_t
+//	Mat im_bgr = imread("im_bgr.bmp");
+//	Mat im_bgr_rotated = Mat::zeros(Size(im_bgr.cols * 2, im_bgr.rows * 3), im_bgr.type()); 
+//	WDIBPIXEL *pDstBase = im_bgr_rotated.data, *pSrcBase = im_bgr.data;
+//	int n_channel = im_bgr.channels(), 
+//		srcW = im_bgr.cols, srcH = im_bgr.rows, srcDelta = im_bgr.step;
+//		dstW = im_bgr_rotated.cols, dstH = im_bgr_rotated.rows, dstDelta = im_bgr_rotated.step;
+//	float fSrcCX = 0.5 * srcW, fSrcCY = 0.4 * srcH, 
+//		fDstCX = 0.6 * dstW, fDstCY = 0.2 * dstH, fAngle = deg2rad(45), fScale = 1.0;
+//	if (1 == n_channel && IsExp2(srcW) && IsExp2(srcH)) RotateWrapFillFastSrcSizeExp2(
+//		pDstBase, dstW, dstH, dstDelta, pSrcBase, srcW, srcH, srcDelta, n_channel, 
+//		fDstCX, fDstCY, fSrcCX, fSrcCY, fAngle, fScale, true, 0);
+//	=> RotateWrapFillFastSrcSizeExp2 
+
+static
+void RotateWrapFillFastSrcSizeExp2(
+    WDIBPIXEL *pDstBase, int dstW, int dstH, int dstDelta,
+    WDIBPIXEL *pSrcBase, int srcW, int srcH, int srcDelta,
+    int n_channel,
+    float fDstCX, float fDstCY,
+    float fSrcCX, float fSrcCY,
+    float fAngle, float fScale, 
+    bool is_mosaicking, int n_sp)
+{
+    cout_indented(n_sp, "RotateWrapFillFastSrcSizeExp2");
+    if (dstW <= 0) { return; }
+    if (dstH <= 0) { return; }
+    srcDelta /= sizeof(WDIBPIXEL);
+    dstDelta /= sizeof(WDIBPIXEL);
+    //cout_indented(n_sp + 1, "srcDelta_ori : " + to_string(srcDelta_ori));
+    cout_indented(n_sp + 1, "srcDelta : " + to_string(srcDelta));
+    cout_indented(n_sp + 1, "dstDelta : " + to_string(dstDelta));   
+    float duCol = (float)sin(-fAngle) * (1.0f / fScale);
+    float dvCol = (float)cos(-fAngle) * (1.0f / fScale);
+    float duRow = dvCol;
+    float dvRow = -duCol;
+    float startingu = fSrcCX - (fDstCX * dvCol + fDstCY * duCol);
+    float startingv = fSrcCY - (fDstCX * dvRow + fDstCY * duRow);
+    float rowu = startingu;
+    float rowv = startingv;
+    for(int y = 0; y < dstH; y++)
+    {
+        float u = rowu;
+        float v = rowv;
+        WDIBPIXEL *pDst = pDstBase + (dstDelta * y);
+        for(int x = 0; x < dstW ; x++)
+        {
+            #if DEBUG_DRAW
+            if ((int(u) == int(fSrcCX)) && (int(v) == int(fSrcCY)))
+            {
+                *pDst++ = DEBUG_MARK_COLOR;
+                u += duRow;
+                v += dvRow;
+                continue;
+            }
+            #endif
+            int sx = (int)u * n_channel;
+            int sy = (int)v;
+            // Negative u/v adjustement
+            if(is_mosaicking)
+            {
+                if (u < 0) {
+                    for(int iC = 0; iC < n_channel; iC++) sx--; 
+                }
+                if (v < 0) { sy--; }
+                sx &= (srcDelta - n_channel);
+                sy &= (srcH - 1);
+            }
+            else
+            {
+                if(!(0 <= u && u < srcW && 0 <= v && v < srcH)) 
+                {
+                    for(int iC = 0; iC < n_channel; iC++) pDst++;
+                    u += duRow;
+                    v += dvRow;
+                    continue;
+                }                
+            }
+            WDIBPIXEL *pSrc = pSrcBase + sx + (sy * srcDelta);
+            for(int iC = 0; iC < n_channel; iC++) *pDst++ = *pSrc++;
+            u += duRow;
+            v += dvRow;
+        }
+        rowu += duCol;
+        rowv += dvCol;
+    }
+}
+
+
+// 	#define WDIBIXEL uint8_t
+//	Mat im_bgr = imread("im_bgr.bmp");
+//	Mat im_bgr_rotated = Mat::zeros(Size(im_bgr.cols * 2, im_bgr.rows * 3), im_bgr.type()); 
+//	WDIBPIXEL *pDstBase = im_bgr_rotated.data, *pSrcBase = im_bgr.data;
+//	int n_channel = im_bgr.channels(), 
+//		srcW = im_bgr.cols, srcH = im_bgr.rows, srcDelta = im_bgr.step;
+//		dstW = im_bgr_rotated.cols, dstH = im_bgr_rotated.rows, dstDelta = im_bgr_rotated.step;
+//	float fSrcCX = 0.5 * srcW, fSrcCY = 0.4 * srcH, 
+//		fDstCX = 0.6 * dstW, fDstCY = 0.2 * dstH, fAngle = deg2rad(45), fScale = 1.0;
+//	RotateWrapFill(
+//		pDstBase, dstW, dstH, dstDelta, pSrcBase, srcW, srcH, srcDelta, n_channel, 
+//		fDstCX, fDstCY, fSrcCX, fSrcCY, fAngle, fScale, true, 0);
+//	=> RotateWrapFill 
+
+void RotateWrapFill(
+    WDIBPIXEL *pDstBase, int dstW, int dstH, int dstDelta,
+    WDIBPIXEL *pSrcBase, int srcW, int srcH, int srcDelta,
+    int n_channel,
+    float fDstCX, float fDstCY,
+    float fSrcCX, float fSrcCY, 
+    float fAngle, float fScale, 
+    bool is_mosaicking, int n_sp)
+{
+    cout_indented(n_sp, "RotateWrapFill");    
+    if (1 == n_channel && IsExp2(srcW) && IsExp2(srcH))
+    {
+        cout_indented(n_sp + 1, "scrW : " + to_string(srcW));
+        RotateWrapFillFastSrcSizeExp2
+        (
+            pDstBase, dstW,dstH,dstDelta,
+            pSrcBase,srcW, srcH, srcDelta,
+            n_channel,
+            fDstCX, fDstCY,
+            fSrcCX, fSrcCY,
+            fAngle, fScale,
+            is_mosaicking, n_sp + 1
+        );
+        return;
+    }    
+    cout_indented(n_sp + 1, "srcDelta : " + to_string(srcDelta));
+    cout_indented(n_sp + 1, "dstDelta : " + to_string(dstDelta));   //exit(0);
+    if (dstW <= 0) { return; }
+    if (dstH <= 0) { return; }
+    //cout_indented(n_sp, "srcDelta : " + to_string(srcDelta));   
+    srcDelta /= sizeof(WDIBPIXEL);
+    dstDelta /= sizeof(WDIBPIXEL);
+    float duCol = (float)sin(-fAngle) * (1.0f / fScale);
+    float dvCol = (float)cos(-fAngle) * (1.0f / fScale);
+    float duRow = dvCol;
+    float dvRow = -duCol;
+    float startingu = fSrcCX - (fDstCX * dvCol + fDstCY * duCol);
+    float startingv = fSrcCY - (fDstCX * dvRow + fDstCY * duRow);
+    float rowu = startingu;
+    float rowv = startingv;   
+    //cout_indented(n_sp + 1, "(fSrcCX, fSrcCY) : (" + to_string(fSrcCX) + ", " + to_string(fSrcCY) + ")");
+    for(int y = 0; y < dstH; y++)
+    {
+        //cout_indented(n_sp + 1, "y : " + to_string(y));
+        float u = rowu;
+        float v = rowv;
+        //cout_indented(n_sp + 1, "(u, v) : (" + to_string(u));
+        WDIBPIXEL *pDst = pDstBase + (dstDelta * y);
+        for(int x = 0; x < dstW ; x++)
+        {
+            //cout_indented(n_sp + 2, "x : " + to_string(x));
+            #if DEBUG_DRAW
+            if ((int(u) == int(fSrcCX)) && (int(v) == int(fSrcCY)))
+            {
+                *pDst++ = DEBUG_MARK_COLOR;
+                u += duRow;
+                v += dvRow;
+                continue;
+            }
+            #endif
+            int sx = (int)u * n_channel;
+            int sy = (int)v;
+            //cout_indented(n_sp + 2, "(sx, sy) b4 : (" + to_string(sx) + ", " + to_string(sy) + ") / (" + to_string(srcW) + ", " + to_string(srcH) + ")");   exit(0);
+            // Negative u/v adjustement
+            // We need some additional proccessing for negative u and v values
+            // value in range (-0.99..;0) should be mapped to last source pixel, not zero
+            // Because zero source pixel already drawn at [0;0.99..)
+            // (else we will observe double line of same colored pixels in when u/v flips from + to -)
+            // Example: without shift u = -0.25 becimes sx=0, we need sx=-1, since we already had sx=0 at u=+0.25
+            if(is_mosaicking)
+            {
+                if (u < 0)
+                {
+                // Negative u/v adjustement
+                    for(int iC = 0; iC < n_channel; iC++) sx--;
+                    sx = -sx % srcDelta; sx = srcDelta - sx;
+                }
+                sx %= srcDelta;
+                if (v < 0)
+                {
+                    // Negative u/v adjustement
+                    sy--;
+                    sy = -sy % srcH; sy = srcH - sy; 
+                }
+                sy %= srcH;
+            }
+            else
+            {
+                if(!(0 <= u && u < srcW && 0 <= v && v < srcH)) 
+                {
+                    for(int iC = 0; iC < n_channel; iC++) pDst++;
+                    u += duRow;
+                    v += dvRow;
+                    continue;
+                }
+            }
+            //cout_indented(n_sp + 2, "(sx, sy) after : (" + to_string(sx) + ", " + to_string(sy) + ") / (" + to_string(srcW) + ", " + to_string(srcH) + ")");   exit(0);
+            WDIBPIXEL *pSrc = pSrcBase + sx + (sy * srcDelta);
+            for(int iC = 0; iC < n_channel; iC++)            
+                *pDst++ = *pSrc++;
+                //*pDst++ = *pSrc;
+            u += duRow;
+            v += dvRow;
+        }
+        rowu += duCol;
+        rowv += dvCol;
+    }
+}
+
+
+
+
+
+
 
 
 //	vector<Point> li_pt(4);

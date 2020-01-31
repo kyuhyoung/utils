@@ -10,16 +10,6 @@ void cout_indented(int n_space, const string& str)
 }
 
 
-//	cout << IsExp2(4) << endl;
-//	=> 1
-//	cout << IsExp2(3) << endl;
-//	=> 0
-
-static bool IsExp2(unsigned int value)
-{
-    return (value > 0 && (value & (value - 1)) == 0);
-}
-
 
 //------------ c++ counterpart of python function "join" -------------- 
 //	experimental::filesystem linker error 시
@@ -359,6 +349,18 @@ vector<string> get_list_of_image_path_under_this_directory(const string& dir_img
 //   math related
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//	cout << IsExp2(4) << endl;
+//	=> 1
+//	cout << IsExp2(3) << endl;
+//	=> 0
+
+static bool IsExp2(unsigned int value)
+{
+    return (value > 0 && (value & (value - 1)) == 0);
+}
+
 
 //------------ C++ function equivalent to Matlab's mod function --------------  
 //	cout << matlab_mod_equivalent(-0.5, 10) << endl;

@@ -30,6 +30,7 @@
   
 #### math related
 
+  * IsExp2()
   * matlab_mod_equivalent()
   * rad2deg()
   * deg2rad()
@@ -55,6 +56,8 @@
   
 #### OpenCV related  
 
+  * RotateWrapFillFastSrcSizeExp2()
+  * RotateWrapFill()
   * contour_2_shape_name()
   * merge_mask()
   * get_hsv_histogram()

@@ -56,6 +56,9 @@
   
 #### OpenCV related  
 
+  * compute_edge_bilateral()
+  * compute_edge_gaussian()
+  * compute_edge_median()
   * RotateWrapFillFastSrcSizeExp2()
   * RotateWrapFill()
   * contour_2_shape_name()

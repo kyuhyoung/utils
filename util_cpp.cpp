@@ -947,6 +947,39 @@ void RotateWrapFill(
 
 
 
+bool is_this_contour_circle_or_ellipse(RotatedRect& box, const vector<Point>& li_pt, const Size& sz, float th_dist_center, float th_dist_boundary, const Point2f *p_center, float area, int n_sp)
+{
+    cout_indented(n_sp, "is_this_contour_circle_or_ellipse"); //exit(0);
+        Point2f p_cen = NULL == p_center ? compute_center_of_contour(li_pt, n_sp + 1) : *p_center;
+            //RotatedRect box = fitEllipseDirect(li_pt);
+                box = fitEllipseDirect(li_pt);
+                    float dist = dist_two_points(p_cen, box.center);
+                        float d_norm = dist / sqrt(box.size.width * box.size.width + box.size.height * box.size.height); 
+                            cout_indented(n_sp + 1, "dist : " + to_string(dist) + ", d_norm : " + to_string(d_norm) + ", th_dist_center : " + to_string(th_dist_center));  //exit(0);
+                                if(d_norm > th_dist_center) return false;
+                                    Mat im_white(sz, CV_8UC1, Scalar(255)), im_black = Mat::zeros(sz, CV_8UC1), im_dist;
+                                        
+                                            vector<vector<Point> > li_li_pt = {li_pt}; 
+                                                drawContours(im_black, li_li_pt, 0, Scalar(255), 1, 8); 
+                                                    ellipse(im_white, box, Scalar(0), 1, 8);
+                                                        //imwrite("im_white.bmp", im_white);  exit(0); 
+                                                            distanceTransform(im_white, im_dist, DIST_L2, DIST_MASK_5);
+                                                                print_mat_type(im_dist, n_sp + 1);
+                                                                    print_matrix_min_max(im_dist, false, n_sp + 1);
+                                                                        double minVal, maxVal, d_max_norm; Point minLoc, maxLoc;
+                                                                            minMaxLoc(im_dist, &minVal, &maxVal, &minLoc, &maxLoc, im_black);
+                                                                                cout_indented(n_sp + 1, "minVal : " + to_string(minVal) + ", maxVal : " + to_string(maxVal));   //exit(0);
+                                                                                    float areea = area > 0 ? area : compute_area_of_contour(li_pt, n_sp + 1);
+                                                                                        d_max_norm = maxVal / sqrt(areea);
+                                                                                            cout_indented(n_sp + 1, "d_max_norm : " + to_string(d_max_norm) + " / " + to_string(th_dist_boundary));  //exit(0);
+                                                                                                cout_indented(n_sp + 1, "box.size.width : " + to_string(box.size.width) + ", box.size.height : " + to_string(box.size.height));  //exit(0);
+                                                                                                    float r_box_size = MAX(box.size.width, box.size.height) / MIN(box.size.width, box.size.height); 
+                                                                                                        cout_indented(n_sp + 1, "r_box_size : " + to_string(r_box_size));  //exit(0);
+                                                                                                            return d_max_norm < th_dist_boundary;
+                                                                                                            }
+
+
+
 
 
 
@@ -969,13 +1002,14 @@ void RotateWrapFill(
 #define TH_RATIO_ISOSCLES_TRIANGLE 1.1
 #define TH_RATIO_EQUILATERAL_TRIANGLE 1.1
 
-string contour_2_shape_name(const vector<Point>& li_pt, const Size& sz, const Mat *im_mask, int n_sp)
+tuple<string, Point2f, float> contour_2_shape(const vector<Point>& li_pt, const Size& sz, const Mat *im_mask, float th_d_center_ellipse, float th_d_boundary_ellipse, int n_sp)
 {
-	cout_indented(n_sp, "contour_2_shape_name");
-	string shape_name = "some";	
+    cout_indented(n_sp, "contour_2_shape_name");
+    tuple<string, Point2f, float> tuple_shape_center_radius("some", Point2f(-1, -1), -1); 
+    //string shape_name = "some";
     Moments mom = NULL == im_mask ? moments(li_pt) : moments(*im_mask, true);
-    float area = NULL == im_mask ? contourArea(li_pt) : countNonZero(*im_mask), 
-    Point p_center(cvRound(mom.m10 / mom.m00), cvRound(mom.m01 / mom.m00));  
+    float area = NULL == im_mask ? contourArea(li_pt) : countNonZero(*im_mask);
+    Point2f p_center(mom.m10 / mom.m00, mom.m01 / mom.m00);  
     float epsilon = arcLength(li_pt, true) * 0.02;
     vector<Point> li_pt_approx;
     approxPolyDP(li_pt, li_pt_approx, epsilon, true);
@@ -984,27 +1018,27 @@ string contour_2_shape_name(const vector<Point>& li_pt, const Size& sz, const Ma
     float rad_max = -1, rad_min = 100000000000000;
     for(iP = 0; iP < n_pt; iP++)
     {
-        float dist = cv::norm(p_center - li_pt[iP]);
+        float dist = dist_two_points(p_center, li_pt[iP]);
         li_d_center_boundary[iP] = dist;
         if(dist > rad_max) rad_max = dist;
         if(dist < rad_min) rad_min = dist;
     }
     cout_indented(n_sp + 1, "n_pt_approx : " + to_string(n_pt_approx) + "\trad_max : " + to_string(rad_max) + "\trad_min : " + to_string(rad_min));
     float //rad_dif = rad_max - rad_min, 
-		area_penta_rad_min = 5 * cos(deg2rad(54)) * rad_min * rad_min,
-        area_penta_rad_max = 5 / tan(deg2rad(54)) * rad_max * rad_max;
+        area_penta_rad_min = 5 * cos(deg2rad(54)) * rad_min * rad_min,
+        area_penta_rad_max = 5 / tan(deg2rad(54)) * rad_max * rad_max;                                                      
     float //ratio_rad_dif = rad_dif / rad_max, 
-		ratio_rad = rad_max / rad_min, 
-		area_penta_max = MAX(area_penta_rad_min, area_penta_rad_max),
+        ratio_rad = rad_max / rad_min, 
+        area_penta_max = MAX(area_penta_rad_min, area_penta_rad_max),
         area_penta_min = MIN(area_penta_rad_min, area_penta_rad_max), 
-		squareness = area / (4.0 * rad_min * rad_min),
+        squareness = area / (4.0 * rad_min * rad_min),
         rectness = area / (4.0 * rad_min * sqrt(rad_max * rad_max - rad_min * rad_min)),
         equilateral_triangleness = (area * sqrt(3)) / ((rad_max + rad_min) * (rad_max + rad_min)), 
         //ellipseness = area / (rad_max * rad_min * CV_PI),
         diamondness = (area * sqrt(rad_max * rad_max - rad_min * rad_min)) / (2.0 * rad_max * rad_max * rad_min);
-    cout_indented(n_sp + 1, "ratio_rad_dif : " + to_string(ratio_rad_dif) + " / " + to_string(TH_RATIO_RADIUS_DIF));
+    //cout_indented(n_sp + 1, "ratio_rad_dif : " + to_string(ratio_rad_dif) + " / " + to_string(TH_RATIO_RADIUS_DIF));
     cout_indented(n_sp + 1, "min penta : " + to_string(MIN_RATIO_RADIUS_PENTA) + " / ratio_rad : " + to_string(ratio_rad) + " / max penta : " + to_string(MAX_RATIO_RADIUS_PENTA));
-    cout_indented(n_sp + 1, "min : " + to_string(ELLIPSENESS_MIN) + " / ellipseness : " + to_string(ellipseness) + " / max : " + to_string(ELLIPSENESS_MAX));
+    //cout_indented(n_sp + 1, "min : " + to_string(ELLIPSENESS_MIN) + " / ellipseness : " + to_string(ellipseness) + " / max : " + to_string(ELLIPSENESS_MAX));
     cout_indented(n_sp + 1, "min : " + to_string(SQUARENESS_MIN) + " / squareness : " + to_string(squareness) + " / max : " + to_string(SQUARENESS_MAX));
     cout_indented(n_sp + 1, "min : " + to_string(RECTNESS_MIN) + " / rectness : " + to_string(rectness) + " / max : " + to_string(RECTNESS_MAX));
     if(3 == n_pt_approx)
@@ -1016,7 +1050,10 @@ string contour_2_shape_name(const vector<Point>& li_pt, const Size& sz, const Ma
         cout_indented(n_sp + 1, "ratio_max_min : " + to_string(ratio_max_min) + " / " + to_string(TH_RATIO_EQUILATERAL_TRIANGLE));
         if(ratio_max_min < TH_RATIO_EQUILATERAL_TRIANGLE)
         {
-			shape_name = "triangle_equilateral";
+            //shape_name = "triangle_equilateral";
+            std::get<0>(tuple_shape_center_radius) = "triangle_equilateral";
+            std::get<1>(tuple_shape_center_radius) = p_center;
+            std::get<2>(tuple_shape_center_radius) = d_max;
         }
         else
         {
@@ -1024,49 +1061,74 @@ string contour_2_shape_name(const vector<Point>& li_pt, const Size& sz, const Ma
             cout_indented(n_sp + 1, "r_01_12 : " + to_string(r_01_12) + ", r_12_20 : " + to_string(r_12_20) + ", r_20_01 : " + to_string(r_20_01) + " / " + to_string(TH_RATIO_EQUILATERAL_TRIANGLE));
             if(r_01_12 < TH_RATIO_ISOSCLES_TRIANGLE || r_12_20 < TH_RATIO_ISOSCLES_TRIANGLE || r_20_01 < TH_RATIO_ISOSCLES_TRIANGLE)
             {
-				shape_name = "triangle_isosceles";
+                //shape_name = "triangle_isosceles";
+                std::get<0>(tuple_shape_center_radius) = "triangle_isosceles";
+                std::get<1>(tuple_shape_center_radius) = p_center;
+                std::get<2>(tuple_shape_center_radius) = d_max;
             }
         }
     }
     else if(4 == n_pt_approx)
     {
-        if(SQUARENESS_MIN < squareness && squareness < SQUARENESS_MAX)	
+        if(SQUARENESS_MIN < squareness && squareness < SQUARENESS_MAX)  
         {
-			shape_name = "square";
+            //shape_name = "square";
+            std::get<0>(tuple_shape_center_radius) = "square";
+            std::get<1>(tuple_shape_center_radius) = p_center;
+            std::get<2>(tuple_shape_center_radius) = rad_max;
         }
         else if(RECTNESS_MIN < rectness && rectness < RECTNESS_MAX)
         {
-			shape_name = "rectangle";
+            //shape_name = "rectangle";
+            std::get<0>(tuple_shape_center_radius) = "rectangle";
+            std::get<1>(tuple_shape_center_radius) = p_center;
+            std::get<2>(tuple_shape_center_radius) = rad_max;
         }
-		else if(DIAMONDNESS_MIN < diamondness && diamondness < DIAMONDNESS_MAX)
+        else if(DIAMONDNESS_MIN < diamondness && diamondness < DIAMONDNESS_MAX)
         //else if(0.95 < diamondness && diamondness < 1.05)
         {
-			shape_name = "diamond";
+            //shape_name = "diamond";
+            std::get<0>(tuple_shape_center_radius) = "diamond";
+            std::get<1>(tuple_shape_center_radius) = p_center;
+            std::get<2>(tuple_shape_center_radius) = rad_max;
         }
-    }          
+    }
     else if(5 == n_pt_approx)
     {
         if(MIN_RATIO_RADIUS_PENTA < ratio_rad && ratio_rad < MAX_RATIO_RADIUS_PENTA)
         {
-			shape_name = "pentagon";
+            //shape_name = "pentagon";
+            std::get<0>(tuple_shape_center_radius) = "pentagon";
+            std::get<1>(tuple_shape_center_radius) = p_center;
+            std::get<2>(tuple_shape_center_radius) = rad_max;
         }
     }
     else// if(n_pt_approx > 7)
     {
-		RoatatedRect rbox;
+        RotatedRect rbox;
         //if(ratio_rad_dif < TH_RATIO_RADIUS_DIF)
         if(ratio_rad < TH_RATIO_RADIUS_CIRCLE)
         {
-			shape_name = "circle";
+            //shape_name = "circle";
+            std::get<0>(tuple_shape_center_radius) = "circle";
+            std::get<1>(tuple_shape_center_radius) = p_center;
+            std::get<2>(tuple_shape_center_radius) = rad_max;
         }
         //else if(ELLIPSENESS_MIN < ellipseness && ellipseness < ELLIPSENESS_MAX)
         else if(is_this_contour_circle_or_ellipse(rbox, li_pt, sz, th_d_center_ellipse, th_d_boundary_ellipse, &p_center, area, n_sp + 1))
         {
-			shape_name = "ellipse";
+
+            float r_box_size = MAX(rbox.size.width, rbox.size.height) / MIN(rbox.size.width, rbox.size.height);
+            {
+                //shape_name = "circle";
+                std::get<0>(tuple_shape_center_radius) = r_box_size < TH_RATIO_RADIUS_CIRCLE ? "circle" : "ellipse";
+                std::get<1>(tuple_shape_center_radius) = p_center;
+                std::get<2>(tuple_shape_center_radius) = rad_max;
+            }
         }
-    }      
-    cout_indented(n_sp + 1, shape_name);
-    return shape_name;
+    }
+    //cout_indented(n_sp + 1, shape_name);
+    return tuple_shape_center_radius;
 }
 
 

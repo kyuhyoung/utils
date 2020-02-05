@@ -6,7 +6,7 @@
 
 void cout_indented(int n_space, const string& str)
 {
-    std::cout << std::string(n_space, ' ') << str << std::endl;
+    if(n_space >= 0) std::cout << std::string(n_space, ' ') << str << std::endl;
 }
 
 

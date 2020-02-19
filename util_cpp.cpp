@@ -950,6 +950,18 @@ double compute_area_of_contour(const vector<Point>& li_pt, int n_sp)
 	return contourArea(li_pt);           
 }
 
+ Point2f compute_center_of_contour(const vector<Point>& li_pt, int n_sp)   
+ {                                                                                                        
+	 cout_indented(n_sp, "compute_center_of_countour"); 
+	 const Point *pts = (const Point *) Mat(li_pt).data;
+	 int n_pt = Mat(li_pt).rows;      
+	 Rect bbox = boundingRect(li_pt);      
+	 Mat im_blob = Mat::zeros(bbox.y + bbox.height + 2, bbox.x + bbox.width + 2, CV_8UC1);   
+	 fillPoly(im_blob, &pts, &n_pt, 1, Scalar(255));       
+	 Moments mom = moments(im_blob, true);  
+	 return Point2f(mom.m10 / mom.m00, mom.m01 / mom.m00);
+ }	 
+
 bool is_this_contour_circle_or_ellipse(RotatedRect& box, const vector<Point>& li_pt, const Size& sz, float th_dist_center, float th_dist_boundary, const Point2f *p_center, float area, int n_sp)
 {
     cout_indented(n_sp, "is_this_contour_circle_or_ellipse"); //exit(0);

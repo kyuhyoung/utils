@@ -995,6 +995,8 @@ bool is_this_contour_circle_or_ellipse(RotatedRect& box, const vector<Point>& li
 #define MAX_RATIO_RADIUS_PENTA  RATIO_RADIUS_PENTA * 1.15
 #define SQUARENESS_MIN          0.95
 #define SQUARENESS_MAX          1.10
+#define DIAMONDNESS_MIN		0.95	
+#define DIAMONDNESS_MAX		1.05	
 #define RECTNESS_MIN            0.95
 #define RECTNESS_MAX            1.1
 //#define ELLIPSENESS_MIN         0.95

@@ -61,6 +61,7 @@
   * compute_edge_median()
   * RotateWrapFillFastSrcSizeExp2()
   * RotateWrapFill()
+  * compute_area_of_contour()
   * is_this_contour_circle_or_ellipse()
   * contour_2_shape()
   * merge_mask()

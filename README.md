@@ -56,6 +56,10 @@
   
 #### OpenCV related  
 
+  * emd_btn_histograms()
+  * distance_btn_histograms()
+  * cluster_histograms()
+  * compute_histogram_4_emd()
   * compute_edge_bilateral()
   * compute_edge_gaussian()
   * compute_edge_median()

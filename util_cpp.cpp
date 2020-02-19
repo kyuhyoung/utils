@@ -944,8 +944,11 @@ void RotateWrapFill(
 }
 
 
-
-
+double compute_area_of_contour(const vector<Point>& li_pt, int n_sp)     
+{
+	cout_indented(n_sp, "compute_area_of_contour");                                                     
+	return contourArea(li_pt);           
+}
 
 bool is_this_contour_circle_or_ellipse(RotatedRect& box, const vector<Point>& li_pt, const Size& sz, float th_dist_center, float th_dist_boundary, const Point2f *p_center, float area, int n_sp)
 {

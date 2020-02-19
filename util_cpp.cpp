@@ -1024,10 +1024,22 @@ tuple<string, Point2f, float> contour_2_shape(const vector<Point>& li_pt, const 
     cout_indented(n_sp, "contour_2_shape_name");
     tuple<string, Point2f, float> tuple_shape_center_radius("some", Point2f(-1, -1), -1); 
     //string shape_name = "some";
-    Moments mom = NULL == im_mask ? moments(li_pt) : moments(*im_mask, true);
-    float area = NULL == im_mask ? contourArea(li_pt) : countNonZero(*im_mask);
-    Point2f p_center(mom.m10 / mom.m00, mom.m01 / mom.m00);  
-    float epsilon = arcLength(li_pt, true) * 0.02;
+	
+	float area;
+	Point2f p_center;  
+    if(im_mask)
+	{
+		Moments mom = moments(*im_mask, true);
+		p_center.x = mom.m10 / mom.m00;	p_center.y = mom.m01 / mom.m00;		
+      	area = countNonZero(*im_mask);
+	}
+	else
+	{
+		p_center = compute_center_of_contour(li_pt, n_sp + 1);
+		area = contourArea(li_pt);
+	}
+    
+	float epsilon = arcLength(li_pt, true) * 0.02;
     vector<Point> li_pt_approx;
     approxPolyDP(li_pt, li_pt_approx, epsilon, true);
     int iP, n_pt = li_pt.size(), n_pt_approx = li_pt_approx.size();

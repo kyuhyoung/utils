@@ -731,6 +731,194 @@ string hls_01_2_color_name(float hue_01, float lig_01, float sat_01, int n_sp)
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+
+float emd_btn_histograms(const Mat& sig1, const Mat& sig2, int n_sp)    
+{
+	cout_indented(n_sp, "emd_btn_histograms");           
+	float dist = EMD(sig1, sig2, cv::DIST_L2);       
+	cout_indented(n_sp + 1, "dist : " + to_string(dist));     
+	return dist;           
+}           
+
+
+
+float distance_btn_histograms(const Mat& h1, const Mat& h2, int n_sp)                                      
+{                                                                                                          
+    cout_indented(n_sp, "distance_btn_histograms");                                                        
+    float dist;                                                                                            
+    //normalize(h1, h1, 1, 0, cv::NORM_L1);    normalize(h1, h1, 1, 0, cv::NORM_L1);                       
+    int n_bin_1 = h1.rows, n_bin_2 = h1.cols;                                                              
+    vector<Vec3f> sigv1, sigv2;                                                                            
+    float sum1 = 0, sum2 = 0;                                                                              
+    for(int h = 0; h < n_bin_1; h++)                                                                       
+    {                                                                                                      
+        //cout_indented(n_sp + 1, "h : " + to_string(h) + " / " + to_string(n_bin_1));                     
+        for(int s = 0; s < n_bin_2; s++)                                                                   
+        {                                                                                                  
+            //cout_indented(n_sp + 2, "s : " + to_string(s) + " / " + to_string(n_bin_2));                 
+            float bin_val_1 = h1.at<float>(h, s), bin_val_2 = h2.at<float>(h, s);                          
+            if( bin_val_1 != 0 ) sigv1.push_back( cv::Vec3f(bin_val_1, (float)h, (float)s));               
+            if( bin_val_2 != 0 ) sigv2.push_back( cv::Vec3f(bin_val_2, (float)h, (float)s));               
+            sum1 += bin_val_1;  sum2 += bin_val_2;                                                         
+        }                                                                                                  
+    }                                                                                                      
+    //cout << "sum1 : " << sum1 << ", sum2 : " << sum2 << endl;                                            
+    // make Nx3 32fC1 matrix, where N is the number of nonzero histogram bins                              
+    cout_indented(n_sp + 1, "sigv1.size() : " + to_string(sigv1.size()));                                  
+    cout_indented(n_sp + 1, "sigv2.size() : " + to_string(sigv2.size()));                                  
+    Mat sig1 = cv::Mat(sigv1).clone().reshape(1), sig2 = cv::Mat(sigv2).clone().reshape(1);                
+    //dist = EMD(sig1, sig2, cv::DIST_L2);                                                                 
+    dist = emd_btn_histograms(sig1, sig2, n_sp + 1)    
+	cout_indented(n_sp + 1, "dist : " + to_string(dist));                                                  
+    return dist;                                                                                           
+}                       
+
+
+
+ bool cluster_histograms(int& id_last, vector<int>& li_id, Mat& hash_table_dist, vector<vector<int> >&      
+     li_cluster_id, vector<Mat>& li_hist, float th_dist, bool is_hsv, int n_sp)                                 
+{                                                                                                          
+    cout_indented(n_sp, "cluster_histograms");                                                             
+    cout_indented(n_sp + 1, "li_hist.size() : " + to_string(li_hist.size()));                              
+    bool is_something_merged = false;                                                                      
+    while(1)                                                                                               
+    {                                                                                                      
+        int i1, i2, n_cluster = li_id.size();                                                              
+        cout_indented(n_sp + 1, "n_cluster : " + to_string(n_cluster));                                    
+        float min_dist = 10000000000000, max_dist = -1;                                                    
+        int idx1_closest = -1, idx2_closest = -1;                                                          
+        vector<Mat> li_hist_emd;                                                                           
+        for(int iC = 0; iC < n_cluster; iC++)                                                              
+        {                                                                                                  
+            cout_indented(n_sp + 2, "iC : " + to_string(iC) + " / " + to_string(n_cluster));               
+            li_hist_emd.push_back(compute_histogram_4_emd(li_hist[iC], is_hsv, n_sp + 3));                 
+        }                                                                                                  
+        for(i1 = 0; i1 < n_cluster - 1; i1++)                                                              
+        {                                                                                                  
+            int id_1 = li_id[i1];                                                                          
+            for(i2 = i1 + 1; i2 < n_cluster; i2++)                                                         
+            {                                                                                              
+                int id_2 = li_id[i2];                                                                      
+                float dist = hash_table_dist.at<float>(id_1, id_2);                                        
+                if(0 == dist)                                                                              
+                {                                                                                          
+                    dist = emd_btn_histograms(li_hist_emd[i1], li_hist_emd[i2], -100);                     
+                    hash_table_dist.at<float>(id_1, id_2) = dist; hash_table_dist.at<float>(id_2, id_1) =  
+dist;                                                                                                      
+                }                                                                                          
+                if(dist < min_dist)                                                                        
+                {                                                                                          
+                    min_dist = dist;                                                                       
+                    if(dist < th_dist) { idx1_closest = i1;  idx2_closest = i2; }                          
+                }                                                                                          
+                if(dist > max_dist) max_dist = dist;                                                       
+            }                                                                                              
+        }                           
+        if(idx1_closest + idx2_closest < 0) break;                                                         
+        is_something_merged = true;                                                                        
+        int id_1 = li_id[idx1_closest], id_2 = li_id[idx2_closest];                                        
+        float n_member_1 = li_cluster_id[idx1_closest].size(), n_member_2 = li_cluster_id[idx2_closest].   
+size();                                                                                                    
+        float w1 = n_member_1 / (n_member_1 + n_member_2), w2 = n_member_2 / (n_member_1 + n_member_2);    
+        cout_indented(n_sp + 2, "w1 : " + to_string(w1) + ", w2 : " + to_string(w2));  //exit(0);          
+        li_hist[idx1_closest] = w1 * li_hist[idx1_closest] + w2 * li_hist[idx2_closest];                   
+        li_hist.erase(li_hist.begin() + idx2_closest);                                                     
+        for(int iS = 0; iS < li_cluster_id[idx2_closest].size(); iS++)                                     
+        {                                                                                                  
+            li_cluster_id[idx1_closest].push_back(li_cluster_id[idx2_closest][iS]);                        
+        }                                                                                                  
+        li_cluster_id.erase(li_cluster_id.begin() + idx2_closest);                                         
+        for(auto cluster_id : li_cluster_id)                                                               
+        {                                                                                                  
+            for(auto id : cluster_id) cout_indented(n_sp + 4, "id : " + to_string(id));                    
+        }                                                                                                  
+        if(0 == hash_table_dist.at<float>(id_1, id_2) || 0 == hash_table_dist.at<float>(id_2, id_1))       
+        {                                                                                                  
+            hash_table_dist.at<float>(id_1, id_2) = min_dist;   hash_table_dist.at<float>(id_2, id_1) =    
+min_dist;                                                                                                  
+        }                                                                                                  
+        li_id[idx1_closest] = id_last++;                                                                   
+        li_id.erase(li_id.begin() + idx2_closest);                                                         
+    }                                                                                                      
+    return is_something_merged;                                                                            
+}                                                                                                          
+
+		
+		
+		
+Mat compute_histogram_4_emd(const Mat& hist, bool is_hsv, int n_sp)   
+{
+	cout_indented(n_sp, "compute_histogram_4_emd");                                                       
+	vector<Vec3f> sigv;       
+	float ssum = 0;  
+	if(is_hsv)
+	{
+		int n_bin_h = hist.size[0], n_bin_s = hist.size[1], n_bin_v = hist.size[2];// : hist.size[2];      
+		for(int h = 0; h < n_bin_h; h++)                                                                   
+        {                                                                                                  
+            for(int s = 0; s < n_bin_s; s++)                                                               
+            {                                                                                              
+                float sum_val = 0;                                                                         
+				for(int v = 0; v < n_bin_v; v++)                                                           
+                {                                                                                          
+                    float bin_val = hist.at<float>(h, s, v);                                               
+                    sum_val += bin_val;                                                                    
+                }                                                                                          
+                if(0 != sum_val) sigv.push_back(cv::Vec3f(sum_val, (float)h, (float)s));                   
+                ssum += sum_val;                                                                           
+            }                                                                                              
+        }                                                                                                  
+    }                                                                                                      
+    else    //  hls                                                                                        
+    {                                                                                                      
+		int n_bin_h = hist.size[0], n_bin_l = hist.size[1], n_bin_s = hist.size[2];// : hist.size[2];      
+        for(int h = 0; h < n_bin_h; h++)                                                                   
+        {                                                                                                  
+            for(int s = 0; s < n_bin_s; s++)                                                               
+            {                                                                                              
+                float sum_lig = 0;                                                                         
+                for(int l = 0; l < n_bin_l; l++)                                                           
+                {                                                                                          
+                    float bin_val = hist.at<float>(h, l, s);                                               
+                    sum_lig += bin_val;                                                                    
+                }                                                                                          
+                if(0 != sum_lig) sigv.push_back(cv::Vec3f(sum_lig, (float)h, (float)s));                   
+                ssum += sum_lig;                                                                           
+            }                                                                                              
+        }                                                                                                  
+    }                                                                                                      
+    cout_indented(n_sp + 1, "ssum : " + to_string(ssum));                                                  
+    cout_indented(n_sp + 1, "sigv.size() : " + to_string(sigv.size()));                                    
+    return cv::Mat(sigv).clone().reshape(1);                                                               
+}                                                                                                          
+
+Mat compute_edge_bilateral(const Mat& im_gray, int diameter, double sigma_color, double sigma_space, double          th_low, double th_high)
+{
+    Mat im_blur, im_255_edge;
+    bilateralFilter(im_gray, im_blur, diameter /*9*/, sigma_color/*75*/, sigma_space/*75*/);
+    Canny(im_blur, im_255_edge, th_low, th_high);
+    return im_255_edge;
+}
+
+Mat compute_edge_gaussian(const Mat& im_gray, const Size& smooth_sz, double th_low, double th_high)
+{
+    Mat im_blur, im_255_edge;
+    //medianBlur(im_gray, im_blur, smooth_size/*7*/);
+    GaussianBlur(im_gray, im_blur, smooth_sz, 0, 0);
+    Canny(im_blur, im_255_edge, th_low, th_high);
+    return im_255_edge;
+}
+
+Mat compute_edge_median(const Mat& im_gray, int smooth_size, double th_low, double th_high)
+{
+    Mat im_blur, im_255_edge;
+    medianBlur(im_gray, im_blur, smooth_size/*7*/);
+    Canny(im_blur, im_255_edge, th_low, th_high);
+    return im_255_edge;
+}
+
+
 // 	#define WDIBIXEL uint8_t
 //	Mat im_bgr = imread("im_bgr.bmp");
 //	Mat im_bgr_rotated = Mat::zeros(Size(im_bgr.cols * 2, im_bgr.rows * 3), im_bgr.type()); 

@@ -733,6 +733,54 @@ string hls_01_2_color_name(float hue_01, float lig_01, float sat_01, int n_sp)
 
 
 
+vector<int> compute_indice_of_no_hole_contour(const vector<Vec4i>& hierarchy, int n_sp)
+{
+    cout_indented(n_sp, "compute_indice_of_no_hole_contour");
+    int iC, idx_nex = 0, n_cnt = hierarchy.size();
+    vector<int> li_idx_no_hole_cnt = {idx_nex};
+    for(iC = 0; iC < n_cnt; iC++)
+    {
+        if(idx_nex != iC) continue;
+        idx_nex = hierarchy[iC][0];
+        if(idx_nex < 0) break;
+        li_idx_no_hole_cnt.push_back(idx_nex);
+        cout_indented(n_sp + 1, "idx_nex : " + to_string(idx_nex));
+    }
+    return li_idx_no_hole_cnt;
+}
+
+
+
+Mat create_mat_with_some_value(const Size& sz, int mat_type, const Scalar& val)
+{
+    return Mat(sz, mat_type, val);
+}
+
+float compute_ratio_of_largest_blob(const Mat& im_255_blob, int n_sp)
+{
+    cout_indented(n_sp, "compute_ratio_of_largest_blob");
+    vector<vector<Point> > li_cnt;
+    findContours(im_255_blob, li_cnt, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    int n_cnt = li_cnt.size();
+    double area_max = 0;
+    if(n_cnt > 1)
+    {
+        for(auto cnt : li_cnt)
+        {
+            //double area = contourArea(cnt);
+            double area = compute_area_of_contour(cnt, n_sp + 2);
+            //cout_indented(n_sp + 2, "area : " + to_string(area));
+            if(area > area_max) area_max = area;
+        }
+    }
+    else
+    {
+        area_max = countNonZero(im_255_blob);
+    }
+    cout_indented(n_sp + 1, "area_max : " + to_string(area_max) + " / " + to_string(im_255_blob.cols *               im_255_blob.rows));
+    return area_max / float(im_255_blob.cols * im_255_blob.rows);
+}
+
 float emd_btn_histograms(const Mat& sig1, const Mat& sig2, int n_sp)    
 {
 	cout_indented(n_sp, "emd_btn_histograms");           

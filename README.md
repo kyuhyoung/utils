@@ -56,6 +56,9 @@
   
 #### OpenCV related  
 
+  * compute_indice_of_no_hole_contour()
+  * create_mat_with_some_value()
+  * compute_ratio_of_largest_blob()
   * emd_btn_histograms()
   * distance_btn_histograms()
   * cluster_histograms()

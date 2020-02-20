@@ -41,7 +41,7 @@
   * angleConv()
   * angleDiff()
   * unwrap()  
-  * compute_bilnear_weight()
+  * compute_bilinear_weight()
   * dist_two_points()
   * calc_area_triangle()
   * calc_area_quadrangle()

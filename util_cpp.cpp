@@ -505,7 +505,7 @@ inline double unwrap(double ang_rad_pre, double ang_rad_new)
 //	cout << "(" << int(px) + 0 << ", " << int(py) + 1 << ") : " << w_x0_y1 << ",\t(" << int(px) + 1 << ", " << int(py) + 1 << ") : " << w_x1_y1 << endl;
 //	=> (30, 40) : 0.5,	(31, 40) : 0.5
 //	   (30, 41) : 0,	(31, 41) : 0
-void compute_bilnear_weight(float& w_x0_y0, float& w_x1_y0, float& w_x0_y1, float& w_x1_y1, float px, float py)
+void compute_bilinear_weight(float& w_x0_y0, float& w_x1_y0, float& w_x0_y1, float& w_x1_y1, float px, float py)
 {
     int x0 = int(px), y0 = int(py);
     float dx0 = px - (float)x0, dy0 = py - (float)y0;

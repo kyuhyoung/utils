@@ -725,12 +725,180 @@ string hls_01_2_color_name(float hue_01, float lig_01, float sat_01, int n_sp)
 }
 
 
+//	vector<int> li{ 10, 20, 30 };
+//	average_of_vector<int>(li, 0);
+//	=> average_of_vector START
+//	=> agv : 20
+//	=> average_of_vector END
+
+template <typename T> 
+double average_of_vector(vector<T> &v, int n_sp)
+{
+    cout_indented(n_sp, "average_of_vector START");  
+    double avg = double(accumulate(v.begin(), v.end(), 0.0)) / double(v.size());
+    cout_indented(n_sp + 1, "agv : " + to_string(avg));  
+    cout_indented(n_sp, "average_of_vector END");  
+    return avg;
+} 
+
+
+//	int x = -2, y = 3;
+//	cout << func_add_absolute<int>(x, y) : " << func_add_absolute<int>(x, y) << endl;
+//	=> func_add_absolute<int>(x, y) : 1
+
+template<typename T> 
+double func_add_absolute(T x, T y)
+{
+    return double(x + fabs(y));
+}
+
+//	vector<int> li_1{ 10, 20, 30 };
+//	mean_absolute_of_vector<int>(li_1, true, 0);
+//	=> mean_absolute_of_vector START
+//	=> agv_abs : 20
+//	=> mean_absolute_of_vector END
+//	vector<int> li_2{ -10, -20, 30 };
+//	mean_absolute_of_vector<int>(li_2, false, 0);
+//	=> mean_absolute_of_vector START
+//	=> agv_abs : 20
+//	=> mean_absolute_of_vector END
+
+template <typename T> 
+double mean_absolute_of_vector(vector<T> &v, bool are_all_positive, int n_sp)
+{
+    cout_indented(n_sp, "mean_absolute_of_vector START");
+    double avg_abs = are_all_positive ? average_of_vector(v, n_sp + 1) : double(std::accumulate(v.begin(), v.end(), float(0), func_add_absolute<T>)) / double(v.size());
+    cout_indented(n_sp + 1, "avg_abs : " + to_string(avg_abs));
+    cout_indented(n_sp, "mean_absolute_of_vector END");
+    return avg_abs;
+}
+
+//	vector<int> li{ 10, 20, 30 };
+//	int med = median_of_vector<int>(li, 0);
+//	=> median_of_vector START
+//	=> median : 20
+//	=> median_of_vector END
+
+template <typename T> 
+T median_of_vector(vector<T> &v, int n_sp)
+{
+    cout_indented(n_sp, "median_of_vector START");
+    size_t n = v.size() / 2;
+    nth_element(v.begin(), v.begin()+n, v.end());
+    cout_indented(n_sp + 1, "median : " + to_string(v[n]));
+    cout_indented(n_sp, "median_of_vector END");
+    return v[n];
+}
+
+
+
+template <typename T>
+struct dist_func {
+    double operator()(T& a, T& b)
+    {
+        //return (a-b).lpNorm<2>();
+        return cv::norm(a, b, NORM_L2);
+    }
+};
+
+//	vector<Vec2f> li_pt = {Vec2f(10, 10), Vec2f(20, 20), Vec2f(30, 30)};
+//	Vec2f p_center_vec;
+//	geometric_median<float>(li_pt, p_center_vec, dist_func<Vec2f>(), 2, 0);
+//	=> geometric_median START
+//	==>  geo_median : (20, 20)
+//	=> geometric_median END
+
+template<typename Scalar, typename Vector, typename Container, typename distFunciton>
+void geometric_median(Container& X, Vector& geo_median, distFunciton distance, int dim, int n_sp, int iterations = 200)
+{
+    cout_indented(n_sp, "geometric_median");
+    size_t N = X.size();
+    cout_indented(n_sp + 1, "N : " + to_string(N));
+    if(N < 3) return;
+    // initial guess
+    bool is_early_stopped = false;
+    Scalar th_delta;
+    std::vector<Vector> A (2, (X[0] + X[1]) / Scalar(2));
+    for(int it = 0; it < iterations; it++)
+    {
+        Vector numerator; 
+        for(size_t i = 0; i < dim; i++) numerator[i] = 0;
+        Scalar denominator = 0;
+        int t = it % 2;
+        for (int n = 0; n < N; n++)
+        {
+            Scalar dist = distance(X[n], A[t]);
+            if (dist != 0)
+            {
+                numerator += X[n] / dist;
+                denominator += 1.0 / dist;
+            }
+        }
+        A[1 - t] = numerator / denominator;
+        Scalar d_delta = distance(A[t], A[1 - t]);
+        if(it)
+        {
+            if(d_delta < th_delta)
+            {
+                is_early_stopped = true;
+                geo_median = A[1 - t];
+                break;
+            }
+        }
+        else th_delta = d_delta * 0.001;
+    }
+    if(!is_early_stopped) geo_median = A[iterations % 2];
+    stringstream ss;    ss << "geo_median : " << geo_median;    cout_indented(n_sp + 1, ss.str());
+    cout_indented(n_sp, "geometric_median END");
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //   OpenCV related
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+
+//	Mat locations, im_255_edge, im_gray = imread("im_gray.bmp", CV_LOAD_GRAYSCALE);
+//	Canny(im_gray, im_255_edge, 50, 150);
+//	connect_broken_contour(im_255_edge, Size(5, 5), 0);
+
+#include "opencv2/ximgproc.hpp"
+Mat connect_broken_contour(const Mat& im_255_edge, const Size& knl_gauss, int n_sp)     
+{
+    cout_indented(n_sp, "complete_broken_contour START");      
+    Mat im_thinning, im_edge_blurred, im_edge_threshold;   
+    GaussianBlur(im_255_edge, im_edge_blurred, knl_gauss, 0);    
+    threshold(im_edge_blurred, im_edge_threshold, 0, 255, THRESH_BINARY);      
+    ximgproc::thinning(im_edge_threshold, im_thinning, ximgproc::THINNING_ZHANGSUEN);    
+    //ximgproc::thinning(im_edge_threshold, im_thinning, ximgproc::THINNING_GUOHALL);             
+    //imwrite("im_thinning.bmp", im_thinning);    //exit(0);                     
+    cout_indented(n_sp, "complete_broken_contour END");         
+    return im_thinning;       
+}          
+
+
+
+//	Mat locations, im_255_edge, im_gray = imread("im_gray.bmp", CV_LOAD_GRAYSCALE);
+//	Canny(im_gray, im_255_edge, 50, 150);
+//	findNonZero(im_255_edge, locations);
+//	locations = locations.reshape(1);
+//	vector<Vec2f> li_pt = Mat_to_vector_Vec2f(locations, 0);
+
+std::vector<cv::Vec2f> Mat_to_vector_Vec2f(const Mat& mat, int n_sp)
+{
+    cout_indented(n_sp, "Mat_to_vector_Vec2f START");
+    if(!(
+        2 == mat.channels() * mat.cols
+    )) exit(0);
+
+    Mat2f matt = (mat.cols == 2) ? mat.reshape(2) : mat.clone(); 
+    
+    std::vector<cv::Vec2f> li_vec2f(matt.begin(), matt.end());
+    cout_indented(n_sp, "Mat_to_vector_Vec2f END");
+    return li_vec2f;
+}
 
 
 vector<int> compute_indice_of_no_hole_contour(const vector<Vec4i>& hierarchy, int n_sp)
@@ -1477,6 +1645,170 @@ string mat_type_2_str(int type, int n_sp)
   	r += "C";
   	r += (chans + '0');
   	return r;
+}
+
+
+
+//	Mat im_bgr = imread("im_bgr.bmp" CV_LOAD_IMAGE_COLOR);
+//	Mat mat_norm = mat_norm_channel_wise(im_bgr, NORM_L2);
+
+template<typename T> 
+Mat mat_norm_channel_wise(const Mat& mat, int norm_type)
+{
+    Mat mat_norm(mat.size(), CV_64FC1);
+	int n_c = mat.channels();	
+    if(2 == n_c)
+    {
+        for(int iR = 0; iR < mat.rows; iR++)
+        {
+            for(int iC = 0; iC < mat.cols; iC++)
+            {
+                mat_norm.at<double>(iR, iC) = norm(mat.at<Vec<T, 2> >(iR, iC), norm_type);
+            }
+        }
+    } 
+    else if(3 == n_c)
+    {
+        for(int iR = 0; iR < mat.rows; iR++)
+        {
+            for(int iC = 0; iC < mat.cols; iC++)
+            {
+                mat_norm.at<double>(iR, iC) = norm(mat.at<Vec<T, 3> >(iR, iC), norm_type);
+            }
+        }
+    } 
+    else if(4 == n_c)
+    {
+        for(int iR = 0; iR < mat.rows; iR++)
+        {
+            for(int iC = 0; iC < mat.cols; iC++)
+            {
+                mat_norm.at<double>(iR, iC) = norm(mat.at<Vec<T, 4> >(iR, iC), norm_type);
+            }
+        }
+    }  
+    else if(5 == n_c)
+    {
+        for(int iR = 0; iR < mat.rows; iR++)
+        {
+            for(int iC = 0; iC < mat.cols; iC++)
+            {
+                mat_norm.at<double>(iR, iC) = norm(mat.at<Vec<T, 5> >(iR, iC), norm_type);
+            }
+        }
+    }  
+    else if(6 == n_c)
+    {
+        for(int iR = 0; iR < mat.rows; iR++)
+        {
+            for(int iC = 0; iC < mat.cols; iC++)
+            {
+                mat_norm.at<double>(iR, iC) = norm(mat.at<Vec<T, 6> >(iR, iC), norm_type);
+            }
+        }
+    }   
+    else if(7 == n_c)
+    {
+        for(int iR = 0; iR < mat.rows; iR++)
+        {
+            for(int iC = 0; iC < mat.cols; iC++)
+            {
+                mat_norm.at<double>(iR, iC) = norm(mat.at<Vec<T, 7> >(iR, iC), norm_type);
+            }
+        }
+    }  
+    else if(8 == n_c)
+    {
+        for(int iR = 0; iR < mat.rows; iR++)
+        {
+            for(int iC = 0; iC < mat.cols; iC++)
+            {
+                mat_norm.at<double>(iR, iC) = norm(mat.at<Vec<T, 8> >(iR, iC), norm_type);
+            }
+        }
+    }      
+    else if(9 == n_c)
+    {
+        for(int iR = 0; iR < mat.rows; iR++)
+        {
+            for(int iC = 0; iC < mat.cols; iC++)
+            {
+                mat_norm.at<double>(iR, iC) = norm(mat.at<Vec<T, 9> >(iR, iC), norm_type);
+            }
+        }
+    }
+    return mat_norm;    
+}
+
+
+//	Point2f p_center(10, 20);
+//	float c = cos(deg2rad(60)), s = sin(deg2rad(60));
+//	float rot_mat[] = {	c,  -s, -p_center.x * c + p_center.y * s + p_center.x, 
+//        			s,  c,  -p_center.x * s - p_center.y * c + p_center.y,
+//			        0,  0,  1
+//	};
+//	Mat mat_rot = init_mat<float>(3, 3, rot_mat, 0);
+//	Mat mat_norm = get_row_or_column_or_channel_wise_norm(mat_rot, "row", NORM_L2, 0);
+
+Mat get_row_or_column_or_channel_wise_norm(const Mat& mat, const string& str, int norm_type, int n_sp)
+{
+    cout_indented(n_sp, "get_row_or_column_or_channel_wise_norm START");
+    Mat mat_norm;//(mat.rows, 1, CV_64FC1);
+    if("row" == str)
+    {
+        mat_norm.create(mat.rows, 1, CV_64FC1);
+        for(int iR = 0; iR < mat.rows; iR++) mat_norm.at<double>(iR) = norm(mat.row(iR), norm_type); 
+    }
+    else if("column" == str)
+    {
+        mat_norm.create(1, mat.cols, CV_64FC1);
+        for(int iC = 0; iC < mat.cols; iC++) mat_norm.at<double>(iC) = norm(mat.col(iC), norm_type); 
+    }
+    else if("channel" == str)
+    {
+        int n_c = mat.channels();
+        //typedef Vec<float, n_c> veec;
+        if(CV_8U == mat.depth() || CV_16U == mat.depth()) mat_norm = mat.clone();
+        else if(1 == n_c) mat_norm = cv::abs(mat);
+        else
+        {
+            //mat_norm.create(mat.size(), CV_64FC1);
+            if(CV_8S == mat.depth()) mat_norm = mat_norm_channel_wise<schar>(mat, norm_type); 
+            else if(CV_16S == mat.depth()) mat_norm = mat_norm_channel_wise<short>(mat, norm_type); 
+            else if(CV_32S == mat.depth()) mat_norm = mat_norm_channel_wise<int>(mat, norm_type); 
+            else if(CV_32F == mat.depth()) mat_norm = mat_norm_channel_wise<float>(mat, norm_type); 
+            else if(CV_64F == mat.depth()) mat_norm = mat_norm_channel_wise<double>(mat, norm_type); 
+        }
+    }
+    cout_indented(n_sp, "get_row_or_column_or_channel_wise_norm END");
+    return mat_norm;
+}
+
+
+
+//	Point2f p_center(10, 20);
+//	float c = cos(deg2rad(60)), s = sin(deg2rad(60));
+//	float rot_mat[] = {	c,  -s, -p_center.x * c + p_center.y * s + p_center.x, 
+//        			s,  c,  -p_center.x * s - p_center.y * c + p_center.y,
+//			        0,  0,  1
+//	};
+//	Mat mat_rot = init_mat<float>(3, 3, rot_mat, 0);
+
+template <typename T> 
+Mat init_mat(int n_r, int n_c, T li_val[], int n_sp)
+{
+    cout_indented(n_sp, "init_mat START");
+    int iR, iE, iC, n_elem = n_r * n_c;
+    Mat_<T> mat(n_r, n_c);
+    for(iR = 0, iE = 0; iR < n_r; iR++)
+    {
+        for(iC = 0; iC < n_c; iC++, iE++)
+        {
+            mat(iR, iC) = li_val[iE];
+        }      
+    }
+    cout_indented(n_sp, "init_mat END");
+    return mat;
 }
 
 

@@ -1401,6 +1401,23 @@ bool is_this_contour_circle_or_ellipse(RotatedRect& box, const vector<Point>& li
 
 
 
+//	Mat im_bgr = imread("im_bgr.bmp", CV_LOAD_IMAGE_COLOR);
+//  Mat im_hls = cvtColor(im_bgr, im_hls, COLOR_BGR2HLS);
+//	Mat hist_hls = get_histogram(im_hks
+
+float compute_entropy(const Mat& hist_ori, int n_sp)               
+{
+    cout_indented(n_sp, "compute_entropy START");       
+    //hist /= frame.total();                 
+    Mat hist_norm, logP;    
+    normalize(hist_ori, hist_norm, 1, 0, NORM_L1);   
+    hist_norm += 1e-4; //prevent 0        
+    cv::log(hist_norm, logP);         
+    float entropy = -1 * sum(hist_norm.mul(logP)).val[0];    
+    cout_indented(n_sp, "compute_entropy END");         
+    return entropy;   
+}                                  
+
 
 //	vector<Point> li_pt(4);
 //	li_pt[0] = Point(0, 0);	li_pt[1] = Point(100, 0);	li_pt[2] = Point(100, 100);	li_pt[3] = Point(0, 1000);

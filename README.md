@@ -52,10 +52,17 @@
   * calc_angle_deg_three_points()
   * compute_angle_deg_between_two_lines()
   * hls_01_2_color_name()
+  * average_of_vector()
+  * func_add_absolute()
+  * mean_absolute_of_vector()
+  * median_of_vector()
+  * geometric_median()  
 
   
 #### OpenCV related  
 
+  * connect_broken_contour()
+  * Mat_to_vector_Vec2f()
   * compute_indice_of_no_hole_contour()
   * create_mat_with_some_value()
   * compute_ratio_of_largest_blob()
@@ -77,6 +84,9 @@
   * get_hls_histogram()
   * get_histogram()   
   * mat_type_2_str() 
+  * mat_norm_channel_wise()
+  * get_row_or_column_or_channel_wise_norm()
+  * init_mat()
   * print_mat_type()
   * print_matrix_min_max()
   * compute_offset_for_puttext()

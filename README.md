@@ -125,6 +125,8 @@
   * set_cam_properties_ocv()
   * sort_two_seqs_as_first_seq_sorted()
   * write_one_frame_to_video()
+  * writeMat2File()
+
     
   
 ## util_python.py : python utility functions.

@@ -1877,6 +1877,46 @@ Mat init_mat(int n_r, int n_c, T li_val[], int n_sp)
 }
 
 
+
+void print_mat(const Mat& mat, const string& str_mat_name, int n_sp)
+{
+    cout_indented(n_sp, "print_mat START");
+    if(1 == mat.channels()) print_mat_2d(mat, str_mat_name, n_sp + 1);
+    else print_mat_3d(mat, str_mat_name, n_sp + 1);
+    cout_indented(n_sp, "print_mat END");
+}
+
+void print_mat_2d(const Mat& mat, const string& str_mat_name, int n_sp)
+{
+    if(str_mat_name.empty()) n_sp--;
+    else cout_indented(n_sp, str_mat_name + " =");
+    cout_indented(n_sp, "[");
+    for(int iR = 0; iR < mat.rows; iR++)
+    {
+        stringstream ss;    ss << mat.row(iR);
+        cout_indented(n_sp + 1, ss.str());
+    }
+    cout_indented(n_sp, "]");
+    return;
+}
+
+void print_mat_3d(const Mat& mat, const string& str_mat_name, int n_sp)
+{
+    if(str_mat_name.empty()) n_sp--;
+    else cout_indented(n_sp, str_mat_name + " =");
+    int iC, n_ch = mat.channels();
+    vector<Mat> li_mat(n_ch);
+    split(mat, li_mat);
+    cout_indented(n_sp, "[");
+    for(int iC = 0; iC < n_ch; iC++)
+    {
+        print_mat_2d(li_mat[iC], "", n_sp + 1);
+    }
+    cout_indented(n_sp, "]");
+    return;
+}
+
+
 //	Mat mat = Mat::zeros(100, 10, CV_8UC3);
 //	print_mat_type(mat, 0);
 //	=> mat type : 8UC3	
@@ -2255,45 +2295,6 @@ Mat crop_with_center_and_radius(const Mat& im, const Point2f& p_center, float ra
   	Rect rect(pt1, Size(side, side));
   	return crop_image(im, rect);
 }
-
-void print_mat(const Mat& mat, const string& str_mat_name, int n_sp)
-{
-    cout_indented(n_sp, "print_mat START");
-    if(1 == mat.channels()) print_mat_2d(mat, str_mat_name, n_sp + 1);
-    else print_mat_3d(mat, str_mat_name, n_sp + 1);
-    cout_indented(n_sp, "print_mat END");
-}
-
-void print_mat_2d(const Mat& mat, const string& str_mat_name, int n_sp)
-{
-    if(str_mat_name.empty()) n_sp--;
-    else cout_indented(n_sp, str_mat_name + " =");
-    cout_indented(n_sp, "[");
-    for(int iR = 0; iR < mat.rows; iR++)
-    {
-        stringstream ss;    ss << mat.row(iR);
-        cout_indented(n_sp + 1, ss.str());
-    }
-    cout_indented(n_sp, "]");
-    return;
-}
-
-void print_mat_3d(const Mat& mat, const string& str_mat_name, int n_sp)
-{
-    if(str_mat_name.empty()) n_sp--;
-    else cout_indented(n_sp, str_mat_name + " =");
-    int iC, n_ch = mat.channels();
-    vector<Mat> li_mat(n_ch);
-    split(mat, li_mat);
-    cout_indented(n_sp, "[");
-    for(int iC = 0; iC < n_ch; iC++)
-    {
-        print_mat_2d(li_mat[iC], "", n_sp + 1);
-    }
-    cout_indented(n_sp, "]");
-    return;
-}
-
 
 
 //------------ Rotatae an image by a given degrees either with resizing or not	--------------  

@@ -2787,6 +2787,216 @@ vector<Point> find_peaks_2D(const vector<Point2f>& li_center, const Size& sz_im,
 
 
 
+//	ref. : https://stackoverflow.com/questions/10167534/how-to-find-out-what-type-of-a-mat-object-is-with-mattype-in-opencv
+void writeMat2File(cv::Mat& m, const string& filename, bool channelwise)
+{
+	if (m.dims >= 4)
+	{
+		cout << "Matrix dimension is " << m.dims << "File writing for matrix of more than 3 dimension is not implemented yet." << endl;
+		return;
+	}
+
+	ofstream fout(filename);
+
+	if (!fout)
+	{
+		cout << "File Not Opened" << endl;  return;
+	}
+
+	int taip = m.type() % 8;
+	int n_c = m.channels();
+	if (channelwise)
+	{
+		if (0 == taip)	//	unsinged char
+		{
+			for (int iC = 0; iC < n_c; iC++)
+			{
+				for (int i = 0; i < m.rows; i++)
+				{
+					unsigned char *ptr_row = m.ptr<unsigned char>(i);
+					for (int j = 0; j < m.cols; j++) fout << ptr_row[n_c * j + iC] << "\t";
+					fout << endl;
+				}
+			}
+		}
+
+		else if (1 == taip)	//	nsinged char
+		{
+			for (int iC = 0; iC < n_c; iC++)
+			{
+				for (int i = 0; i < m.rows; i++)
+				{
+					signed char *ptr_row = m.ptr<signed char>(i);
+					for (int j = 0; j < m.cols; j++) fout << ptr_row[n_c * j + iC] << "\t";
+					fout << endl;
+				}
+			}
+		}
+
+		else if (2 == taip)	//	nsinged char
+		{
+			for (int iC = 0; iC < n_c; iC++)
+			{
+				for (int i = 0; i < m.rows; i++)
+				{
+					unsigned short *ptr_row = m.ptr<unsigned short>(i);
+					for (int j = 0; j < m.cols; j++) fout << ptr_row[n_c * j + iC] << "\t";
+					fout << endl;
+				}
+			}
+		}
+
+		else if (3 == taip)	//	nsinged char
+		{
+			for (int iC = 0; iC < n_c; iC++)
+			{
+				for (int i = 0; i < m.rows; i++)
+				{
+					signed short *ptr_row = m.ptr<signed short>(i);
+					for (int j = 0; j < m.cols; j++) fout << ptr_row[n_c * j + iC] << "\t";
+					fout << endl;
+				}
+			}
+		}
+
+		else if (4 == taip)	//	nsinged char
+		{
+			for (int iC = 0; iC < n_c; iC++)
+			{
+				for (int i = 0; i < m.rows; i++)
+				{
+					int *ptr_row = m.ptr<int>(i);
+					for (int j = 0; j < m.cols; j++) fout << ptr_row[n_c * j + iC] << "\t";
+					fout << endl;
+				}
+			}
+		}
+
+		else if (5 == taip)	//	nsinged char
+		{
+			for (int iC = 0; iC < n_c; iC++)
+			{
+				for (int i = 0; i < m.rows; i++)
+				{
+					float *ptr_row = m.ptr<float>(i);
+					for (int j = 0; j < m.cols; j++) fout << ptr_row[n_c * j + iC] << "\t";
+					fout << endl;
+				}
+			}
+		}
+
+		else if (6 == taip)	//	nsinged char
+		{
+			for (int iC = 0; iC < n_c; iC++)
+			{
+				for (int i = 0; i < m.rows; i++)
+				{
+					double *ptr_row = m.ptr<double>(i);
+					for (int j = 0; j < m.cols; j++) fout << ptr_row[n_c * j + iC] << "\t";
+					fout << endl;
+				}
+			}
+		}
+	}
+
+	else
+	{
+		if (0 == taip)	//	unsinged char
+		{
+			for (int i = 0; i < m.rows; i++)
+			{
+				unsigned char *ptr_row = m.ptr<unsigned char>(i);
+				for (int j = 0; j < m.cols; j++)
+				{
+					for (int iC = 0; iC < n_c; iC++) fout << ptr_row[n_c * j + iC] << "\t";
+				}
+				fout << endl;
+			}
+		}
+		else if (1 == taip)	//	singed char
+		{
+			for (int i = 0; i < m.rows; i++)
+			{
+				signed char *ptr_row = m.ptr<signed char>(i);
+				for (int j = 0; j < m.cols; j++)
+				{
+					for (int iC = 0; iC < n_c; iC++) fout << ptr_row[n_c * j + iC] << "\t";
+				}
+				fout << endl;
+			}
+		}
+
+		else if (2 == taip)	//	unsinged short
+		{
+			for (int i = 0; i < m.rows; i++)
+			{
+				unsigned short *ptr_row = m.ptr<unsigned short>(i);
+				for (int j = 0; j < m.cols; j++) 
+				{
+					for (int iC = 0; iC < n_c; iC++) fout << ptr_row[n_c * j + iC] << "\t";
+				}
+				fout << endl;
+			}
+		}
+
+		else if (3 == taip)	//	singed short
+		{
+			for (int i = 0; i < m.rows; i++)
+			{
+				signed short *ptr_row = m.ptr<signed short>(i);
+				for (int j = 0; j < m.cols; j++)
+				{
+					for (int iC = 0; iC < n_c; iC++) fout << ptr_row[n_c * j + iC] << "\t";
+				}
+				fout << endl;
+			}
+		}
+
+		else if (4 == taip)	//	int
+		{
+			for (int i = 0; i < m.rows; i++)
+			{
+				int *ptr_row = m.ptr<int>(i);
+				for (int j = 0; j < m.cols; j++)
+				{
+					for (int iC = 0; iC < n_c; iC++) fout << ptr_row[n_c * j + iC] << "\t";
+				}
+				fout << endl;
+			}
+		}
+
+		else if (5 == taip)	//	float
+		{
+			for (int i = 0; i < m.rows; i++)
+			{
+				float *ptr_row = m.ptr<float>(i);
+				for (int j = 0; j < m.cols; j++) 
+				{
+					for (int iC = 0; iC < n_c; iC++) fout << ptr_row[n_c * j + iC] << "\t";
+				}
+				fout << endl;
+			}
+		}
+
+		else if (6 == taip)	//	double
+		{
+			for (int i = 0; i < m.rows; i++)
+			{
+				double *ptr_row = m.ptr<double>(i);
+				for (int j = 0; j < m.cols; j++) 
+				{
+					for (int iC = 0; iC < n_c; iC++) fout << ptr_row[n_c * j + iC] << "\t";
+				}
+				fout << endl;
+			}
+		}
+	}
+	fout.close();
+}
+
+
+
+
 
 	
 		

@@ -299,6 +299,77 @@ def get_batch_size_as_multiple_of_num_gpu(len_batch):
 #   image related
 ###################################################################################################################
 
+
+def cropbbox(imagewidth, imageheight, thumbwidth, thumbheight):
+    """ cropbbox(imagewidth,imageheight, thumbwidth,thumbheight)
+
+        Compute a centered image crop area for making thumbnail images.
+          imagewidth,imageheight are source image dimensions
+          thumbwidth,thumbheight are thumbnail image dimensions
+
+        Returns bounding box pixel coordinates of the cropping area
+        in this order (left,upper, right,lower).
+    """
+    # determine scale factor
+    fx = float(imagewidth)/thumbwidth
+    fy = float(imageheight)/thumbheight
+    f = fx if fx < fy else fy
+
+    # calculate size of crop area
+    cropheight,cropwidth = int(thumbheight*f),int(thumbwidth*f)
+
+    # for centering use half the size difference of the image and the crop area
+    dx = (imagewidth-cropwidth)/2
+    dy = (imageheight-cropheight)/2
+
+    # return bounding box of centered crop area on source image
+    return dx, dy, cropwidth + dx, cropheight + dy
+
+
+def aspectcrop(im, wh_2_be):
+    thumbwidth, thumbheight = wh_2_b2
+    #im = Image.open(StringIO(f))
+    imagewidth, imageheight = im.size
+    dx, dy, cropwidth_plus_dx, cropheight_plus_dy = cropbbox(imagewidth, imageheight, thumbwidth, thumbheight)
+    im_cropped = im.crop((dx, dy, cropwidth_plus_dx, cropheight_plus_dy))
+    return im_cropped 
+
+def centercrop_and_resize(im, wh_2_be):
+    w_2_be, h_2_be = size_2_be
+    h_over_w_2_be = h_2_be / w_2_be
+    im_cropped = aspectcrop(im, h_over_w_2_be)
+    im_resized = im_cropped.resize(wh_2_be, Image.ANTIALIAS)
+    return im_resized
+
+
+def letterbox_image_pil(image, size):
+    '''resize image with unchanged aspect ratio using padding'''
+    iw, ih = image.size
+    w, h = size
+    scale = min(w/iw, h/ih)
+    nw = int(iw*scale)
+    nh = int(ih*scale)
+    image = image.resize((nw,nh), Image.BICUBIC)
+    new_image = Image.new('RGB', size, (128,128,128))
+    new_image.paste(image, ((w-nw)//2, (h-nh)//2))
+    return new_image
+
+def letterbox_image_opencv(image, size):
+    '''resize image with unchanged aspect ratio using padding'''
+    iw, ih = image.shape[0:2][::-1]
+    w, h = size
+    scale = min(w/iw, h/ih)
+    nw = int(iw*scale)
+    nh = int(ih*scale)
+    image = cv2.resize(image, (nw,nh), interpolation=cv2.INTER_CUBIC)
+    new_image = np.zeros((size[1], size[0], 3), np.uint8)
+    new_image.fill(128)
+    dx = (w-nw)//2
+    dy = (h-nh)//2
+    new_image[dy:dy+nh, dx:dx+nw,:] = image
+    return new_image    
+    
+
 #########################################################################################################
 # input
 #   dir_img : string of directory path.

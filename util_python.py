@@ -393,7 +393,7 @@ def compute_margin_ratio_left_top(w_h_ori, w_h_net, is_letterbox):
         h_resized = h_ori * ratio
         ratio_t = (h_net - h_resized) / (h_net * 2.0)
         #ratio_b = ratio_t
-    return ratio_l, ratio_t
+    return ratio_l, ratio_t, ratio
     #return [ratio_l, ratio_r, ratio_t, ratio_b]
 
 

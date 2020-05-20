@@ -158,6 +158,12 @@
 
 
 #### image related  
+
+  * cropbbox()
+  * aspectcrop()
+  * centercrop_and_resize()
+  * letterbox_image_pil()
+  * letterbox_image_opencv()
   * get_list_of_image_path_under_this_directory()
   * genereate_random_color_list()
   * gen_random_color_bgr()

@@ -311,23 +311,23 @@ def cropbbox(imagewidth, imageheight, thumbwidth, thumbheight):
         in this order (left,upper, right,lower).
     """
     # determine scale factor
-    fx = float(imagewidth)/thumbwidth
-    fy = float(imageheight)/thumbheight
+    fx = float(imagewidth) / thumbwidth
+    fy = float(imageheight) / thumbheight
     f = fx if fx < fy else fy
 
     # calculate size of crop area
-    cropheight,cropwidth = int(thumbheight*f),int(thumbwidth*f)
+    cropheight, cropwidth = int(thumbheight * f), int(thumbwidth * f)
 
     # for centering use half the size difference of the image and the crop area
-    dx = (imagewidth-cropwidth)/2
-    dy = (imageheight-cropheight)/2
+    dx = (imagewidth - cropwidth) / 2
+    dy = (imageheight - cropheight) / 2
 
     # return bounding box of centered crop area on source image
     return dx, dy, cropwidth + dx, cropheight + dy
 
 
 def aspectcrop(im, wh_2_be):
-    thumbwidth, thumbheight = wh_2_b2
+    thumbwidth, thumbheight = wh_2_be
     #im = Image.open(StringIO(f))
     imagewidth, imageheight = im.size
     dx, dy, cropwidth_plus_dx, cropheight_plus_dy = cropbbox(imagewidth, imageheight, thumbwidth, thumbheight)
@@ -335,9 +335,10 @@ def aspectcrop(im, wh_2_be):
     return im_cropped 
 
 def centercrop_and_resize(im, wh_2_be):
-    w_2_be, h_2_be = size_2_be
-    h_over_w_2_be = h_2_be / w_2_be
-    im_cropped = aspectcrop(im, h_over_w_2_be)
+    #w_2_be, h_2_be = wh_2_be
+    #h_over_w_2_be = h_2_be / w_2_be
+    #im_cropped = aspectcrop(im, h_over_w_2_be)
+    im_cropped = aspectcrop(im, wh_2_be)
     im_resized = im_cropped.resize(wh_2_be, Image.ANTIALIAS)
     return im_resized
 

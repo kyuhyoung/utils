@@ -511,7 +511,7 @@ def get_sequence_id_from_directory(direc, is_ai_challenge_19):
 
 #########################################################################################################
 #   Generalized version of cropping subimage : The subimage is kind of moving window such like bouncing ball inside the image.  
-#   with 'xy_shift' as '(0, 0)' this becomes a regular image cropping getting subimage of cv2.Rect(xy_previous, wh_cropped)
+#   With 'xy_previous' as '(0, 0)', this becomes a regular image cropping getting subimage of cv2.Rect(xy_shift, wh_cropped)
 def crop_image(im_bgr, xy_previous, xy_shift, wh_cropped):
 # shift x : '+' means from left to right
 #           '-' means from right to left

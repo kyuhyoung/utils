@@ -3,6 +3,9 @@
 //	ss << "I am " << 5 << " years old.";
 //	cout_indented(2, ss.str());
 //	=>   I am 5 years old.
+//	cout_indented(2, "I am " + std::to_string(5) + " years old.");
+//	=>   I am 5 years old.
+
 
 void cout_indented(int n_space, const string& str)
 {

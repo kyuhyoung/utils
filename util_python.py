@@ -5,6 +5,16 @@
 
 #########################################################################################################
 # input
+# str_path = '/path/to/the/file.ext'
+# prephix = '_prefix'
+# print('new path : ', add_postfix_right_b4_extension(str_path, postphix)
+# => new path : /path/to/the/file_postfix.ext 
+def add_postfix_right_b4_extension(str_path, postphix):
+    base, extenzion = os.path.splitext(str_path)
+    return base + postphix + extenzion
+
+#########################################################################################################
+# input
 #   strin : string
 #   sub_str : string
 # output

@@ -182,6 +182,26 @@ bool is_first_a_factor_of_second(int first, int second)
     return 0 == second % first;
 }
 
+
+//------------ Check if a file is a image. -------------- 
+//	cout << is_image_file("/home/someuser/flower.png") << endl;
+//	=> true
+//	cout << is_image_file("/home/someuser/poet.txt") << endl;
+//	=> false
+
+bool is_image_file(const string& filename)
+{
+	size_t pos = filename.rfind('.');
+ 	if (pos == string::npos) return false;
+ 	string ext = make_string_lowercase(filename.substr(pos + 1));
+ 	if (ext == "jpg" || ext == "jpeg" || ext == "gif" || ext == "bmp" || ext == "png" ||
+ 		ext == "pgm" || ext == "tif" || ext == "ppm" || ext == "tiff" || ext == "pnm")
+ 			return true;
+ 	return false;
+ }
+
+
+
 //------------ Integer to string with formatting --------------  
 //	cout << itos_formatted(278, 5) << endl;
 //	=> 00278
@@ -219,22 +239,32 @@ string make_string_lowercase(string input)
  	return input;
 }
 
-//------------ Check if a file is a image. -------------- 
-//	cout << is_image_file("/home/someuser/flower.png") << endl;
-//	=> true
-//	cout << is_image_file("/home/someuser/poet.txt") << endl;
-//	=> false
 
-bool is_image_file(const string& filename)
+//------------ It is the counterpart of basename() in Python. --------------
+//	cout << get_exa_exact_file_name_from_path("/home/someuser/somefolder/somefile.someext") << endl;
+//	=> somefile
+string get_exact_file_name_from_path(const string& str_path)
 {
-	size_t pos = filename.rfind('.');
- 	if (pos == string::npos) return false;
- 	string ext = make_string_lowercase(filename.substr(pos + 1));
- 	if (ext == "jpg" || ext == "jpeg" || ext == "gif" || ext == "bmp" || ext == "png" ||
- 		ext == "pgm" || ext == "tif" || ext == "ppm" || ext == "tiff" || ext == "pnm")
- 			return true;
- 	return false;
- }
+	string filename = str_path;
+	// Remove directory if present.
+	// Do this before extension removal incase directory has a period character.
+	const size_t last_slash_idx = filename.find_last_of("\\/");
+	if (std::string::npos != last_slash_idx) filename.erase(0, last_slash_idx + 1);
+	// Remove extension if present.
+	const size_t period_idx = filename.rfind('.');
+	if (std::string::npos != period_idx) filename.erase(period_idx);
+	return filename;
+}
+
+//------------ get_id_of_file_as_number --------------
+//	cout << get_last_integer_substring("my_image_000023.bmp") << endl;
+//	=> 23
+int get_id_of_file_as_number(const string& fn)
+{
+	string fn_wo_ext = get_exact_file_name_from_path(fn);
+	return get_last_integer_substring(fn_wo_ext);
+}
+
 
 
 //------------ From a string extract the last number which occurs in that string. --------------
@@ -270,30 +300,30 @@ int get_last_integer_substring(const string& str_ori)
 	return stoi(str);
 }
 
-//------------ It is the counterpart of basename() in Python. --------------
-//	cout << get_exa_exact_file_name_from_path("/home/someuser/somefolder/somefile.someext") << endl;
-//	=> somefile
-string get_exact_file_name_from_path(const string& str_path)
+
+
+
+//------------ get_list_of_image_path_under_this_directory --------------
+//	vector<string> li_fn_img = li_get_list_of_image_path_under_this_directory("/home/someuser/somefolder/", 412, 414);
+//	for(int i = 0; i < li_fn_img.size(); i++) cout << li_fn_img[i] << " ";
+//	=> /home/someuser/somefolder/img412.bmp /home/someuser/somefolder/img413.png /home/someuser/somefolder/img414.jpg 
+#include <experimental/filesystem>  // this requires to use "-lstdc++fs" as a library in Makefile.
+namespace fs = std::experimental::filesystem;
+vector<string> get_list_of_image_path_under_this_directory(const string& dir_img, int id_frm_start, int id_frm_last)
 {
-	string filename = str_path;
-	// Remove directory if present.
-	// Do this before extension removal incase directory has a period character.
-	const size_t last_slash_idx = filename.find_last_of("\\/");
-	if (std::string::npos != last_slash_idx) filename.erase(0, last_slash_idx + 1);
-	// Remove extension if present.
-	const size_t period_idx = filename.rfind('.');
-	if (std::string::npos != period_idx) filename.erase(period_idx);
-	return filename;
+	vector<string> li;
+	for(auto& p: fs::recursive_directory_iterator(dir_img))
+	{
+		string str_path = p.path().string();
+		if(!is_image_file(str_path)) continue;
+		if(id_frm_start >= 0 &&  get_id_of_file_as_number(str_path) < id_frm_start) continue;
+		if(id_frm_last >= 0 &&  get_id_of_file_as_number(str_path) > id_frm_last) continue;
+		li.push_back(str_path);
+	}
+	sort(li.begin(), li.end());
+	return li;
 }
 
-//------------ get_id_of_file_as_number --------------
-//	cout << get_last_integer_substring("my_image_000023.bmp") << endl;
-//	=> 23
-int get_id_of_file_as_number(const string& fn)
-{
-	string fn_wo_ext = get_exact_file_name_from_path(fn);
-	return get_last_integer_substring(fn_wo_ext);
-}
 
 
 //---------------------------------------------------------------------
@@ -325,27 +355,22 @@ vector< vector<int> > get_list_of_list_of_ids_as_number(const vector< vector<str
 }
 
 
+//---------------------------------------------------------------------
+//	std::string str_float = to_string_with_precision<float>(123.456789, 4);
+//	cout << "str_float : " << str_float << endl;
+//	=> str_float : 123.4567
 
-//------------ get_list_of_image_path_under_this_directory --------------
-//	vector<string> li_fn_img = li_get_list_of_image_path_under_this_directory("/home/someuser/somefolder/", 412, 414);
-//	for(int i = 0; i < li_fn_img.size(); i++) cout << li_fn_img[i] << " ";
-//	=> /home/someuser/somefolder/img412.bmp /home/someuser/somefolder/img413.png /home/someuser/somefolder/img414.jpg 
-#include <experimental/filesystem>  // this requires to use "-lstdc++fs" as a library in Makefile.
-namespace fs = std::experimental::filesystem;
-vector<string> get_list_of_image_path_under_this_directory(const string& dir_img, int id_frm_start, int id_frm_last)
+#include <sstream>
+template <typename T>
+std::string to_string_with_precision(const T a_value, const int n = 6)
 {
-	vector<string> li;
-	for(auto& p: fs::recursive_directory_iterator(dir_img))
-	{
-		string str_path = p.path().string();
-		if(!is_image_file(str_path)) continue;
-		if(id_frm_start >= 0 &&  get_id_of_file_as_number(str_path) < id_frm_start) continue;
-		if(id_frm_last >= 0 &&  get_id_of_file_as_number(str_path) > id_frm_last) continue;
-		li.push_back(str_path);
-	}
-	sort(li.begin(), li.end());
-	return li;
+    std::ostringstream out;
+    out.precision(n);
+    out << std::fixed << a_value;
+    return out.str();
 }
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////

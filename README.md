@@ -26,6 +26,7 @@
   * mkdirs()
   * python_join_equivalent()
   * split_string_by_delimiter()
+  * to_string_with_precision()
   * what_time_in_seconds_is_it_now()    
   
 #### math related

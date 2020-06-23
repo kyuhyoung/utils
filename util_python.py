@@ -27,6 +27,14 @@ def count_substring(strin, sub_str):
         kount = 1 + count_substring(strin[idx_sub + 1:], sub_str)
     return kount
 
+
+
+#########################################################################################################
+def is_array_like(obj):
+    return hasattr(obj, '__iter__') and hasattr(obj, '__len__')
+
+
+
 #########################################################################################################
 # input
 #   strin : string

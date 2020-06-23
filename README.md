@@ -136,6 +136,7 @@
 
   * add_postfix_right_b4_extension()
   * count_substring()
+  * is_array_like()
   * is_only_letter()
   * is_only_number()
   * is_only_letter_or_digit()

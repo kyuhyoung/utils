@@ -752,6 +752,7 @@ def xyxy_2_ltwh(xyxy):
     ltwh[..., 3] = xyxy[..., 3] - xyxy[..., 1]
     return ltwh
 '''
+
 def xyxy_2_ltwh(xyxy):
     """Convert [x1 y1 x2 y2] box format to [x1 y1 w h] format."""
     if isinstance(xyxy, (list, tuple)):
@@ -763,7 +764,14 @@ def xyxy_2_ltwh(xyxy):
         return (x1, y1, w, h)
     elif isinstance(xyxy, np.ndarray):
         # Multiple boxes given as a 2D ndarray
-        return np.hstack((xyxy[:, 0:2], xyxy[:, 2:4] - xyxy[:, 0:2] + 1))
+        if 2 < xyxy.ndim: 
+            shape_ori = xyxy.shape
+            n_box = np.prod(shape_ori[:-1])
+            xyxy = np.reshape(xyxy, (n_box, shape_ori[-1]))  
+            t0 = np.hstack((xyxy[:, 0 : 2], xyxy[:, 2 : 4] - xyxy[:, 0 : 2] + 1))
+            return np.reshape(t0, shape_ori)
+        else:        
+            return np.hstack((xyxy[..., 0 : 2], xyxy[..., 2 : 4] - xyxy[..., 0 : 2] + 1))
     else:
         raise TypeError('Argument xyxy must be a list, tuple, or numpy array.')
 

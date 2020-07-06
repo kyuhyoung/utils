@@ -186,6 +186,8 @@
   * compute_bounding_box_of_non_zero_pixels()
   * generate_tiled_tif()
   * generate_tiled_tif_2()
+  * ltwh_2_xyxy()
+  * xyxy_2_ltwh()
 
   
 #### OpenCV related   

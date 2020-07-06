@@ -752,7 +752,7 @@ def xyxy_2_ltwh(xyxy):
     ltwh[..., 3] = xyxy[..., 3] - xyxy[..., 1]
     return ltwh
 '''
-def xyxy_to_ltwh(xyxy):
+def xyxy_2_ltwh(xyxy):
     """Convert [x1 y1 x2 y2] box format to [x1 y1 w h] format."""
     if isinstance(xyxy, (list, tuple)):
         # Single box given as a list of coordinates

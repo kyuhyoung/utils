@@ -717,22 +717,72 @@ def generate_tiled_tif_2(fn_img, fn_result, postfix):
     
     
 #########################################################################################################
+'''
 def ltwh_2_xyxy(ltwh):
-    xyxy = ltwh
+    xyxy = ltwh.copy()
     xyxy[..., 2] = ltwh[..., 0] + ltwh[..., 2]
     xyxy[..., 3] = ltwh[..., 1] + ltwh[..., 3]
     return xyxy
+'''
+def ltwh_to_xyxy(ltwh):
+    """Convert [x1 y1 w h] box format to [x1 y1 x2 y2] format."""
+    if isinstance(ltwh, (list, tuple)):
+        # Single box given as a list of coordinates
+        assert len(ltwh) == 4
+        x1, y1 = xywh[0], ltwh[1]
+        x2 = x1 + np.maximum(0., ltwh[2] - 1.)
+        y2 = y1 + np.maximum(0., ltwh[3] - 1.)
+        return (x1, y1, x2, y2)
+    elif isinstance(ltwh, np.ndarray):
+        # Multiple boxes given as a 2D ndarray
+        return np.hstack(
+            (ltwh[:, 0:2], ltwh[:, 0:2] + np.maximum(0, ltwh[:, 2:4] - 1))
+        )
+    else:
+        raise TypeError('Argument xywh must be a list, tuple, or numpy array.')
+
 
     
     
 #########################################################################################################
+'''
 def xyxy_2_ltwh(xyxy):
-    ltwh = xyxy
+    ltwh = xyxy.copy()
     ltwh[..., 2] = xyxy[..., 2] - xyxy[..., 0]
     ltwh[..., 3] = xyxy[..., 3] - xyxy[..., 1]
     return ltwh
+'''
+def xyxy_to_ltwh(xyxy):
+    """Convert [x1 y1 x2 y2] box format to [x1 y1 w h] format."""
+    if isinstance(xyxy, (list, tuple)):
+        # Single box given as a list of coordinates
+        assert len(xyxy) == 4
+        x1, y1 = xyxy[0], xyxy[1]
+        w = xyxy[2] - x1 + 1
+        h = xyxy[3] - y1 + 1
+        return (x1, y1, w, h)
+    elif isinstance(xyxy, np.ndarray):
+        # Multiple boxes given as a 2D ndarray
+        return np.hstack((xyxy[:, 0:2], xyxy[:, 2:4] - xyxy[:, 0:2] + 1))
+    else:
+        raise TypeError('Argument xyxy must be a list, tuple, or numpy array.')
 
 
+def xywh_2_xyxy(xywh):
+    xyxy = xywh.new(xywh.shape)
+    xyxy[..., 0] = xywh[..., 0] - xywh[..., 2] / 2.0
+    xyxy[..., 1] = xywh[..., 1] - xywh[..., 3] / 2.0
+    xyxy[..., 2] = xywh[..., 0] + xywh[..., 2] / 2.0
+    xyxy[..., 3] = xywh[..., 1] + xywh[..., 3] / 2.0
+    return xyxy
+
+def xyxy_2_xywh(xyxy):
+    xywh = xyxy.new(xyxy.shape)
+    xywh[..., 0] = (xyxy[..., 0] + xyxy[..., 2]) / 2.0
+    xywh[..., 1] = (xyxy[..., 1] + xyxy[..., 3]) / 2.0
+    xywh[..., 2] = xywh[..., 2] - xywh[..., 0]
+    xywh[..., 3] = xywh[..., 3] - xywh[..., 1]
+    return xywh
 
 
 #######################################################################################################################################

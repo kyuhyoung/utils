@@ -735,9 +735,16 @@ def ltwh_to_xyxy(ltwh):
         return (x1, y1, x2, y2)
     elif isinstance(ltwh, np.ndarray):
         # Multiple boxes given as a 2D ndarray
-        return np.hstack(
-            (ltwh[:, 0:2], ltwh[:, 0:2] + np.maximum(0, ltwh[:, 2:4] - 1))
-        )
+        
+        
+        if 2 < ltwh.ndim: 
+            shape_ori = ltwh.shape
+            n_box = np.prod(shape_ori[:-1])
+            ltwh = np.reshape(ltwh, (n_box, shape_ori[-1]))
+            t0 = np.hstack((ltwh[:, 0:2], ltwh[:, 0:2] + np.maximum(0, ltwh[:, 2:4] - 1))      
+            return np.reshape(t0, shape_ori)
+        else: 
+            return np.hstack((ltwh[:, 0:2], ltwh[:, 0:2] + np.maximum(0, ltwh[:, 2:4] - 1))
     else:
         raise TypeError('Argument xywh must be a list, tuple, or numpy array.')
 

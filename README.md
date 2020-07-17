@@ -160,7 +160,14 @@
   * print_indented(n_sp, *args)
 
 
-
+#### math related  
+ 
+  * angle_axis_2_euler_angles_rpy()
+  * deg2rad()
+  * euler_angles_rpy_2_angle_axis()
+  * is_rotation_matrix()
+  * rad2deg()
+  * rotation_matrix_2_euler_angles_rpy()
 
 #### image related  
 

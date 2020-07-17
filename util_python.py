@@ -316,6 +316,137 @@ def print_indented(n_sp, *args):
 
 
 
+    
+    
+    
+    
+    
+#########################################################################################################################
+########        math related        ##################################################################################
+########################################################################################################################
+
+
+
+#########################################################################################################
+#   aa_rad = (1.2443, -1.9191, 0.6236)
+#   rpy_rad = angle_axis_2_euler_angles_rpy(aa_rad)
+#   rpy_deg = rad2deg(rpy_rad)
+#   print('rpy_det :', rpy_deg)
+#   rpy_det : (0, 180, 20)
+
+import cv2
+def angle_axis_2_euler_angles_rpy(aa_rad):
+    rot_mat = np.zeros(shape=(3, 3))
+    cv2.Rodrigues(np.array(aa_rad), rot_mat)
+    rpy_rad = rotation_matrix_2_euler_angles_rpy(rot_mat)
+    return rpy_rad
+
+
+#########################################################################################################
+#   deg = 180
+#   rad = deg2rad(deg)
+#   print('deg :', deg, ', rad :', rad)
+#   deg : 180, rad : 3.141592
+#   deg = (0, 180, 360)
+#   rad = deg2rad(deg)
+#   print('deg :', deg, ', rad :', rad)
+#   deg : (0, 180, 360), rad : (0, 3.141592, 6.2830)
+
+import numpy as np
+def deg2rad(deg):
+    return np.deg2rad(deg)
+
+
+
+
+#########################################################################################################
+#   roll, pitch, yaw = 0, 180, 20
+#   roll, pitch, yaw = deg2rad((roll, pitch, yaw))
+#   aa_rad = euler_angles_rpy_2_angle_axis((roll, pitch, yaw))
+#   print('aa_rad :', aa_rad)
+#   aa_rad : (1.2443, -1.9191, 0.6236)
+
+def euler_angles_rpy_2_angle_axis(rpy_rad):
+    roll, pitch, yaw = rpy_rad
+    yawMatrix = np.matrix([[math.cos(yaw), -math.sin(yaw), 0],
+                           [math.sin(yaw), math.cos(yaw), 0], [0, 0, 1]])
+    pitchMatrix = np.matrix([[math.cos(pitch), 0,
+                              math.sin(pitch)], [0, 1, 0],
+                             [-math.sin(pitch), 0,
+                              math.cos(pitch)]])
+    rollMatrix = np.matrix([[1, 0, 0], [0, math.cos(roll), -math.sin(roll)],
+                            [0, math.sin(roll),
+                             math.cos(roll)]])
+    R = yawMatrix * pitchMatrix * rollMatrix
+    theta = math.acos(((R[0, 0] + R[1, 1] + R[2, 2]) - 1) / 2)
+    multi = 1 / (2 * math.sin(theta))
+    rx = multi * (R[2, 1] - R[1, 2]) * theta
+    ry = multi * (R[0, 2] - R[2, 0]) * theta
+    rz = multi * (R[1, 0] - R[0, 1]) * theta
+    return (rx, ry, rz)
+
+
+
+
+
+
+#########################################################################################################
+#   rot_mat = np.identity(3, dtype=np.float)
+#   is_rot_mat = is_rotation_matrix(rot_mat)
+#   print('is_rot_mat :', is_rot_mat)
+#   is_rot_mat : 1
+#   rot_mat = np.zeros((3, 3), dtype=np.float)
+#   is_rot_mat = is_rotation_matrix(rot_mat)
+#   print('is_rot_mat :', is_rot_mat)
+#   is_rot_mat : 0
+
+import numpy as np
+def is_rotation_matrix(R):
+    Rt = np.transpose(R)
+    shouldBeIdentity = np.dot(Rt, R)
+    I = np.identity(3, dtype=R.dtype)
+    n = np.linalg.norm(I - shouldBeIdentity)
+    return n < 1e-6
+
+#########################################################################################################
+#   rad = math.pi
+#   deg = rad2deg(rad)
+#   print('rad :', rad, ', deg :', deg)
+#   rad : 3.141592, deg : 180
+#   rad = (0, math.pi, 2 * math.pi)
+#   deg = rad2deg(rad)
+#   print('rad :', rad, ', deg :', deg)
+#   rad : (0, 3.141592, 6.2830), deg : (0, 180, 360)
+
+import numpy as np
+def rad2deg(rad):
+    return np.rad2deg(rad)
+
+#########################################################################################################
+#   rot_mat = np.identity(3, dtype=np.float)
+#   euler_angles = rotation_matrix_2_euler_angles_rpy(rot_mat)
+#   print('euler_angles :', euler_angles)
+#   euler_angles : [0, 0, 0]
+
+import math
+def rotation_matrix_2_euler_angles_rpy(R):
+    assert (is_rotation_matrix(R))
+    sy = math.sqrt(R[0, 0] * R[0, 0] + R[1, 0] * R[1, 0])
+    singular = sy < 1e-6
+    if not singular:
+        x = math.atan2(R[2, 1], R[2, 2])
+        y = math.atan2(-R[2, 0], sy)
+        z = math.atan2(R[1, 0], R[0, 0])
+    else:
+        x = math.atan2(-R[1, 2], R[1, 1])
+        y = math.atan2(-R[2, 0], sy)
+        z = 0
+
+    return np.array([x, y, z])
+
+
+
+
 
 ###################################################################################################################
 #   image related

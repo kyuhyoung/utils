@@ -152,25 +152,26 @@ bool is_this_camera_index(const std::string& strin)
 	return 2 >= strin.size() && is_only_number(strin);	
 }
 
-//------------ Check parse string by delimiter into a vector of strings --------------  
-//	vector<string> li_str = split_string_by_delimiter("10,abc,234,3rf");
+//------------ Check parse string by delimiter into a vector of strings -------------- 
+//	string str = "10 ,abc ;234 %:3rf >"
+//	string const delims{ " ,;%:>" };
+//	vector<string> li_str = split_string_by_delimiter(str, delims);
 //	for(int i = 0; i < li_str.size(); i++) cout << li_str[i] << " ";
 //	=> 10 abc 234 3rf
 using namespace std;
-vector<string> split_string_by_delimiter(const string& strin, const string& delimiter)
+vector<string> split_string_by_delimiter(const string& strin, string const& delims)
 {
-	vector<string> li_str;
-	size_t last = 0, next = 0;
-	 while ((next = strin.find(delimiter, last)) != string::npos)
-	 {
-	 	//cout << strin.substr(last, next - last) << endl;
-	 	li_str.push_back(strin.substr(last, next - last));
-	 	last = next + 1;
-	 }
-	 //cout << strin.substr(last) << endl;
-	 li_str.push_back(strin.substr(last));
-	 return li_str;
-}
+	//std::string const delims{ " .,:;!?" };
+	std::vector<std::string> li_str;
+	size_t beg, pos = 0;
+	while ((beg = strin.find_first_not_of(delims, pos)) != std::string::npos)
+	{
+		pos = strin.find_first_of(delims, beg + 1);
+		li_str.push_back(strin.substr(beg, pos - beg));
+		std::cout << li_str.back() << std::endl;
+	}
+	return li_str;
+}	
 
 //------------ Check if the first integer is one of factors of the second integer --------------  
 //	cout << is_first_a_factor_of_second(3, 15) << endl;

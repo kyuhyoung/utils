@@ -144,7 +144,7 @@ void error(const char *s)
 //	=> true
 bool is_only_number(const std::string& s)
 {
-	bool starts_with_non_digit = false, is_number = true;
+	bool is_number = true;
 	int n_pure_num = 0, n_dot = 0;
 	if(s.empty()) is_number = false;
 	else
@@ -158,7 +158,6 @@ bool is_only_number(const std::string& s)
 				if(std::isdigit(*it)) n_pure_num++;
 				else
 				{
-					starts_with_non_digit = true;
 					if('.' == *it) n_dot++;
 				}
 			}

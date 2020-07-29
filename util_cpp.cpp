@@ -142,11 +142,10 @@ void error(const char *s)
 //	=> true
 //	cout << is_only_number(".1234");
 //	=> true
-
 bool is_only_number(const std::string& s)
 {
-	bool is_number = true;
-	int n_dot = 0;
+	bool starts_with_non_digit = false, is_number = true;
+	int n_pure_num = 0, n_dot = 0;
 	if(s.empty()) is_number = false;
 	else
 	{
@@ -155,22 +154,31 @@ bool is_only_number(const std::string& s)
 			//std::cout << "*it : " << *it << std::endl;
 			if(s.begin() == it)
 			{
-				if(!(std::isdigit(*it) || '-' == *it || '.' == *it)) { is_number = false;  break; }
-				if('.' == *it) n_dot++;
+				if(!(std::isdigit(*it) || '-' == *it || '.' == *it)) {    is_number = false;  break; }
+				if(std::isdigit(*it)) n_pure_num++;
+				else
+				{
+					starts_with_non_digit = true;
+					if('.' == *it) n_dot++;
+				}
 			}
 			else
 			{
 				if('.' == *it) {
 					if(++n_dot > 1) { is_number = false;  break; }
 				}
-				else if(!(std::isdigit(*it))) { is_number = false;  break; }
+				else
+				{
+					if(std::isdigit(*it)) n_pure_num++;
+					else { is_number = false;  break; }
+				}
 			}
 		}
 	}
-	//bool is_number = !s.empty() && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c) || '.     ' == c; }) == s.end();
-	//std::cout << "s : " << s << ", is_number : " << is_number << std::endl;
+	if(0 == n_pure_num) is_number = false;
+	std::cout << "s : " << s << ", is_number : " << is_number << std::endl;
+	//exit(0);
 	return is_number;
-	//return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
 }
 
 

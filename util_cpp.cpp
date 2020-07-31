@@ -2363,7 +2363,19 @@ Mat crop_with_center_and_radius(const Mat& im, const Point2f& p_center, float ra
 }
 
 
-//------------ Rotatae an image by a given degrees either with resizing or not	--------------  
+// Checks if a matrix is a valid rotation matrix.
+bool is_rotation_matrix(cv::Mat &R)
+{
+    cv::Mat Rt;
+    cv::transpose(R, Rt);
+    cv::Mat shouldBeIdentity = Rt * R;
+    cv::Mat I = Mat::eye(3, 3, shouldBeIdentity.type());    
+    return  cv::norm(I, shouldBeIdentity) < 1e-6;    
+}
+
+
+
+//------------ Rotatate an image by a given degrees either with resizing or not	--------------  
 // Note that for binary case, thru "warpAffine" the image becomes blurred. So "threshold" function should be applied again.	
 /* Usage
 cv::Mat src = cv::imread("im.png");

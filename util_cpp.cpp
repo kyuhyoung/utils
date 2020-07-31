@@ -2364,7 +2364,7 @@ Mat crop_with_center_and_radius(const Mat& im, const Point2f& p_center, float ra
 
 
 // Checks if a matrix is a valid rotation matrix.
-bool is_rotation_matrix(cv::Mat &R)
+bool is_rotation_matrix(const cv::Mat &R)
 {
     cv::Mat Rt;
     cv::transpose(R, Rt);

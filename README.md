@@ -103,6 +103,7 @@
   * init_mat_with_array_of_values()
   * init_mat_with_one_value()
   * init_video_writer()
+  * is_rotation_matrix()
   * is_this_contour_circle_or_ellipse()
   * make_set_of_rotated_square_images()
   * match_intra()  

@@ -1504,6 +1504,20 @@ double compute_area_of_contour(const vector<Point>& li_pt, int n_sp)
 	 return Point2f(mom.m10 / mom.m00, mom.m01 / mom.m00);
  }	 
 
+
+std::pair<cv::Mat, cv::Mat> split_homogeneous_transform_matrix_into_rotation_and_translation(const Mat& mat_homo)
+{
+	if(!(mat_homo.rows >= 3 && mat_homo.cols >= 3 && mat_homo.cols == mat_homo.rows))
+	{
+		std::cout << "The given matrix is NOT homogeneous transformation matrix." << std::endl; exit(0);
+	}
+	int dim_rot = mat_homo.rows - 1;
+	cv::Mat mat_rot = mat_homo(cv::Rect(0, 0, dim_rot, dim_rot)).clone();
+	cv::Mat vec_tra = mat_homo(cv::Rect(dim_rot, 0, 1, dim_rot)).clone();
+	return std::pair<cv::Mat, cv::Mat>(mat_rot, vec_tra);
+}
+
+
 bool is_this_contour_circle_or_ellipse(RotatedRect& box, const vector<Point>& li_pt, const Size& sz, float th_dist_center, float th_dist_boundary, const Point2f *p_center, float area, int n_sp)
 {
     cout_indented(n_sp, "is_this_contour_circle_or_ellipse"); //exit(0);

@@ -1038,6 +1038,30 @@ Mat init_mat_with_one_value(const Size& sz, int mat_type, const Scalar& val)
 }
 
 
+
+cv::Mat combine_rotation_translation_into_homogeneous_matrix(const cv::Mat& rot, const cv::Mat& tra)
+{
+	cv::Mat rot_mat;
+	bool is_rot_valid = true;
+	int n_elem_rot = rot.rows * rot.cols;
+	if(3 == n_elem_rot)
+	{
+		cv::Rodrigues(rot, rot_mat);
+	}
+	else if(9 == n_elem_rot)
+	{
+		if(is_rotation_matrix(rot)) rot_mat = rot;
+		else is_rot_valid = false;
+	}
+	else is_rot_valid = false;
+	if(!is_rot_valid) { std::cout << "The given rotation matirx is NOT a real rotation matrix." << std::endl;        exit(0); }
+	cv::Mat mat_homo = cv::Mat::eye(4, 4, CV_32F);
+	rot_mat.copyTo(mat_homo(cv::Rect(0, 0, 3, 3)));
+	tra.copyTo(mat_homo(cv::Rect(3, 0, 1, 3)));
+	return mat_homo;
+}
+
+
 float compute_ratio_of_largest_blob(const Mat& im_255_blob, int n_sp)
 {
     cout_indented(n_sp, "compute_ratio_of_largest_blob");

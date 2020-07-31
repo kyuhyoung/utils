@@ -64,6 +64,7 @@
 
   * are_all_seqs_gray()
   * cluster_histograms()
+  * combine_rotation_translation_into_homogeneous_matrix()
   * compute_area_of_contour()
   * compute_center_of_contour()
   * compute_circle_margin()

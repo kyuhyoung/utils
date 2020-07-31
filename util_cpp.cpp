@@ -1032,11 +1032,11 @@ vector<int> compute_indice_of_no_hole_contour(const vector<Vec4i>& hierarchy, in
 }
 
 
-
-Mat create_mat_with_some_value(const Size& sz, int mat_type, const Scalar& val)
+Mat init_mat_with_one_value(const Size& sz, int mat_type, const Scalar& val)
 {
     return Mat(sz, mat_type, val);
 }
+
 
 float compute_ratio_of_largest_blob(const Mat& im_255_blob, int n_sp)
 {
@@ -1923,10 +1923,10 @@ Mat get_row_or_column_or_channel_wise_norm(const Mat& mat, const string& str, in
 //        			s,  c,  -p_center.x * s - p_center.y * c + p_center.y,
 //			        0,  0,  1
 //	};
-//	Mat mat_rot = init_mat<float>(3, 3, rot_mat, 0);
+//	Mat mat_rot = init_mat_with_array_of_values<float>(3, 3, rot_mat, 0);
 
 template <typename T> 
-Mat init_mat(int n_r, int n_c, T li_val[], int n_sp)
+Mat init_mat_with_array_of_values(int n_r, int n_c, T li_val[], int n_sp)
 {
     cout_indented(n_sp, "init_mat START");
     int iR, iE, iC, n_elem = n_r * n_c;

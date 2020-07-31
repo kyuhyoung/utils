@@ -1929,7 +1929,9 @@ template <typename T>
 Mat init_mat_with_array_of_values(int n_r, int n_c, T li_val[], int n_sp)
 {
     cout_indented(n_sp, "init_mat START");
-    int iR, iE, iC, n_elem = n_r * n_c;
+    Mat_<T> mat(n_r, n_c, li_val);
+#if 0 
+	int iR, iE, iC, n_elem = n_r * n_c;
     Mat_<T> mat(n_r, n_c);
     for(iR = 0, iE = 0; iR < n_r; iR++)
     {
@@ -1938,6 +1940,7 @@ Mat init_mat_with_array_of_values(int n_r, int n_c, T li_val[], int n_sp)
             mat(iR, iC) = li_val[iE];
         }      
     }
+#endif	// 0	
     cout_indented(n_sp, "init_mat END");
     return mat;
 }

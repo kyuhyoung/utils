@@ -2905,6 +2905,13 @@ vector<Point> find_peaks_2D(const vector<Point2f>& li_center, const Size& sz_im,
 }
 
 
+double sum_of_squared(const cv::Mat& m)
+{
+	double sqrt_sos = cv::norm(m, cv::NORM_L2);
+	return sqrt_sos * sqrt_sos;
+}
+	
+
 
 //	ref. : https://stackoverflow.com/questions/10167534/how-to-find-out-what-type-of-a-mat-object-is-with-mattype-in-opencv
 void writeMat2File(cv::Mat& m, const string& filename, bool channelwise)

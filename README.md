@@ -128,6 +128,7 @@
   * set_cam_properties_ocv()
   * sort_two_seqs_as_first_seq_sorted()
   * split_homogeneous_transform_matrix_into_rotation_and_translation()
+  * sqrt_of_mean_square()
   * sum_of_squared()
   * write_one_frame_to_video()
   * writeMat2File()

@@ -2904,6 +2904,12 @@ vector<Point> find_peaks_2D(const vector<Point2f>& li_center, const Size& sz_im,
     return li_center_max;        
 }
 
+double sqrt_of_mean_square(const cv::Mat& m)
+{
+	double sos = sum_of_squared(m);
+	double ms = sos / m.total();
+	return sqrt(ms);		
+}
 
 double sum_of_squared(const cv::Mat& m)
 {

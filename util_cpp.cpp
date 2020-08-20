@@ -1310,6 +1310,46 @@ Mat compute_edge_median(const Mat& im_gray, int smooth_size, double th_low, doub
 }
 
 
+
+
+Mat exponential_map_direct(const Mat &v, const double &delta_t, int n_sp)
+{
+    cout_indented(n_sp, "exponential_map_direct START");   
+    if(!(6 == v.rows && 1 == v.cols)) throw std::length_error("Cannot compute direct exponential map from a " + std::to_string(v.rows) + " by " + std::to_string(v.cols) + ". Should be 6 by 1.");
+    double theta, si, co, sinc, mcosc, msinc;
+    Mat rd, u, dt(3, 1, CV_64F), v_dt = v * delta_t;
+    v_dt(Rect(0, 3, 1, 3)).copyTo(u);
+    Rodrigues(u, rd);
+    theta = norm(u, NORM_L2);    
+    si = sin(theta);
+    co = cos(theta);
+    sinc = sinc_wo_visp(si, theta);
+    mcosc = mcosc_wo_visp(co, theta);
+    msinc = msinc_wo_visp(si, theta);
+    double  u_0 =       u.at<double>(0),    u_1 =       u.at<double>(1),    u_2 =       u.at<double>(2), 
+            v_dt_0 =    v_dt.at<double>(0), v_dt_1 =    v_dt.at<double>(1), v_dt_2 =    v_dt.at<double>(2);
+    dt.at<double>(0) =  v_dt_0 * (sinc + u_0 * u_0 * msinc) +
+                        v_dt_1 * (u_0 * u_1 * msinc - u_2 * mcosc) + 
+                        v_dt_2 * (u_0 * u_2 * msinc + u_1 * mcosc);
+    dt.at<double>(1) =  v_dt_0 * (u_0 * u_1 * msinc + u_2 * mcosc) + 
+                        v_dt_1 * (sinc + u_1 * u_1 * msinc) +
+                        v_dt_2 * (u_1 * u_2 * msinc - u_0 * mcosc);
+
+    dt.at<double>(2) =  v_dt_0 * (u_0 * u_2 * msinc - u_1 * mcosc) +
+                        v_dt_1 * (u_1 * u_2 * msinc + u_0 * mcosc) +
+                        v_dt_2 * (sinc + u_2 * u_2 * msinc);
+    Mat Delta = combine_rotation_translation_into_homogeneous_matrix(rd, dt);
+    cout_indented(n_sp, "exponential_map_direct END");   
+    return Delta;
+}
+
+
+
+
+
+
+
+
 // 	#define WDIBIXEL uint8_t
 //	Mat im_bgr = imread("im_bgr.bmp");
 //	Mat im_bgr_rotated = Mat::zeros(Size(im_bgr.cols * 2, im_bgr.rows * 3), im_bgr.type()); 
@@ -1770,6 +1810,46 @@ tuple<string, Point2f, float> contour_2_shape(const vector<Point>& li_pt, const 
     return tuple_shape_center_radius;
 }
 
+
+
+Mat mean_rotation_matrix_moakher(const std::vector<Mat> &vec_R)
+{
+    int n_rot = vec_R.size();
+    Mat meanR = Mat::zeros(3, 3, CV_64F);
+    for(size_t i = 0; i < vec_R.size(); i++) meanR += vec_R[i];
+    meanR /= static_cast<double>(n_rot);
+    // Euclidean mean of the rotation matrix following Moakher's method (SIAM 2002)
+    //vpMatrix M, U, V;   vpColVector sv;
+    //meanR.pseudoInverse(M, sv, 1e-6, U, V);
+    Mat M, U, V, sv, kerA;
+    pseudoInverse_wo_visp(meanR, M, sv, 1e-6, U, V, kerA);
+    //double det = sv[0]*sv[1]*sv[2];
+    double det = sv.at<double>(0) * sv.at<double>(1) * sv.at<double>(2);
+    if(det > 0) {
+        meanR = U * V.t();
+    }
+    else {
+        //vpMatrix D(3, 3);   D = 0.0;    D[0][0] = D[1][1] = 1.0; D[2][2] = -1;
+        Mat D = Mat::eye(3, 3, CV_64F); D.at<double>(2, 2) = -1;
+        meanR = U * D * V.t();
+    }
+    //R = meanR;
+    //return R;
+    return meanR;
+}
+
+
+Mat mean_traslation_vector(const std::vector<Mat> li_tra)
+{
+    int iT, n_tra = li_tra.size();
+    Mat meanT = li_tra[0].clone();
+    for(iT = 1; iT < n_tra; iT++)
+    {
+        meanT += li_tra[iT];
+    }
+    meanT /= n_tra;
+    return meanT;
+}
 
 
 

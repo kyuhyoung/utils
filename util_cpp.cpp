@@ -910,6 +910,7 @@ void geometric_median(Container& X, Vector& geo_median, distFunciton distance, i
     cout_indented(n_sp, "geometric_median END");
 }
 
+#define RAD_MIN_MC      2.5e-4
 double mcosc(double cosx, double x)
 {
   //if (fabs(x) < ang_min_mc)
@@ -919,7 +920,15 @@ double mcosc(double cosx, double x)
             return ((1.0 - cosx) / x / x);
             }
 
-
+#define RAD_MIN_MC      2.5e-4
+double msinc(double sinx, double x)
+{
+  //if (fabs(x) < ang_min_mc)
+  if (fabs(x) < RAD_MIN_MC)
+      return (1. / 6.0);
+        else
+            return ((1.0 - sinx / x) / x / x);
+            }
 
 //------------ Generate a random number between 'minV' and 'maxV' --------------
 //srand(time(NULL)); // Seed the time
@@ -928,9 +937,23 @@ inline int random_number_in_between(int minV, int maxV)
     return rand() % (maxV - minV + 1) + minV;
 }    
 
+#define RAD_MIN_SINC    1.0e-8
+double sinc(double sinx, double rad)
+{
+  if (fabs(rad) < RAD_MIN_SINC)
+      return 1.0;
+        else
+            return sinx / rad;
+            }
 
-
-
+#define RAD_MIN_SINC    1.0e-8
+double sinc(double rad)
+{
+  if (fabs(rad) < RAD_MIN_SINC)
+      return 1.0;
+        else
+            return sin(rad) / rad;
+            }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////

@@ -132,6 +132,7 @@
   * rot_mat_2_quaternion()
   * save_one_image_under_directory()
   * set_cam_properties_ocv()
+  * skew_symmetric()
   * sort_two_seqs_as_first_seq_sorted()
   * split_homogeneous_transform_matrix_into_rotation_and_translation()
   * sqrt_of_mean_square()

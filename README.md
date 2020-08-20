@@ -124,6 +124,7 @@
   * rotate_image_by_degree()
   * RotateWrapFill()
   * RotateWrapFillFastSrcSizeExp2()
+  * rot_mat_2_quaternion()
   * save_one_image_under_directory()
   * set_cam_properties_ocv()
   * sort_two_seqs_as_first_seq_sorted()

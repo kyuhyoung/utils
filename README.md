@@ -95,6 +95,7 @@
   * draw_rect_with_padding() 
   * draw_rotation_pencil()
   * emd_btn_histograms()
+  * exponential_map_direct()
   * find_peaks_on_mat()
   * find_peaks_2D()
   * get_boundary_point_of_1st_radiated_from_2nd()

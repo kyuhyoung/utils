@@ -58,6 +58,7 @@
   * msinc()
   * rad2deg()
   * random_number_in_between()
+  * sinc()
   * unwrap()  
   * which_side_this_point_is_on_of_line_with_two_points()
 
@@ -133,6 +134,7 @@
   * split_homogeneous_transform_matrix_into_rotation_and_translation()
   * sqrt_of_mean_square()
   * sum_of_squared()
+  * svd_opencv()
   * write_one_frame_to_video()
   * writeMat2File()
 

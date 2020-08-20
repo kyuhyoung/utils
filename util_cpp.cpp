@@ -2654,7 +2654,73 @@ bool get_next_index(vector<int>& li_idx, const vector<vector<int>>& li_li_id)
 	cout << "is_the_end : " << is_the_end << endl;  //exit(0);
 	return !is_the_end;
 }
-			
+	
+
+void compute_pseudo_inverse(const Mat &a, const Mat &sv, const Mat &v, unsigned int nrows, unsigned int ncols, unsigned int nrows_orig, unsigned int ncols_orig, double svThreshold, Mat &Ap, unsigned int &rank)
+{
+    Mat a1 = Mat::zeros(ncols, nrows, a.type());
+    // compute the highest singular value and the rank of h
+    double maxsv = 0;
+    for (unsigned int i = 0; i < ncols; i++) {
+        double sv_abs = fabs(sv.at<double>(i));
+        if(sv_abs > maxsv) maxsv = sv_abs;
+    }
+    rank = 0;
+    for (unsigned int i = 0; i < ncols; i++) {
+        if(fabs(sv.at<double>(i)) > maxsv * svThreshold) rank++;
+        for(unsigned int j = 0; j < nrows; j++) {
+            for (unsigned int k = 0; k < ncols; k++) {
+                if(fabs(sv.at<double>(k)) > maxsv * svThreshold) {
+                    a1.at<double>(i, j) += v.at<double>(i, k) * a.at<double>(j, k) / sv.at<double>(k);
+                }
+            }
+        }
+    }
+    Ap = nrows_orig >= ncols_orig ? a1 : a1.t();
+    return;
+}
+
+void compute_pseudo_inverse(const Mat &U, const Mat &sv, const Mat &V, unsigned int nrows_orig, unsigned int ncols_orig, double svThreshold, Mat &Ap, unsigned int &rank, Mat &imA, Mat &imAt, Mat &kerAt)
+{
+    Ap = Mat::zeros(ncols_orig, nrows_orig, CV_64F);
+    // compute the highest singular value and the rank of h
+    double maxsv = sv.at<double>(0);
+    rank = 0;
+    for(unsigned int i = 0; i < ncols_orig; i++) {
+        if(fabs(sv.at<double>(i)) > maxsv * svThreshold) {
+            rank++;
+        }
+        for(unsigned int j = 0; j < nrows_orig; j++) {
+            for(unsigned int k = 0; k < ncols_orig; k++) {
+                double sv_k = sv.at<double>(k);
+                if(fabs(sv_k) > maxsv * svThreshold) {
+                    Ap.at<double>(i, j) += V.at<double>(i, k) * U.at<double>(j, k) / sv_k;
+                }
+            }
+        }
+    }
+    // Compute im(A) and im(At)
+    U(Rect(0, 0, rank, nrows_orig)).copyTo(imA);  
+    V(Rect(0, 0, rank, ncols_orig)).copyTo(imAt);  
+    if(rank != ncols_orig) {
+        kerAt = Mat::zeros(ncols_orig - rank, ncols_orig, CV_64F);
+        for (unsigned int j = 0, k = 0; j < ncols_orig; j++) {
+            if(fabs(sv.at<double>(j)) <= maxsv * svThreshold) {
+                double sos = sum_of_squared(V.col(j)); 
+                if(sos > std::numeric_limits<double>::epsilon())
+                {
+                    for(unsigned int i = 0; i < V.rows; i++) {
+                        kerAt.at<double>(k, i) = V.at<double>(i, j);
+                    }
+                    k++;
+                }
+            }
+        }
+    }     
+}
+
+
+
 			
 //-----------------------------------------------------------------------------------------------------  
 //	vector<vector<string>> li_li_path;
@@ -2694,6 +2760,47 @@ void concatenate_images_from_seqeunces_into_video_or_sequence(vector< vector<str
 		iF++;
 	}
 	if(save_as_video) { cout << "concatenated video has just saved at : " << path_vid << endl;  vw.release(); }
+}
+
+
+
+unsigned int pseudo_inverse(const Mat& A, Mat &Ap, Mat &sv, double svThreshold, Mat &imA, Mat &imAt, Mat &kerA) 
+{
+    unsigned int rank, nrows = A.rows, ncols = A.cols;
+    Mat A_dummy, U, V, sv_;
+    if(nrows < ncols) {
+        A_dummy = Mat::zeros(ncols, ncols, A.type());  sv = Mat::zeros(nrows, 1, A.type());
+    } 
+    else {
+        A_dummy = Mat::zeros(nrows, ncols, A.type());  sv = Mat::zeros(ncols, 1, A.type());
+    }
+    A.copyTo(A_dummy(Rect(0, 0, ncols, nrows)));
+    svd_opencv(A_dummy, U, sv_, V);
+    //compute_pseudo_inverse(U, sv_, V, nrows, ncols, svThreshold, Ap, rank, imA, imAt, kerA);
+    compute_pseudo_inverse(U, sv_, V, nrows, ncols, svThreshold, Ap, rank, imA, imAt, kerA);
+    // Remove singular values equal to to that correspond to the lines of 0
+    // introduced when m < n
+    sv_(Rect(0, 0, 1, sv.rows)).copyTo(sv);
+    return rank;
+}
+
+
+unsigned int pseudo_inverse(const Mat& A, Mat &Ap, double svThreshold)
+{
+    unsigned int rank, nrows, ncols, nrows_orig = A.rows, ncols_orig = A.cols;
+    Ap = Mat(ncols_orig, nrows_orig, A.type());
+    if (nrows_orig >= ncols_orig) {
+        nrows = nrows_orig;
+        ncols = ncols_orig;
+    } 
+    else {
+        nrows = ncols_orig;
+        ncols = nrows_orig;
+    }
+    Mat U, sv, V, A_dummy = nrows_orig >= ncols_orig ? A.clone() : A.t();
+    svd_opencv(A_dummy, U, sv, V);
+    compute_pseudo_inverse(U, sv, V, nrows, ncols, nrows_orig, ncols_orig, svThreshold, Ap, rank);
+    return rank;
 }
 
 //-----------------------------------------------------------------------------------------------------  
@@ -2996,6 +3103,19 @@ double sum_of_squared(const cv::Mat& m)
 	return sqrt_sos * sqrt_sos;
 }
 	
+void svd_opencv(const Mat& A, Mat& U, Mat &w, Mat &V)
+{
+    std::cout << "VISP_HAVE_OPENCV_VERSION : " << VISP_HAVE_OPENCV_VERSION << std::endl;
+    cv::Mat m;
+    A.convertTo(m, CV_64F);
+    //int rows = U.rows, cols = U.cols;
+    //cv::Mat m(rows, cols, CV_64F, this->data);
+    cv::SVD opencvSVD(m);
+    V = opencvSVD.vt.t();
+    w = opencvSVD.w;
+    U = opencvSVD.u;
+    return;
+}
 
 
 //	ref. : https://stackoverflow.com/questions/10167534/how-to-find-out-what-type-of-a-mat-object-is-with-mattype-in-opencv

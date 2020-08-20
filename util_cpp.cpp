@@ -475,15 +475,6 @@ vector<float> compute_list_of_possible_rotation_degree(float min_deg)
     return li_deg_possible;
 }
 
-//------------ Generate a random number between 'minV' and 'maxV' --------------
-//srand(time(NULL)); // Seed the time
-inline int random_number_in_between(int minV, int maxV)
-{
-    return rand() % (maxV - minV + 1) + minV;
-}    
-
-
-
 vector<Scalar> generate_random_color_list(unsigned int n_color)
 {
     vector<Scalar> li_color;
@@ -818,6 +809,7 @@ double func_add_absolute(T x, T y)
     return double(x + fabs(y));
 }
 
+
 //	vector<int> li_1{ 10, 20, 30 };
 //	mean_absolute_of_vector<int>(li_1, true, 0);
 //	=> mean_absolute_of_vector START
@@ -917,6 +909,28 @@ void geometric_median(Container& X, Vector& geo_median, distFunciton distance, i
     stringstream ss;    ss << "geo_median : " << geo_median;    cout_indented(n_sp + 1, ss.str());
     cout_indented(n_sp, "geometric_median END");
 }
+
+double mcosc(double cosx, double x)
+{
+  //if (fabs(x) < ang_min_mc)
+  if (fabs(x) < RAD_MIN_MC)
+      return 0.5;
+        else
+            return ((1.0 - cosx) / x / x);
+            }
+
+
+
+//------------ Generate a random number between 'minV' and 'maxV' --------------
+//srand(time(NULL)); // Seed the time
+inline int random_number_in_between(int minV, int maxV)
+{
+    return rand() % (maxV - minV + 1) + minV;
+}    
+
+
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////

@@ -855,7 +855,7 @@ def ltwh_2_xyxy(ltwh):
     xyxy[..., 3] = ltwh[..., 1] + ltwh[..., 3]
     return xyxy
 '''
-def ltwh_to_xyxy(ltwh):
+def ltwh_to_ltrb(ltwh):
     """Convert [x1 y1 w h] box format to [x1 y1 x2 y2] format."""
     if isinstance(ltwh, (list, tuple)):
         # Single box given as a list of coordinates
@@ -891,7 +891,7 @@ def xyxy_2_ltwh(xyxy):
     return ltwh
 '''
 
-def xyxy_2_ltwh(xyxy):
+def ltrb_2_ltwh(xyxy):
     """Convert [x1 y1 x2 y2] box format to [x1 y1 w h] format."""
     if isinstance(xyxy, (list, tuple)):
         # Single box given as a list of coordinates

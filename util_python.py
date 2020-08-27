@@ -914,20 +914,20 @@ def xyxy_2_ltwh(xyxy):
         raise TypeError('Argument xyxy must be a list, tuple, or numpy array.')
 
 
-def xywh_2_xyxy(xywh):
-    xyxy = xywh.new(xywh.shape)
-    xyxy[..., 0] = xywh[..., 0] - xywh[..., 2] / 2.0
-    xyxy[..., 1] = xywh[..., 1] - xywh[..., 3] / 2.0
-    xyxy[..., 2] = xywh[..., 0] + xywh[..., 2] / 2.0
-    xyxy[..., 3] = xywh[..., 1] + xywh[..., 3] / 2.0
-    return xyxy
+def xywh_2_ltrb(xywh):                             
+    ltrb = xywh.new(xywh.shape)
+    ltrb[..., 0] = xywh[..., 0] - xywh[..., 2] / 2.0
+    ltrb[..., 1] = xywh[..., 1] - xywh[..., 3] / 2.0
+    ltrb[..., 2] = xywh[..., 0] + xywh[..., 2] / 2.0
+    ltrb[..., 3] = xywh[..., 1] + xywh[..., 3] / 2.0
+    return ltrb
 
-def xyxy_2_xywh(xyxy):
-    xywh = xyxy.new(xyxy.shape)
-    xywh[..., 0] = (xyxy[..., 0] + xyxy[..., 2]) / 2.0
-    xywh[..., 1] = (xyxy[..., 1] + xyxy[..., 3]) / 2.0
-    xywh[..., 2] = xywh[..., 2] - xywh[..., 0]
-    xywh[..., 3] = xywh[..., 3] - xywh[..., 1]
+def ltrb_2_xywh(ltrb):
+    xywh = ltrb.new(ltrb.shape)
+    xywh[..., 0] = (ltrb[..., 0] + ltrb[..., 2]) / 2.0
+    xywh[..., 1] = (ltrb[..., 1] + ltrb[..., 3]) / 2.0
+    xywh[..., 2] = ltrb[..., 2] - ltrb[..., 0]
+    xywh[..., 3] = ltrb[..., 3] - ltrb[..., 1]
     return xywh
 
 

@@ -210,12 +210,10 @@
   * compute_bounding_box_of_non_zero_pixels()
   * generate_tiled_tif()
   * generate_tiled_tif_2()
-  * ltwh_2_xyxy()
-  * xyxy_2_ltwh()
-  * xywh_2_xyxy()
-  * xyxy_2_xywh()
-  
-
+  * ltwh_2_ltrb()
+  * ltrb_2_ltwh()
+  * xywh_2_ltrb()
+  * ltrb_2_xywh()
   
 #### OpenCV related   
   * init_from_cam_or_video()

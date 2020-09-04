@@ -496,32 +496,73 @@ def centercrop_and_resize(im, wh_2_be):
     return im_resized
 
 
-def letterbox_image_pil(image, size):
+def letterboxing_pil(image, wh_tgt, letterbox_type, only_return_image = True, means = None, interpolation = None):
     '''resize image with unchanged aspect ratio using padding'''
-    iw, ih = image.size
-    w, h = size
-    scale = min(w/iw, h/ih)
-    nw = int(iw*scale)
-    nh = int(ih*scale)
-    image = image.resize((nw,nh), Image.BICUBIC)
-    new_image = Image.new('RGB', size, (128,128,128))
-    new_image.paste(image, ((w-nw)//2, (h-nh)//2))
-    return new_image
+    h_src, w_src = image.size
+    w_tgt, h_tgt = wh_tgt
+    #scale = min(w/iw, h/ih)
+    scale = min(w_tgt / w_src, h_tgt / h_src)
+    #nw = int(iw*scale);    nh = int(ih*scale)
+    #image = image.resize((nw,nh), Image.BICUBIC)
+    if fabs(scale - 1.0) > 1e-5:  
+        w_new = int(w_src * scale); h_new = int(h_src * scale)
+        if interpolation:
+            image = image.resize((w_new, h_new), interpolation)
+        else:     
+            image = image.resize((w_new, h_new), Image.BICUBIC)
+    else:
+        w_new = w_src;  h_new = h_src;
+    if 'top_left' == letterbox_type:
+        x_offset = 0;   y_offset = 0
+        x_padding = w_tgt - w_new;  y_padding = h_tgt - h_new;
+    elif 'center' == letterbox_type:
+        x_offset = (w_tgt - w_new) // 2;    y_offset = (h_tgt - h_new) // 2
+        x_padding = x_offset;               y_padding = y_offset;
+    else:
+        raise NameError('Invalid letterbox_type')      
+    if means:
+        new_image = Image.new(image.mode, wh_tgt, means)
+    else:
+        new_image = Image.new(image.mode, wh_tgt)
+    #new_image.paste(image, ((w-nw)//2, (h-nh)//2))
+    new_image.paste(image, (x_offset, y_offset))    
+    if only_return_image:
+        return new_image
+    else:
+        return new_image, w_new, h_new, w_src, h_src, x_padding, y_padding 
 
-def letterbox_image_opencv(image, size):
+def letterboxing_opencv(image, wh_tgt, letterbox_type, only_return_image = True, means = None, interpolation = None):
     '''resize image with unchanged aspect ratio using padding'''
-    iw, ih = image.shape[0:2][::-1]
-    w, h = size
-    scale = min(w/iw, h/ih)
-    nw = int(iw*scale)
-    nh = int(ih*scale)
-    image = cv2.resize(image, (nw,nh), interpolation=cv2.INTER_CUBIC)
-    new_image = np.zeros((size[1], size[0], 3), np.uint8)
-    new_image.fill(128)
-    dx = (w-nw)//2
-    dy = (h-nh)//2
-    new_image[dy:dy+nh, dx:dx+nw,:] = image
-    return new_image    
+    #iw, ih = image.shape[0:2][::-1]
+    h_src, w_src, chn = image.shape
+    w_tgt, h_tgt = wh_tgt
+    scale = min(w_tgt / w_src, h_tgt / h_src)
+    if fabs(scale - 1.0) > 1e-5:  
+        w_new = int(w_src * scale); h_new = int(h_src * scale)
+        if interpolation:
+            image = cv2.resize(image, (w_new, h_new), interpolation = interpolation)
+        else:     
+            image = cv2.resize(image, (w_new, h_new), interpolation = cv2.INTER_CUBIC)
+    else:
+        w_new = w_src;  h_new = h_src;       
+    if 'top_left' == letterbox_type:
+        x_offset = 0;   y_offset = 0
+        x_padding = w_tgt - w_new;  y_padding = h_tgt - h_new;
+    elif 'center' == letterbox_type:
+        x_offset = (w_tgt - w_new) // 2;    y_offset = (h_tgt - h_new) // 2
+        x_padding = x_offset;               y_padding = y_offset;
+    else:
+        raise NameError('Invalid letterbox_type')        
+    new_image = np.zeros((h_tgt, w_tgt, chn), np.uint8)
+    if means:
+        #new_image.fill(128)
+        new_image[...] = means
+    #new_image[dy:dy+nh, dx:dx+nw,:] = image
+    new_image[y_offset : y_offset + h_new, x_offset : x_offset + w_new, :] = image
+    if only_return_image:
+        return new_image
+    else:
+        return new_image, w_new, h_new, w_src, h_src, x_padding, y_padding 
     
 
 #########################################################################################################

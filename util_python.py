@@ -312,11 +312,24 @@ def get_batch_size_as_multiple_of_num_gpu(len_batch):
 
 #########################################################################################################
 def print_indented(n_sp, *args):
-    print('  ' * n_sp, *args)
+    if n_sp >= 0:
+        print('  ' * n_sp, *args)
 
 
-
-    
+#########################################################################################################
+# example
+# parser.add_argument("--nice", type=str2bool, nargs='?',
+#                        const=True, default=False,
+#                        help="Activate nice mode.")
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')    
     
     
     

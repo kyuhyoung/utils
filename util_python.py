@@ -71,6 +71,9 @@ def is_only_letter_or_digit(strin):
             is_letter_or_digit = True
     return is_letter_or_digit    
 
+def is_this_list_empty(li):
+    return (not li)
+
 #########################################################################################################
 # input
 #   li_num : list of numbers

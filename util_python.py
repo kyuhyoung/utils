@@ -29,11 +29,49 @@ def count_substring(strin, sub_str):
     return kount
 
 
+#########################################################################################################
+def filter_coi(li_det, li_class, li_coi, idx_class, device):
+    #n_det = len(li_det);
+    #print('len(li_det) :', len(li_det));  #exit()
+    #print('type(li_det) :', type(li_det));  exit()
+    idx_coi = torch.tensor([], dtype=torch.long);
+    for idx in range(len(li_det)):
+        if li_class[int(li_det[idx, idx_class])] in li_coi:
+            idx_coi = torch.cat((idx_coi, torch.tensor([idx])), 0)
+    #print('li_det b4 : ', li_det);    
+    idx_coi = idx_coi.to(device)
+    #t1 = torch.index_select(li_det, 0, idx_coi)
+    #print('t1 : ', t1); exit()    
+    return torch.index_select(li_det, 0, idx_coi)
+    #return list(filter(lambda x: li_class[int(x[idx_class])] in li_coi, li_det)) 
+
+
+#########################################################################################################
+def float3(x):  # format floats to 3 decimals
+    return float(format(x, '.3f'))
+
+
 
 #########################################################################################################
 def is_array_like(obj):
     return hasattr(obj, '__iter__') and hasattr(obj, '__len__')
 
+
+
+#########################################################################################################
+def is_dict_with_given_keys(di, li_key):
+    #print('di : ', di)
+    #print('AAA')
+    if not any(di):             return False
+    #print('BBB')
+    if len(di) != len(li_key):  return False
+    #print('CCC')
+    for key in li_key:
+        #print('key : ')
+        #print(key)
+        if not (key in di):
+            return False
+    return True
 
 
 #########################################################################################################
@@ -313,6 +351,88 @@ def get_batch_size_as_multiple_of_num_gpu(len_batch):
         #batch_size = batch_per_gpu_actuall * n_gpu
     return batch_per_gpu_actuall
 
+
+
+
+
+#########################################################################################################
+def merge_divided_detections(det_batch, idx_bbox_from, li_offset_xy, is_whole_included, wh_letterbox, wh_tile, wh_ori, letterbox_type, bbox_type, n_sp):
+    '''
+    bbox_type : one of 'ltrb' / 'ltwh' / 'xywh'
+         for image_i, pred in enumerate(li_det):
+                 pred[:, 0] += li_offset_xy[image_i][0]; 
+                         pred[:, 1] += li_offset_xy[image_i][1];
+                             '''
+                                 #im_bgr_resized = cv2.resize(im_bgr_hwc_ori_np, None, fx = ratio_resize, fy = ratio_resize)
+                                     
+    print_indented(n_sp, 'merge_divided_detections START')
+    '''
+    print_indented(n_sp + 1, 'is_whole_included :', is_whole_included);  #exit()
+    print_indented(n_sp + 1, 'li_offset_xy.shape :', li_offset_xy.shape);  #exit()
+    print_indented(n_sp + 1, 'type(li_offset_xy) :', type(li_offset_xy));  #exit()
+    print_indented(n_sp + 1, 'det_batch.shape :', det_batch.shape);  #exit()
+    print_indented(n_sp + 1, 'bbox_type :', bbox_type);  #exit()
+    '''
+    #print_indented(n_sp + 1, 'type(im_bgr_hwc_ori_np) :', type(im_bgr_hwc_ori_np)); #exit()
+    if isinstance(det_batch, torch.Tensor):
+        li_offset_xy = torch.from_numpy(li_offset_xy).to(det_batch)
+    #'''
+    for image_i, offset_xy in enumerate(li_offset_xy):
+        print_indented(n_sp + 2, 'image_i :', image_i, ' / ', len(li_offset_xy))
+        #print('offset_xy.shape :', offset_xy.shape);     #exit()
+        #print_indented(n_sp + 3, 'offset_xy :', offset_xy);     #exit()
+        #offset_xy[0] = 100; offset_xy[1] = 1000;
+        #print('offset_xy after :', offset_xy);     #exit()
+        #print_indented(n_sp + 3, 'det_batch[image_i, 1, :4] b4 :', det_batch[image_i, 1, :4])
+        det_batch[image_i, :, idx_bbox_from : idx_bbox_from + 4] = letterbox_bbox_2_ori_bbox(det_batch[image_i, :, idx_bbox_from : idx_bbox_from + 4], wh_letterbox, wh_tile, letterbox_type, bbox_type, offset_xy, n_sp + 3)
+        #det_batch[image_i, :, idx_bbox_from : idx_bbox_from + 2] += offset_xy[:]
+        #if 'ltrb' == bbox_type:
+        #    det_batch[image_i, :, idx_bbox_from + 2 : idx_bbox_from + 4] += offset_xy[:]
+        #print_indented(n_sp + 3, 'det_batch[image_i, 1, :4] after :', det_batch[image_i, 1, :4])
+        #print_indented(n_sp + 3, 'offset_xy :', offset_xy)
+        #if offset_xy[0] and offset_xy[1]:
+        #    exit()
+        #print('AAA');   exit()
+        #for xy in range(2):     
+        #    det_batch[image_i, :, xy] += offset_xy[xy]
+    #exit()
+    #'''
+    if is_whole_included:
+        bbox_letterbox = det_batch[-1, :, idx_bbox_from : idx_bbox_from + 4]
+        #print_indented(n_sp + 3, 'bbox_type :', bbox_type)
+        #print_indented(n_sp + 3, 'bbox_letterbox.shape :', bbox_letterbox.shape);   exit()
+        
+        #wh_ori = (im_bgr_hwc_ori_np.shape[1], im_bgr_hwc_ori_np.shape[0])
+        bbox_ori = letterbox_bbox_2_ori_bbox(bbox_letterbox, wh_letterbox, wh_ori, letterbox_type, bbox_type, (0, 0), n_sp + 2)
+        
+        ''' 
+        iB = 0
+        for bbox in bbox_ori:
+            dx = abs(126 - bbox[0]);    dy = abs(1367 - bbox[1]);
+            if dx < 1 and dy < 1:
+                print_indented(n_sp + 4, 'iB :', iB, ', bbox :', bbox, ', objectness : ', det_batch[-1, iB, 4], ', class confidences :', det_batch[-1, iB, 5:])
+            iB += 1
+        print_indented(n_sp + 3, 'iB :', iB);   #exit()
+        '''
+        #print_indented(n_sp + 3, 'det_batch[-1, 1, :4] b4 :', det_batch[-1, 1, :4])
+        det_batch[-1, :, idx_bbox_from : idx_bbox_from + 4] = bbox_ori
+        #print_indented(n_sp + 3, 'det_batch[-1, 1, :4] after :', det_batch[-1, 1, :4])
+        #print_indented(n_sp + 3, 'det_batch[len(li_offset_xy) - 1, 1, :4] after :', det_batch[len(li_offset_xy) -1, 1, :4])
+    #exit()     
+    n_batch, n_det, n_attribute = tuple(det_batch.size())
+    n_det_total = n_batch * n_det;
+    #print('n_batch : ', n_batch);   print('n_det : ', n_det);   print('n_attribute : ', n_attribute);   print('n_det_total : ', n_det_total);  #exit();
+    #det = np.vstack(li_det)
+    det_merged = det_batch.view(-1, n_attribute);
+    #print('det_merged.size() : ', det_merged.size()); #exit()
+    det_merged.unsqueeze_(0)
+    return det_merged
+
+
+
+
+
+
 #########################################################################################################
 def print_indented(n_sp, *args):
     if n_sp >= 0:
@@ -356,6 +476,269 @@ def angle_axis_2_euler_angles_rpy(aa_rad):
     cv2.Rodrigues(np.array(aa_rad), rot_mat)
     rpy_rad = rotation_matrix_2_euler_angles_rpy(rot_mat)
     return rpy_rad
+
+
+
+#########################################################################################################
+def ap_per_class(tp, conf, pred_cls, target_cls):
+    """ Compute the average precision, given the recall and precision curves.
+    Source: https://github.com/rafaelpadilla/Object-Detection-Metrics.
+    # Arguments
+        tp:    True positives (list).
+        conf:  Objectness value from 0-1 (list).
+        pred_cls: Predicted object classes (list).
+        target_cls: True object classes (list).
+    # Returns
+        The average precision as computed in py-faster-rcnn.
+    """
+
+    # Sort by objectness
+    i = np.argsort(-conf)
+    tp, conf, pred_cls = tp[i], conf[i], pred_cls[i]
+
+    # Find unique classes
+    unique_classes = np.unique(target_cls)
+
+    # Create Precision-Recall curve and compute AP for each class
+    ap, p, r = [], [], []
+    for c in unique_classes:
+        i = pred_cls == c
+        n_gt = (target_cls == c).sum()  # Number of ground truth objects
+        n_p = i.sum()  # Number of predicted objects
+
+        if n_p == 0 and n_gt == 0:
+            continue
+        elif n_p == 0 or n_gt == 0:
+            ap.append(0)
+            r.append(0)
+            p.append(0)
+        else:
+            # Accumulate FPs and TPs
+            fpc = (1 - tp[i]).cumsum()
+            tpc = (tp[i]).cumsum()
+
+            # Recall
+            recall_curve = tpc / (n_gt + 1e-16)
+            r.append(recall_curve[-1])
+
+            # Precision
+            precision_curve = tpc / (tpc + fpc)
+            p.append(precision_curve[-1])
+
+            # AP from recall-precision curve
+            ap.append(compute_ap(recall_curve, precision_curve))
+
+            # Plot
+            # plt.plot(recall_curve, precision_curve)
+
+    # Compute F1 score (harmonic mean of precision and recall)
+    p, r, ap = np.array(p), np.array(r), np.array(ap)
+    f1 = 2 * p * r / (p + r + 1e-16)
+
+    return p, r, ap, f1, unique_classes.astype('int32')
+
+
+#########################################################################################################
+def bbox_ios(box_self, box_other, bbox_type, n_sp):
+    #print('type(box1) : ', type(box1));     print('type(box2) : ', type(box2)); #exit()
+    #print('box1.shape : ', box1.shape);     print('box2.shape : ', box2.shape); #exit()
+    # Returns the intersecion over self_area of box_self wrt box_other. box_self is 4, box_other is nx4
+    print_indented(n_sp, 'bbox_ios START')
+    print_indented(n_sp + 1, 'box_self.shape :', box_self.shape);   #exit();
+    print_indented(n_sp + 1, 'box_other.shape :', box_other.shape);   #exit();
+    print_indented(n_sp + 1, 'bbox_type :', bbox_type);   #exit();
+
+    box_other = box_other.t()
+    # Get the coordinates of bounding boxes
+    if 'ltrb' == bbox_type:
+        # x1, y1, x2, y2 = box1
+        self_x1, self_y1, self_x2, self_y2 = box_self[0], box_self[1], box_self[2], box_self[3]
+        other_x1, other_y1, other_x2, other_y2 = box_other[0], box_other[1], box_other[2], box_other[3]
+    elif 'xywh' == bbox_type:
+        # x, y, w, h = box1
+        self_x1, self_x2 = box_self[0] - box_self[2] / 2, box_self[0] + box_self[2] / 2
+        self_y1, self_y2 = box_self[1] - box_self[3] / 2, box_self[1] + box_self[3] / 2
+        other_x1, other_x2 = box_other[0] - box_other[2] / 2, box_other[0] + box_other[2] / 2
+        other_y1, other_y2 = box_other[1] - box_other[3] / 2, box_other[1] + box_other[3] / 2
+    
+    elif 'ltwh' == bbox_type:
+        self_x1, self_y1 = box_self[0], box_self[1]
+        self_x2 = self_x1 + box_self[2];    self_y2 = self_y1 + box_self[3]
+        other_x1, other_y1 = box_other[0], box_other[1]
+        other_x2 = other_x1 + box_other[2]; other_y2 = other_y1 + box_other[3]
+    else:
+        raise NameError('invalid bbox_type')   
+   
+    # Intersection area
+    #inter_area = (torch.min(b1_x2, b2_x2) - torch.max(b1_x1, b2_x1)).clamp(0) * (torch.min(b1_y2, b2_y2) - torch.max(b1_y1, b2_y1)).clamp(0)
+    inter_area = (min(self_x2, other_x2) - torch.max(self_x1, other_x1)).clamp(0) * (min(self_y2, other_y2) - max(self_y1, other_y1)).clamp(0)
+    print_indented(n_sp + 1, 'inter_area.shape :', inter_area.shape);   #exit();
+    # Self Area
+    self_area = (self_x2 - self_x1) * (self_y2 - self_y1) + 1e-16
+    print_indented(n_sp, 'bbox_ios END')
+    return inter_area / self_area  # ios
+
+
+
+
+#########################################################################################################
+def bbox_iou(box1, box2, bbox_type, n_sp):
+    # Returns the IoU of box1 to box2. box1 is 4, box2 is nx4
+    print_indented(n_sp, 'bbox_iou START')
+    #print_indented(n_sp + 1, 'box1.shape :', box1.shape);   #exit();
+    #print_indented(n_sp + 1, 'box2.shape :', box2.shape);   #exit();
+    ##   box1.shape : torch.Size([7])
+    ##   box2.shape : torch.Size([100, 7])
+    box2 = box2.t()
+    # Get the coordinates of bounding boxes
+    if 'ltrb' == bbox_type:
+        # x1, y1, x2, y2 = box1
+        b1_x1, b1_y1, b1_x2, b1_y2 = box1[0], box1[1], box1[2], box1[3]
+        b2_x1, b2_y1, b2_x2, b2_y2 = box2[0], box2[1], box2[2], box2[3]
+    elif 'xywh' == bbox_type:
+        # x, y, w, h = box1
+        b1_x1, b1_x2 = box1[0] - box1[2] / 2, box1[0] + box1[2] / 2
+        b1_y1, b1_y2 = box1[1] - box1[3] / 2, box1[1] + box1[3] / 2
+        b2_x1, b2_x2 = box2[0] - box2[2] / 2, box2[0] + box2[2] / 2
+        b2_y1, b2_y2 = box2[1] - box2[3] / 2, box2[1] + box2[3] / 2
+    elif 'ltwh' == bbox_type:
+        b1_x1, b1_y1 = box1[0], box1[1]
+        b1_x2 = b1_x1 + box1[2];    b1_y2 = b1_y1 + box1[3]
+        b2_x1, b2_y1 = box2[0], box2[1]
+        b2_x2 = b2_x1 + box2[2];    b2_y2 = b2_y1 + box2[3]
+    else:
+        raise NameError('invalid bbox_type')   
+    # Intersection area
+    inter_area = (torch.min(b1_x2, b2_x2) - torch.max(b1_x1, b2_x1)).clamp(0) * (torch.min(b1_y2, b2_y2) - torch.max(b1_y1, b2_y1)).clamp(0)
+    #inter_area = (min(b1_x2, b2_x2) - max(b1_x1, b2_x1)).clamp(0) * (min(b1_y2, b2_y2) - max(b1_y1, b2_y1)).clamp(0)
+    #print_indented(n_sp + 1, 'inter_area.shape :', inter_area.shape);   #exit();
+    ##   inter_area.shape : torch.Size([100])
+    # Union Area
+    union_area = ((b1_x2 - b1_x1) * (b1_y2 - b1_y1) + 1e-16) + (b2_x2 - b2_x1) * (b2_y2 - b2_y1) - inter_area
+    print_indented(n_sp, 'bbox_iou END')
+    return inter_area / union_area  # iou
+
+
+
+#########################################################################################################
+def compute_ap(recall, precision):
+    """ Compute the average precision, given the recall and precision curves.
+    Source: https://github.com/rbgirshick/py-faster-rcnn.
+    # Arguments
+        recall:    The recall curve (list).
+        precision: The precision curve (list).
+    # Returns
+        The average precision as computed in py-faster-rcnn.
+    """
+    # correct AP calculation
+    # first append sentinel values at the end
+
+    mrec = np.concatenate(([0.], recall, [1.]))
+    mpre = np.concatenate(([0.], precision, [0.]))
+
+    # compute the precision envelope
+    for i in range(mpre.size - 1, 0, -1):
+        mpre[i - 1] = np.maximum(mpre[i - 1], mpre[i])
+
+    # to calculate area under PR curve, look for points
+    # where X axis (recall) changes value
+    i = np.where(mrec[1:] != mrec[:-1])[0]
+
+    # and sum (\Delta recall) * prec
+    ap = np.sum((mrec[i + 1] - mrec[i]) * mpre[i + 1])
+    return ap
+
+
+
+#########################################################################################################
+def compute_loss(p, targets, model):  # predictions, targets, model
+    ft = torch.cuda.FloatTensor if p[0].is_cuda else torch.Tensor
+    lxy, lwh, lcls, lconf = ft([0]), ft([0]), ft([0]), ft([0])
+    txy, twh, tcls, indices = build_targets(model, targets)
+
+    # Define criteria
+    MSE = nn.MSELoss()
+    CE = nn.CrossEntropyLoss()  # (weight=model.class_weights)
+    BCE = nn.BCEWithLogitsLoss()
+
+    # Compute losses
+    h = model.hyp  # hyperparameters
+    bs = p[0].shape[0]  # batch size
+    k = bs  # loss gain
+    for i, pi0 in enumerate(p):  # layer i predictions, i
+        b, a, gj, gi = indices[i]  # image, anchor, gridy, gridx
+        tconf = torch.zeros_like(pi0[..., 0])  # conf
+
+        # Compute losses
+        if len(b):  # number of targets
+            pi = pi0[b, a, gj, gi]  # predictions closest to anchors
+            tconf[b, a, gj, gi] = 1  # conf
+            # pi[..., 2:4] = torch.sigmoid(pi[..., 2:4])  # wh power loss (uncomment)
+
+            lxy += (k * h['xy']) * MSE(torch.sigmoid(pi[..., 0:2]), txy[i])  # xy loss
+            lwh += (k * h['wh']) * MSE(pi[..., 2:4], twh[i])  # wh yolo loss
+            lcls += (k * h['cls']) * CE(pi[..., 5:], tcls[i])  # class_conf loss
+
+        # pos_weight = ft([gp[i] / min(gp) * 4.])
+        # BCE = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+        lconf += (k * h['conf']) * BCE(pi0[..., 4], tconf)  # obj_conf loss
+    loss = lxy + lwh + lconf + lcls
+
+    return loss, torch.cat((lxy, lwh, lconf, lcls, loss)).detach()
+
+
+
+
+#########################################################################################################
+def compute_offsets_4_mosaicking(min_side, max_side_ratio, min_overlap_ratio, wid, hei, n_sp):
+    print_indented(n_sp, 'compute_offsets_4_mosaicking START')
+    print_indented(n_sp + 1, 'min_side :', min_side, ', min_overlap_ratio :', min_overlap_ratio, ', wid :', wid, ', hei :', hei)
+    #   compute min_side_enough
+    max_side = min_side * max_side_ratio
+    print_indented(n_sp + 1, 'max_side : ' + str(max_side))
+    #   if both w and h is smaller than max_side
+    if wid <= max_side and hei <= max_side:
+        print_indented(n_sp + 1, "wid <= max_side and hei <= max_side")
+        li_offset_x = [0];    li_offset_y = [0];    
+        #len_side = -1; 
+        len_side = max(wid, hei); 
+    #   else if h is smaller than max_side
+    elif hei <= max_side:
+        print_indented(n_sp + 1, "hei <= max_side")
+        li_offset_y = [0];  
+        len_side = hei
+        n_x = get_num_of_division(wid, len_side, min_overlap_ratio, n_sp + 2) 
+        li_offset_x = get_offset_list(wid, len_side, n_x, n_sp + 2)
+    #   else if h is smaller than min_side_enough
+    elif wid <= max_side:
+        print_indented(n_sp + 1, "wid <= max_side")
+        li_offset_x = [0]
+        len_side = wid
+        n_y = get_num_of_division(hei, len_side, min_overlap_ratio, n_sp + 2) 
+        li_offset_y = get_offset_list(hei, len_side, n_y, n_sp + 2)
+    #   else #  both w and h is larger than min_side_enough
+    else:
+        print_indented(n_sp + 1, "wid > max_side and hei > max_side")
+        n_x, len_side_x = get_num_and_side_length_of_division(wid, min_side, max_side, min_overlap_ratio, n_sp + 2)
+        #len_side_x = get_side_length_of_division(wid, n_x, min_overlap_ratio, n_sp + 1)
+        #print_indented(n_sp + 2, 'n_x b4 : ' + str(n_x) + ', len_side_x : ' + str(len_side_x))
+        n_y, len_side_y = get_num_and_side_length_of_division(hei, min_side, max_side, min_overlap_ratio, n_sp + 2)
+        #len_side_y = get_side_length_of_division(hei, n_y, min_overlap_ratio, n_sp + 1)
+        #print_indented(n_sp + 2, 'n_y b4 : ' + str(n_y) + ', len_side_y : ' + str(len_side_y)) #exit()
+        len_side = math.floor(max([len_side_x, len_side_y]))
+        #len_side = math.floor(min([len_side_x, len_side_y]))
+        n_x = get_num_of_division(wid, len_side, min_overlap_ratio, n_sp + 2)
+        n_y = get_num_of_division(hei, len_side, min_overlap_ratio, n_sp + 2)
+        li_offset_x = get_offset_list(wid, len_side, n_x, n_sp + 2)
+        li_offset_y = get_offset_list(hei, len_side, n_y, n_sp + 2)
+    li_offset_xy = np.floor(list(itertools.product(li_offset_x, li_offset_y)))
+    print_indented(n_sp + 1, 'li_offset_xy :'); print(li_offset_xy);
+    print_indented(n_sp + 1, 'len_side :', len_side);  #exit(0);
+    print_indented(n_sp, 'compute_offsets_4_mosaicking END')
+    return li_offset_xy, len_side
+
+
+
 
 
 #########################################################################################################
@@ -403,6 +786,107 @@ def euler_angles_rpy_2_angle_axis(rpy_rad):
 
 
 
+#########################################################################################################
+def get_interval(wid, ss, nn, n_sp):
+    print_indented(n_sp, 'get_interval START')
+    #print_indented(n_sp + 1, 'wid :', wid, ', ss :', ss, ', nn :', nn)
+    interval = int(0)
+    if nn > 0:
+        overlap_ratio = get_overlap_ratio(wid, ss, nn)
+        interval = int(round((1.0 - overlap_ratio) * ss))
+        #interval = int(round((1.0 - overlap_ratio) * ss))
+    #print_indented(n_sp + 1, 'interval : ' + str(interval))
+    #exit(0)
+    print_indented(n_sp, 'get_interval END')
+    return interval
+
+
+#########################################################################################################
+def get_num_of_division(wid, fixed_side, min_overlap_ratio, n_sp):
+    n_div = 0
+    if wid > fixed_side:
+        len_delta = (1.0 - min_overlap_ratio) * fixed_side
+        len_cur = fixed_side
+        n_div += 1
+        while len_cur <= wid:
+            len_cur += len_delta
+            n_div += 1
+        n_div -= 1
+    return n_div
+
+
+#########################################################################################################
+def get_offset_list(wid, ss, nn, n_sp):
+    print_indented(n_sp, 'get_offset_list START')
+    #print_indented(n_sp + 1, 'wid : ' + str(wid) + ', ss : ' + str(ss) + ', nn : ' + str(nn))
+    interval = get_interval(wid, ss, nn, n_sp + 1)
+    overlap = ss - interval 
+    #t0 = get_overlap(wid, ss, nn, n_sp + 1);    print_indented(n_sp + 1, 't0 :', t0)
+    #print_indented(n_sp + 1, 'overlap :', overlap, ', interval :', interval);   #exit()
+    li = [0]
+    while li[-1] + ss < wid:
+        li.append(li[-1] + interval)
+        dif = wid - (li[-1] + ss)
+        #print_indented(n_sp + 2, 'dif : ' + str(dif) + ' / overlap : ' + str(overlap))
+        if dif < overlap:
+            li[-1] += dif
+    print_indented(n_sp + 1, 'li :', li)
+    #exit(0)
+    print_indented(n_sp, 'get_offset_list END')
+    return li
+
+
+#########################################################################################################
+def get_overlap(wid, ss, nn):
+    overlap = -1
+    if nn > 0:
+        overlap_ratio = get_overlap_ratio(wid, ss, nn)
+        print('overlap_ratio : ', overlap_ratio); #  exit()
+        overlap = overlap_ratio * ss;
+    return overlap       
+
+
+
+#########################################################################################################
+def get_overlap_ratio(wid, ss, nn):
+    return 1.0 - (wid - ss) / (nn * ss)
+
+
+#########################################################################################################
+def get_side_length_of_division(wid, nn, overlap_ratio, n_sp):
+    print_indented(n_sp, 'get_side_length_of_division START')
+    print_indented(n_sp + 1, 'wid : ' + str(wid) + ', nn : ' + str(nn) + ', overlap_ratio : ' + str(overlap_ratio))
+    side_len = int(round(wid / (1.0 + nn * (1.0 - overlap_ratio))))
+    print_indented(n_sp + 1, 'side_len : ' + str(side_len))
+    print_indented(n_sp, 'get_side_length_of_division END')
+    return side_len
+
+#########################################################################################################
+def get_num_and_side_length_of_division(wid, min_side, max_side, overlap_ratio, n_sp):
+    print_indented(n_sp, 'get_num_and_side_length_of_division START')
+    print_indented(n_sp + 1, 'wid : ' + str(wid) + ', min_side : ' + str(min_side) + ', max_side : ' + str(max_side) + ', overlap_ratio : ' + str(overlap_ratio))
+    if wid <= max_side:
+        n_div = 0;  w_pre = wid
+    else:       
+        n_div = 0    #print
+        w_cur = wid;    w_pre = -1;
+        while w_cur >= min_side:
+            w_pre = w_cur
+            n_div += 1
+            w_cur = get_side_length_of_division(wid, n_div, overlap_ratio, n_sp + 2)
+            print_indented(n_sp + 2, 'n_div : ' + str(n_div) + ', w_cur : ' + str(w_cur))
+        n_div -= 1
+        if 0 == n_div:
+            n_div = 1;  w_pre = min_side
+        if w_pre > max_side:
+            n_div += 1; w_pre = w_cur
+    print_indented(n_sp + 1, 'n_div : ' + str(n_div) + ', w_pre : ' + str(w_pre))
+    #exit(0)
+    print_indented(n_sp, 'get_num_and_side_length_of_division END')
+    return n_div, w_pre
+
+
+
 
 
 
@@ -423,6 +907,41 @@ def is_rotation_matrix(R):
     I = np.identity(3, dtype=R.dtype)
     n = np.linalg.norm(I - shouldBeIdentity)
     return n < 1e-6
+
+
+
+
+
+#########################################################################################################
+def letterbox_bbox_2_ori_bbox(bbox_letterbox, wh_letterbox, wh_ori, letterbox_type, bbox_type, xy_offset, n_sp):
+    print_indented(n_sp, 'letterbox_bbox_2_ori_bbox START')
+    #print('bbox_letterbox :', bbox_letterbox)
+    wh_src = wh_letterbox;  wh_tgt = wh_ori;
+    gain = min(wh_src[0] / wh_tgt[0], wh_src[1] / wh_tgt[1])
+    bbox_ori = scale_bbox(bbox_letterbox, gain, wh_src, wh_tgt, letterbox_type, bbox_type, n_sp + 1)
+    #bbox_ori[:, :2] += xy_offset[:] 
+    bbox_ori[:, 0] += xy_offset[0]; bbox_ori[:, 1] += xy_offset[1] 
+    if 'ltrb' == bbox_type:
+        #bbox_ori[:, 2:4] += xy_offset[:]; 
+        bbox_ori[:, 2] += xy_offset[0]; bbox_ori[:, 3] += xy_offset[1]; 
+    #print('bbox_ori :', bbox_ori);  #exit(0)
+    print_indented(n_sp, 'letterbox_bbox_2_ori_bbox END')
+    return bbox_ori
+
+#########################################################################################################
+def ori_bbox_2_letterbox_bbox(bbox_ori, wh_ori, wh_letterbox, letterbox_type, n_sp):
+    print_indented(n_sp, 'ori_bbox_2_letterbox_bbox START')
+    wh_src = wh_ori;    wh_tgt = wh_letterbox;
+    gain = max(wh_src[0] / wh_tgt[0], wh_src[1] / wh_tgt[1])
+    bbox_letterbox = scale_bbox(bbox_ori, gain, wh_src, wh_tgt, letterbox_type, bbox_type, n_sp + 1)
+    print_indented(n_sp, 'ori_bbox_2_letterbox_bbox END')
+    return bbox_letterbox
+
+
+
+
+
+
 
 #########################################################################################################
 #   rad = math.pi
@@ -459,6 +978,47 @@ def rotation_matrix_2_euler_angles_rpy(R):
         z = 0
 
     return np.array([x, y, z])
+
+
+#########################################################################################################
+def scale_bbox(bbox, gain, wh_src, wh_tgt, letterbox_type, bbox_type, n_sp):
+    print_indented(n_sp, 'scale_bbox START')
+    #print('bbox b4 :', bbox);
+    #print('bbox.shape :', bbox.shape);
+    if 'center' == letterbox_type:
+        bbox[..., 0] -= (wh_src[0] - wh_tgt[0] * gain) / 2  # x padding
+        bbox[..., 1] -= (wh_src[1] - wh_tgt[1] * gain) / 2  # y padding
+        if 'ltrb' == bbox_type:
+            bbox[..., 2] -= (wh_src[0] - wh_tgt[0] * gain) / 2  # x padding
+            bbox[..., 3] -= (wh_src[1] - wh_tgt[1] * gain) / 2  # y padding
+    elif not('top_left' == letterbox_type):
+        raise NameError('invalid letterbox type')
+    bbox[..., :4] /= gain
+    bbox[..., [0, 2]] = bbox[..., [0, 2]].clamp(min = 0, max = wh_tgt[0] - 1)
+    bbox[..., [1, 3]] = bbox[..., [1, 3]].clamp(min = 0, max = wh_tgt[1] - 1)
+    #print('bbox after :', bbox);
+    #print('gain :', gain);  #exit(0);
+    print_indented(n_sp, 'scale_bbox END')
+    return bbox
+
+
+#########################################################################################################
+def wh_iou(box1, box2):
+    # Returns the IoU of wh1 to wh2. wh1 is 2, wh2 is nx2
+    box2 = box2.t()
+
+    # w, h = box1
+    w1, h1 = box1[0], box1[1]
+    w2, h2 = box2[0], box2[1]
+
+    # Intersection area
+    inter_area = torch.min(w1, w2) * torch.min(h1, h2)
+
+    # Union Area
+    union_area = (w1 * h1 + 1e-16) + w2 * h2 - inter_area
+
+    return inter_area / union_area  # iou
+
 
 
 
@@ -512,6 +1072,85 @@ def centercrop_and_resize(im, wh_2_be):
     return im_resized
 
 
+
+#########################################################################################################
+def compensate_division(li_ltrb_c_cc, li_group, li_str_class, ios_threshold, n_sp): # li_ltrb_c_cc : list of torch 2D       tensor
+    print_indented(n_sp, 'compensate_division START')
+    li_ltrb_c_cc_filtered = []
+    #for ii in range(len(li_ltrb_c_cc)):
+    #    print_indented(n_sp + 1, 'ii :', ii, ', li_ltrb_c_cc[ii].shape : ', li_ltrb_c_cc[ii].shape);
+    #li_id = [int(lrtb_c_cc[0, -1]) for lrtb_c_cc in li_ltrb_c_cc]
+    li_id = [int(lrtb_c_cc[-1]) for lrtb_c_cc in li_ltrb_c_cc]
+    li_id_unique = list(set(li_id))
+    li_id_very_unique = []
+    li_li_str_unique = []
+    for id_unique in li_id_unique:
+        str_cls = li_str_class[id_unique]
+        is_new = True
+        for li_str_unique in li_li_str_unique:
+            if str_cls in li_str_unique:
+                is_new = False; break;
+        if is_new:
+            li_id_very_unique.append(id_unique)
+            gr = [str_cls]
+            for group in li_group:
+                if str_cls in group:
+                    gr = group; break;
+            li_li_str_unique.append(gr)
+    for id_very_unique in li_id_very_unique:
+        str_cls = li_str_class[id_very_unique]
+        gr = [str_cls]
+        for group in li_group:
+            if str_cls in group:
+                gr = group; break;
+        #li_ltrb_c_cc_same_cls = [ltrb_c_cc for ltrb_c_cc in li_ltrb_c_cc if li_str_class[int(ltrb_c_cc[0, -1])]      in gr]
+        li_ltrb_c_cc_same_cls = [ltrb_c_cc for ltrb_c_cc in li_ltrb_c_cc if li_str_class[int(ltrb_c_cc[-1])]      in gr]
+        if 1 >= len(li_ltrb_c_cc_same_cls):
+            li_ltrb_c_cc_filtered.append(li_ltrb_c_cc_same_cls[0]);   continue
+        for i0, ltrb_c_cc_same_cls_0 in enumerate(li_ltrb_c_cc_same_cls):
+            is_too_included = False
+            for i1, ltrb_c_cc_same_cls_1 in enumerate(li_ltrb_c_cc_same_cls):
+                #print_indented(n_sp + 1, 'i1 :', i1, ' / ', len(li_ltrb_c_cc_same_cls))
+                if i1 == i0: continue
+                #ios = float(bbox_ios(torch.squeeze(ltrb_c_cc_same_cls_0), ltrb_c_cc_same_cls_1, 'ltrb', n_sp + 2))
+                ios = float(bbox_ios(torch.squeeze(ltrb_c_cc_same_cls_0), ltrb_c_cc_same_cls_1, 'ltrb', -100))
+                if ios > ios_threshold:
+                    is_too_included = True; break;
+            if not is_too_included:
+                li_ltrb_c_cc_filtered.append(ltrb_c_cc_same_cls_0)
+    print_indented(n_sp + 1, 'len(li_ltrb_c_cc) : ', len(li_ltrb_c_cc))
+    print_indented(n_sp + 1, 'len(li_ltrb_c_cc_filtered) : ', len(li_ltrb_c_cc_filtered));   #exit()
+    print_indented(n_sp, 'compensate_division END')
+    return li_ltrb_c_cc_filtered
+
+
+
+
+
+#########################################################################################################
+def convert_bbox_type(bbox, bbox_type_src, bbox_type_tgt):
+    if bbox_type_src != bbox_type_tgt:
+        if not(bbox_type_src in ('ltrb', 'ltwh', 'xywh') and bbox_type_tgt in ('ltrb', 'ltwh', 'xywh')):
+            raise NameError('Invalid bbox type')
+        if 'ltrb' == bbox_type_src:
+            if 'ltwh' == bbox_type_tgt:
+                bbox = ltrb_2_ltwh(bbox)
+            else:
+                bbox = ltrb_2_xywh(bbox)
+        elif 'ltwh' == bbox_type_src:
+            if 'ltrb' == bbox_type_tgt:
+                bbox = ltwh_2_ltrb(bbox)
+            else:
+                bbox = ltwh_2_xywh(bbox)
+        else:
+            if 'ltrb' == bbox_type_tgt:
+                bbox = xywh_2_ltrb(bbox)
+            else:
+                bbox = xywh_2_ltwh(bbox)
+    return bbox                
+
+
+#########################################################################################################
 def letterboxing_pil(image, wh_tgt, letterbox_type, only_return_image = True, means = None, interpolation = None):
     '''resize image with unchanged aspect ratio using padding'''
     h_src, w_src = image.size
@@ -547,14 +1186,19 @@ def letterboxing_pil(image, wh_tgt, letterbox_type, only_return_image = True, me
     else:
         return new_image, w_new, h_new, w_src, h_src, x_padding, y_padding 
 
-def letterboxing_opencv(image, wh_tgt, letterbox_type, only_return_image = True, means = None, interpolation = None):
+#########################################################################################################
+def letterboxing_opencv(image, wh_tgt, letterbox_type, n_sp, only_return_image = True, means_4_pad = None, interpolation = None):
     '''resize image with unchanged aspect ratio using padding'''
+    print_indented(n_sp, 'letterboxing_opencv START');
     #iw, ih = image.shape[0:2][::-1]
-    h_src, w_src, chn = image.shape
+    is_color = len(image.shape) > 2
+    h_src, w_src = image.shape[:2]
     w_tgt, h_tgt = wh_tgt
     scale = min(w_tgt / w_src, h_tgt / h_src)
-    if fabs(scale - 1.0) > 1e-5:  
+    if abs(scale - 1.0) > 1e-5:  
         w_new = int(w_src * scale); h_new = int(h_src * scale)
+        #print('w_new :', w_new);    exit()
+        #print('image.shape :', image.shape);    exit()
         if interpolation:
             image = cv2.resize(image, (w_new, h_new), interpolation = interpolation)
         else:     
@@ -569,17 +1213,25 @@ def letterboxing_opencv(image, wh_tgt, letterbox_type, only_return_image = True,
         x_padding = x_offset;               y_padding = y_offset;
     else:
         raise NameError('Invalid letterbox_type')        
-    new_image = np.zeros((h_tgt, w_tgt, chn), np.uint8)
-    if means:
+    if is_color:
+        chn = image.shape[2]
+        new_image = np.zeros((h_tgt, w_tgt, chn), np.float32)
+    else:
+        new_image = np.zeros((h_tgt, w_tgt), np.float32)
+        
+    #print('new_image.dtype : ', new_image.dtype); exit(); 
+    if means_4_pad:
         #new_image.fill(128)
-        new_image[...] = means
+        new_image[...] = means_4_pad
     #new_image[dy:dy+nh, dx:dx+nw,:] = image
     new_image[y_offset : y_offset + h_new, x_offset : x_offset + w_new, :] = image
+    print_indented(n_sp, 'letterboxing_opencv END');
     if only_return_image:
         return new_image
     else:
-        return new_image, w_new, h_new, w_src, h_src, x_padding, y_padding 
-    
+        return new_image, w_new, h_new, w_src, h_src, x_offset, y_offset 
+
+
 
 #########################################################################################################
 # input
@@ -905,6 +1557,209 @@ def generate_tiled_tif_2(fn_img, fn_result, postfix):
     
     
 #########################################################################################################
+def non_max_suppression_4_mosaic_ltrb(pred_bbox_c_cc, li_offset_xy, include_original, li_group, wh_net_input, wh_tile, wh_ori, li_str_class, ios_threshold, letterbox_type, bbox_type, use_pytorch_batched_nms, n_sp, conf_thres=0.5, nms_thres=0.5): #pred_letterbox.type() : torch.cuda.FloatTensor
+
+    """
+    Input :
+            bbox_type : one of 'ltrb' / 'ltwh' / 'xywh'
+                pred_xywh_c_cc : tensor. shape (batch_size x N x 85 for yolov3)  85 (= x + y + w + h + 1 objectness + 80 class-confidences for yolov3)
+                        li_offset_xy : ndarray.
+                            Removes detections with lower object confidence score than 'conf_thres'
+                                Non-Maximum Suppression to further filter detections.
+                                    Returns detections with shape:
+                                            (x1, y1, x2, y2, object_conf, class_conf, class)
+                                                """
+                                                    #print('type(li_offset_xy) : ', type(li_offset_xy))
+                                                        #print('pred_xywh_c_cc.shape :', pred_xywh_c_cc.shape);  exit();
+                                                            ##  type(li_offset_xy) :  <class 'numpy.ndarray'>
+                                                                ##  pred_xywh_c_cc.shape : torch.Size([3, 5415, 85])
+                                                                    
+    #if 0 != li_offset_xy.size:
+    #print('pred_xywh_c_cc.shape b4 :', pred_xywh_c_cc.shape);  exit();
+    #t0 = pred_xywh_c_cc[-1].unsqueeze(0);   print('t0.shape :', t0.shape);  exit();
+    #print_indented(n_sp, 'non_max_suppression_4_mosaic START')
+    if li_offset_xy is not None and pred_bbox_c_cc.shape[0] > 1:
+        #pred_xywh_c_cc = merge_divided_detections(pred_xywh_c_cc[-1].unsqueeze(0), 0, np.empty(shape=[0, 0]), include_original, wh_net_input, im_bgr_hwc_ori_np, letterbox_type, bbox_type, n_sp + 1) 
+        pred_bbox_c_cc = merge_divided_detections(pred_bbox_c_cc, 0, li_offset_xy, include_original, wh_net_input, wh_tile, wh_ori, letterbox_type, bbox_type, n_sp + 1) 
+    else:
+        #print('pred_bbox_c_cc b4 :', pred_bbox_c_cc);   #exit()
+        pred_bbox_c_cc = letterbox_bbox_2_ori_bbox(pred_bbox_c_cc, wh_net_input, wh_ori, letterbox_type, bbox_type, (0, 0), n_sp + 1)
+        #print('pred_bbox_c_cc after :', pred_bbox_c_cc);   #exit()
+    #print('pred_xywh_c_cc.shape after :', pred_xywh_c_cc.shape);  exit();
+    min_wh = 2  # (pixels) minimum box width and height
+    output = [None] * len(pred_bbox_c_cc)
+    for image_i, bbox_c_cc in enumerate(pred_bbox_c_cc):
+        print_indented(n_sp + 1, 'image_i :', image_i)
+        # Experiment: Prior class size rejection
+        # x, y, w, h = pred[:, 0], pred[:, 1], pred[:, 2], pred[:, 3]
+        # a = w * h  # area
+        # ar = w / (h + 1e-16)  # aspect ratio
+        # n = len(w)
+        # log_w, log_h, log_a, log_ar = torch.log(w), torch.log(h), torch.log(a), torch.log(ar)
+        # shape_likelihood = np.zeros((n, 60), dtype=np.float32)
+        # x = np.concatenate((log_w.reshape(-1, 1), log_h.reshape(-1, 1)), 1)
+        # from scipy.stats import multivariate_normal
+        # for c in range(60):
+        # shape_likelihood[:, c] =
+        #   multivariate_normal.pdf(x, mean=mat['class_mu'][c, :2], cov=mat['class_cov'][c, :2, :2])
+        #print('xywh_c_cc[:, 4].max() :', xywh_c_cc[:, 4].max()
+        #print('xywh_c_cc[:, 4].argmax() :', xywh_c_cc[:, 4].argmax())
+        #print('xywh_c_cc[xywh_c_cc[:, 4].argmax(), 4] :', xywh_c_cc[xywh_c_cc[:, 4].argmax(), 4]);   exit()
+        ##  xywh_c_cc[:, 4].max() : tensor(0.99119, device='cuda:0')
+        ##  xywh_c_cc[:, 4].argmax() : tensor(3382, device='cuda:0')
+        ##  xywh_c_cc[xywh_c_cc[:, 4].argmax(), 4] : tensor(0.99119, device='cuda:0')
+        # Multiply conf by class conf to get combined confidence
+        class_conf, class_pred = bbox_c_cc[:, 5:].max(1)
+        #print('xywh_c_cc.shape :', xywh_c_cc.shape);
+        #print('class_conf.shape :', class_conf.shape);
+        #print('class_pred.shape :', class_pred.shape);  exit();
+        
+        ##  ixywh_c_cc.shape : torch.Size([16245, 85])  #   16245 = 3 x 5415
+
+        ##  class_conf.shape : torch.Size([16245])
+        ##  class_pred.shape : torch.Size([16245])
+        
+        #print_indented(n_sp + 2, 'xywh_c_cc[:, 4].max() b4 :', bbox_c_cc[:, 4].max());
+        #xywh_c_cc[:, 4] *= class_conf
+        #print_indented(n_sp + 2, 'xywh_c_cc[:, 4].max() after :', bbox_c_cc[:, 4].max());
+        #print_indented(n_sp + 2, 'conf_thres :', conf_thres);
+        
+        # Select only suitable predictions
+        i_conf = bbox_c_cc[:, 4] > conf_thres
+        if 'xywh' == bbox_type or 'ltwh' == bbox_type:
+            i_min_wh = (bbox_c_cc[:, 2 : 4] > min_wh).all(1) 
+        else:
+            wh = bbox_c_cc[:, [1, 3]] - bbox_c_cc[:, [0, 2]]
+            i_min_wh = (wh > min_wh).all(1) 
+        i_finite = torch.isfinite(bbox_c_cc).all(1)
+        i = i_conf & i_min_wh & i_finite
+        #i = (bbox_c_cc[:, 4] > conf_thres) & (bbox_c_cc[:, 2:4] > min_wh).all(1) & torch.isfinite(xywh_c_cc).all(1)
+        #print_indented(n_sp + 2, 'class_conf :', class_conf);
+        print_indented(n_sp + 2, 'len(bbox_c_cc) b4 :', len(bbox_c_cc))
+        bbox_c_cc = bbox_c_cc[i]
+        print_indented(n_sp + 2, 'len(bbox_c_cc) after :', len(bbox_c_cc))
+        #exit()
+        # If none are remaining => process next image
+        if len(bbox_c_cc) == 0:
+            #print('None are remaining');    exit()
+            continue
+            
+        #print('Some are remaining');    exit()
+        # Select predicted classes
+        class_conf = class_conf[i]
+        #class_pred = class_pred[i].unsqueeze(1).float()
+        class_pred = class_pred[i]
+        
+        # Box (center x, center y, width, height) to (x1, y1, x2, y2)
+        ltrb_c_cc = bbox_c_cc.clone()
+        #ltrb_c_cc[:, :4] = xywh2xyxy(xywh_c_cc[:, :4])
+        #ltrb_c_cc[:, :4] = xywh_2_ltrb(xywh_c_cc[:, :4])
+        ltrb_c_cc[:, :4] = convert_bbox_type(bbox_c_cc[:, :4], bbox_type, 'ltrb')
+        # pred[:, 4] *= class_conf  # improves mAP from 0.549 to 0.551
+        # Detections ordered as (x1y1x2y2, obj_conf, class_conf, class_pred)
+        #pred = torch.cat((pred[:, :5], class_conf.unsqueeze(1), class_pred), 1)
+        
+        det_max = []
+        ltrb_c_cc = torch.cat((ltrb_c_cc[:, :5], class_conf.unsqueeze(1), class_pred.unsqueeze(1).float()), 1)
+        if use_pytorch_batched_nms and is_batched_nms_available and isinstance(ltrb_c_cc, torch.Tensor):
+            anchors_nms_idx = batched_nms(ltrb_c_cc[:, :4], class_conf, class_pred, iou_threshold = nms_thres)
+            ltrb_c_cc = ltrb_c_cc[anchors_nms_idx]
+            det_max = list(ltrb_c_cc)
+        else:
+            #ltrb_c_cc = torch.cat((ltrb_c_cc[:, :5], class_conf.unsqueeze(1), class_pred.unsqueeze(1).float()), 1)
+            # Get detections sorted by decreasing confidence scores
+            #pred = pred[(-pred[:, 4]).argsort()]
+            ltrb_c_cc = ltrb_c_cc[(-ltrb_c_cc[:, 4]).argsort()]
+            
+            #nms_style = 'MERGE'  # 'OR' (default), 'AND', 'MERGE' (experimental)
+            nms_style = 'OR'
+            #nms_style = 'SOFT'
+            #for c in pred[:, -1].unique():
+            for c in ltrb_c_cc[:, -1].unique():
+                dc = ltrb_c_cc[ltrb_c_cc[:, -1] == c]  # select class c
+                n = len(dc)
+                if n == 1:
+                    #det_max.append(dc)  # No NMS required if only 1 prediction
+                    det_max.append(dc.squeeze())  # No NMS required if only 1 prediction
+                    continue
+                elif n > 100:
+                    dc = dc[:100]  # limit to first 100 boxes: https://github.com/ultralytics/yolov3/issues/117
+                    
+                # Non-maximum suppression
+                if nms_style == 'OR':  # default
+                    # METHOD1
+                    # ind = list(range(len(dc)))
+                    # while len(ind):
+                    # j = ind[0]
+                    # det_max.append(dc[j:j + 1])  # save highest conf detection
+                    # reject = (bbox_iou(dc[j], dc[ind], 'ltrb') > nms_thres).nonzero()
+                    # [ind.pop(i) for i in reversed(reject)]
+                    
+                    # METHOD2
+                    while dc.shape[0]:
+                        #t1 = dc[:1];    print('t1.shape :', t1.shape);  exit()
+                        #det_max.append(dc[:1])  # save highest conf detection
+                        det_max.append(dc[:1].squeeze())  # save highest conf detection
+                        if len(dc) == 1:  # Stop if we're at the last detection
+                            break
+                        iou = bbox_iou(dc[0], dc[1:], 'ltrb', n_sp + 3)  # iou with other boxes
+                        dc = dc[1:][iou < nms_thres]  # remove ious > threshold
+                        
+                elif nms_style == 'AND':  # requires overlap, single boxes erased
+                    while len(dc) > 1:
+                        iou = bbox_iou(dc[0], dc[1:], 'ltrb', n_sp + 3)  # iou with other boxes
+                        if iou.max() > 0.5:                            
+                            det_max.append(dc[:1].squeeze())
+                            #det_max.append(dc[:1])
+                        dc = dc[1:][iou < nms_thres]  # remove ious > threshold
+                            
+                elif nms_style == 'MERGE':  # weighted mixture box
+                    #print('len(dc) :', len(dc));    exit();
+                    while len(dc):
+                        if len(dc) == 1:
+                            #det_max.append(dc)
+                            det_max.append(dc.squeeze())
+                            break
+                        i = bbox_iou(dc[0], dc, 'ltrb', n_sp + 3) > nms_thres  # iou with other boxes
+                        weights = dc[i, 4:5]
+                        dc[0, :4] = (weights * dc[i, :4]).sum(0) / weights.sum()
+                        #det_max.append(dc[:1])
+                        det_max.append(dc[:1].squeeze())
+                        dc = dc[i == 0]
+                elif nms_style == 'SOFT':  # soft-NMS https://arxiv.org/abs/1704.04503
+                    sigma = 0.5  # soft-nms sigma parameter
+                    while len(dc):
+                        if len(dc) == 1:
+                            #det_max.append(dc)
+                            det_max.append(dc.squeeze())
+                            break
+                        #det_max.append(dc[:1])
+                        det_max.append(dc[:1].squeeze())
+                        iou = bbox_iou(dc[0], dc[1:], 'ltrb', n_sp + 3)  # iou with other boxes
+                        dc = dc[1:]
+                        dc[:, 4] *= torch.exp(-iou ** 2 / sigma)  # decay confidences
+            
+        #print_indented(n_sp + 2, 'det_max[0].shape :', det_max[0].shape);   # exit();
+        #print_indented(n_sp + 2, 'len(det_max) :', len(det_max));    #exit();
+        if include_original:
+            #print_indented(n_sp + 3, 'len(det_max) b4 :', len(det_max));    #exit();
+            #print_indented(n_sp + 3, 'ios_threshold :', ios_threshold);    exit();
+            det_max = compensate_division(det_max, li_group, li_str_class, ios_threshold, n_sp + 3)
+            #print_indented(n_sp + 3, 'len(det_max) after :', len(det_max));    #exit();
+        if len(det_max):
+            #det_max = torch.cat(det_max)  # concatenate
+            det_max = torch.stack(det_max)  # concatenate
+            #print('det_max.shape :', det_max.shape);    exit()
+            output[image_i] = det_max[(-det_max[:, 4]).argsort()]  # sort
+    #exit()
+
+    print_indented(n_sp, 'non_max_suppression_4_mosaic END')
+    return output
+
+    
+    
+    
+#########################################################################################################
 '''
 def ltwh_2_xyxy(ltwh):
     xyxy = ltwh.copy()
@@ -937,7 +1792,28 @@ def ltwh_to_ltrb(ltwh):
         raise TypeError('Argument xywh must be a list, tuple, or numpy array.')
 
 
-    
+#########################################################################################################
+def plot_one_box(no_disp, x, img, color=None, label=None, line_thickness=None):
+    if not no_disp:
+        # Plots one bounding box on image img
+        #tl = line_thickness or round(0.002 * max(img.shape[0:2])) + 1  # line thickness
+        tl = line_thickness or max(round(0.001 * max(img.shape[0:2])), 1)  # line thickness
+        color = color or [random.randint(0, 255) for _ in range(3)]
+        c1, c2 = (int(x[0]), int(x[1])), (int(x[2]), int(x[3]))
+        cv2.rectangle(img, c1, c2, color, thickness=tl)
+        if label:
+            tf = max(tl - 1, 1)  # font thickness
+            #tf = max(tl - 4, 1)  # font thickness
+            #print('tl - 4 : ', tl - 4)  # font thickness
+            #phontScale = tl / 3
+            phontScale = tl / 2
+            t_size = cv2.getTextSize(label, 0, fontScale=phontScale, thickness=tf)[0]
+            c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
+            cv2.rectangle(img, c1, c2, color, -1)  # filled
+            cv2.putText(img, label, (c1[0], c1[1] - 2), 0, phontScale, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
+
+
+                             
     
 #########################################################################################################
 '''
@@ -948,45 +1824,107 @@ def xyxy_2_ltwh(xyxy):
     return ltwh
 '''
 
-def ltrb_2_ltwh(xyxy):
-    """Convert [x1 y1 x2 y2] box format to [x1 y1 w h] format."""
-    if isinstance(xyxy, (list, tuple)):
-        # Single box given as a list of coordinates
-        assert len(xyxy) == 4
-        x1, y1 = xyxy[0], xyxy[1]
-        w = xyxy[2] - x1 + 1
-        h = xyxy[3] - y1 + 1
-        return (x1, y1, w, h)
-    elif isinstance(xyxy, np.ndarray):
-        # Multiple boxes given as a 2D ndarray
-        if 2 < xyxy.ndim: 
-            shape_ori = xyxy.shape
-            n_box = np.prod(shape_ori[:-1])
-            xyxy = np.reshape(xyxy, (n_box, shape_ori[-1]))  
-            t0 = np.hstack((xyxy[:, 0 : 2], xyxy[:, 2 : 4] - xyxy[:, 0 : 2] + 1))
-            return np.reshape(t0, shape_ori)
-        else:        
-            return np.hstack((xyxy[..., 0 : 2], xyxy[..., 2 : 4] - xyxy[..., 0 : 2] + 1))
-    else:
-        raise TypeError('Argument xyxy must be a list, tuple, or numpy array.')
+#########################################################################################################
+def ltrb_2_ltwh(ltrb):
+    ltwh = copy.deepcopy(ltrb)
+    ltwh[..., 2] = ltrb[..., 2] - ltrb[..., 0]
+    ltwh[..., 3] = ltrb[..., 3] - ltrb[..., 1]
+    return ltwh
 
-
-def xywh_2_ltrb(xywh):                             
-    ltrb = xywh.new(xywh.shape)
-    ltrb[..., 0] = xywh[..., 0] - xywh[..., 2] / 2.0
-    ltrb[..., 1] = xywh[..., 1] - xywh[..., 3] / 2.0
-    ltrb[..., 2] = xywh[..., 0] + xywh[..., 2] / 2.0
-    ltrb[..., 3] = xywh[..., 1] + xywh[..., 3] / 2.0
-    return ltrb
-
+#########################################################################################################
 def ltrb_2_xywh(ltrb):
-    xywh = ltrb.new(ltrb.shape)
+    xywh = copy.deepcopy(ltrb)
+    '''
+    if isinstance(ltrb, torch.Tensor):
+        xywh = ltrb.new(ltrb.shape)
+    else:
+        xywh = ltrb.copy() 
+    '''    
     xywh[..., 0] = (ltrb[..., 0] + ltrb[..., 2]) / 2.0
     xywh[..., 1] = (ltrb[..., 1] + ltrb[..., 3]) / 2.0
     xywh[..., 2] = ltrb[..., 2] - ltrb[..., 0]
     xywh[..., 3] = ltrb[..., 3] - ltrb[..., 1]
     return xywh
 
+#########################################################################################################
+def ltwh_2_ltrb(ltwh):
+    #ltrb = ltwh.copy()
+    ltrb = copy.deepcopy(ltwh)
+    ltrb[..., 2] = ltwh[..., 0] + ltwh[..., 2]
+    ltrb[..., 3] = ltwh[..., 1] + ltwh[..., 3]
+    return ltrb
+
+#########################################################################################################
+def ltwh_2_xywh(ltwh):
+    #xywh = ltwh.copy()
+    xywh = copy.deepcopy(ltwh)
+    xywh[..., 0] = ltwh[..., 0] + ltwh[..., 2] / 2.0
+    xywh[..., 1] = ltwh[..., 1] + ltwh[..., 3] / 2.0
+    return xywh
+
+                             
+                             
+def split_image_into_left_and_right(im_ori_bgr):
+    #fn_right = full_path_from_dir_id_extension(dir_save, id_img + '_right', ext)
+    wid_half = round_i(float(im_ori_bgr.shape[1]) / 2.0) 
+    return im_ori_bgr[:, : wid_half, :], im_ori_bgr[:, wid_half :, :]
+
+def split_image_into_up_and_down(im_ori_bgr):
+    hei_half = round_i(float(im_ori_bgr.shape[0]) / 2.0) 
+    return im_ori_bgr[: hei_half, :, :], im_ori_bgr[hei_half :, :, :]
+
+def split_image_into_left_and_right_then_save(fn_ori, dir_save, ext):
+    id_img = get_exact_file_name_from_path(fn_ori)
+    fn_left = full_path_from_dir_id_extension(dir_save, id_img + '_left', ext)
+    fn_right = full_path_from_dir_id_extension(dir_save, id_img + '_right', ext)
+    im_ori_bgr = cv2.imread(fn_ori)
+    im_l_bgr, im_r_bgr = split_image_into_left_and_right(im_ori_bgr);
+    #cv2.imshow('im_l_bgr', im_l_bgr);   cv2.imshow('im_r_bgr', im_r_bgr);   cv2.waitKey(0)
+    distutils.dir_util.mkpath(dir_save)
+    cv2.imwrite(fn_left, im_l_bgr); cv2.imwrite(fn_right, im_r_bgr)
+    #print('Left image size : ', im_l_bgr.shape);  print('Right image size : ', im_r_bgr.shape); print('Left image is saved at : ', fn_left);  print('Right image is saved at : ', fn_right); #exit()
+    return
+
+def split_image_into_up_and_down_then_save(fn_ori, dir_save, ext):
+    id_img = get_exact_file_name_from_path(fn_ori)
+    fn_above = full_path_from_dir_id_extension(dir_save, id_img + '_above', ext)
+    fn_low = full_path_from_dir_id_extension(dir_save, id_img + '_low', ext)
+    im_ori_bgr = cv2.imread(fn_ori);
+    im_a_bgr, im_l_bgr = split_image_into_up_and_down(im_ori_bgr);
+    #cv2.imshow('im_a_bgr', im_a_bgr);   cv2.imshow('im_l_bgr', im_l_bgr);   cv2.waitKey(0)
+    distutils.dir_util.mkpath(dir_save)
+    cv2.imwrite(fn_above, im_a_bgr); cv2.imwrite(fn_low, im_l_bgr)
+    #print('Upper image is saved at : ', fn_above);  print('Lower image is saved at : ', fn_low)
+    return
+                          
+                             
+def xywh_2_ltrb(xywh):             
+    #ltrb = xywh.new(xywh.shape)
+    ltrb = copy.deepcopy(xywh)
+    ltrb[..., 0] = xywh[..., 0] - xywh[..., 2] / 2.0
+    ltrb[..., 1] = xywh[..., 1] - xywh[..., 3] / 2.0
+    ltrb[..., 2] = xywh[..., 0] + xywh[..., 2] / 2.0
+    ltrb[..., 3] = xywh[..., 1] + xywh[..., 3] / 2.0
+    return ltrb
+
+def xywh_2_ltwh(xywh):             
+    #ltwh = xywh.copy()
+    ltwh = copy.deepcopy(xywh)
+    ltwh[..., 0] = xywh[..., 0] - xywh[..., 2] / 2.0
+    ltwh[..., 1] = xywh[..., 1] - xywh[..., 3] / 2.0
+    return ltwh
+
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                             
 
 #######################################################################################################################################
 ########        opencv related        #######################################################################################
@@ -1299,3 +2237,5 @@ def get_class_string_from_torch_tensor(tensor_det, li_class, idx_class):
     return [li_class[int(tensor_det[idx, idx_class])] for idx in range(len(tensor_det))]
 
     
+                             
+        

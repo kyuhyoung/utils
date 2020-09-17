@@ -2106,15 +2106,15 @@ Mat init_mat_with_array_of_values(int n_r, int n_c, T li_val[], int n_sp)
 
 
 
-void print_mat(const Mat& mat, const string& str_mat_name, int n_sp)
+void cout_mat_indented(const Mat& mat, const string& str_mat_name, int n_sp)
 {
-    cout_indented(n_sp, "print_mat START");
-    if(1 == mat.channels()) print_mat_2d(mat, str_mat_name, n_sp + 1);
-    else print_mat_3d(mat, str_mat_name, n_sp + 1);
-    cout_indented(n_sp, "print_mat END");
+    cout_indented(n_sp, "cout_mat_indented START");
+    if(1 == mat.channels()) cout_mat_2d_indented(mat, str_mat_name, n_sp + 1);
+    else cout_mat_3d_indented(mat, str_mat_name, n_sp + 1);
+    cout_indented(n_sp, "cout_mat_indented END");
 }
 
-void print_mat_2d(const Mat& mat, const string& str_mat_name, int n_sp)
+void cout_mat_2d_indented(const Mat& mat, const string& str_mat_name, int n_sp)
 {
     if(str_mat_name.empty()) n_sp--;
     else cout_indented(n_sp, str_mat_name + " =");
@@ -2128,7 +2128,7 @@ void print_mat_2d(const Mat& mat, const string& str_mat_name, int n_sp)
     return;
 }
 
-void print_mat_3d(const Mat& mat, const string& str_mat_name, int n_sp)
+void cout_mat_3d_indented(const Mat& mat, const string& str_mat_name, int n_sp)
 {
     if(str_mat_name.empty()) n_sp--;
     else cout_indented(n_sp, str_mat_name + " =");
@@ -2138,7 +2138,7 @@ void print_mat_3d(const Mat& mat, const string& str_mat_name, int n_sp)
     cout_indented(n_sp, "[");
     for(int iC = 0; iC < n_ch; iC++)
     {
-        print_mat_2d(li_mat[iC], "", n_sp + 1);
+        cout_mat_3d_indented(li_mat[iC], "", n_sp + 1);
     }
     cout_indented(n_sp, "]");
     return;

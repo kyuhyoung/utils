@@ -1822,7 +1822,7 @@ Mat mean_rotation_matrix_moakher(const std::vector<Mat> &vec_R)
     //vpMatrix M, U, V;   vpColVector sv;
     //meanR.pseudoInverse(M, sv, 1e-6, U, V);
     Mat M, U, V, sv, kerA;
-    pseudoInverse_wo_visp(meanR, M, sv, 1e-6, U, V, kerA);
+    pseudo_inverse(meanR, M, sv, 1e-6, U, V, kerA);
     //double det = sv[0]*sv[1]*sv[2];
     double det = sv.at<double>(0) * sv.at<double>(1) * sv.at<double>(2);
     if(det > 0) {
@@ -1869,6 +1869,10 @@ Mat merge_mask(const vector<Mat>& li_mask, vector<int> li_idx, int n_sp)
     }
     return im_mask;
 }
+
+
+
+
 
 Mat get_hsv_histogram(const Mat& im_hsv, const Mat& im_mask, int n_sp)
 {

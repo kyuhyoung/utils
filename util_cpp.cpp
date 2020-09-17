@@ -2149,10 +2149,11 @@ void cout_mat_3d_indented(const Mat& mat, const string& str_mat_name, int n_sp)
 //	print_mat_type(mat, 0);
 //	=> mat type : 8UC3	
 
-void print_mat_type(const Mat& mat, int n_sp)
+void cout_mat_type_indented(const Mat& mat, int n_sp)
 {
-	cout_indented(n_sp, "print_mat_type");
+	cout_indented(n_sp, "cout_mat_type_indented START");
 	cout_indented(n_sp + 1, "mat type : " + mat_type_2_str(mat.type(), n_sp + 1)); 		
+	cout_indented(n_sp, "cout_mat_type_indented END");
 }
 
 //	Mat mat = Mat::zeros(100, 10, CV_8UC1);

@@ -12,6 +12,7 @@
   * is_first_a_factor_of_second()
   * is_image_file()
   * is_only_number()
+  * is_this_string_empty
   * is_this_camera_index()
   * is_this_directory_existing()
   * is_this_file_existing()

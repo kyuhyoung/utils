@@ -189,6 +189,12 @@ bool is_this_camera_index(const std::string& strin)
 	return 2 >= strin.size() && is_only_number(strin);	
 }
 
+
+bool is_this_string_empty(const string& strin)
+{
+	return strin.empty();
+}
+
 //------------ Check parse string by delimiter into a vector of strings -------------- 
 //	string str = "10 ,abc ;234 %:3rf >"
 //	string const delims{ " ,;%:>" };

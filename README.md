@@ -169,6 +169,7 @@
   * get_exact_file_name_from_path()
   * is_this_empty_string()  
   * is_this_existing_directory()
+  * is_this_existing_file()
   * merge_divided_detections()
   * mkdir_if_not_exist()  
   * extract_file_extension()  

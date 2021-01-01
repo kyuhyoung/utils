@@ -315,6 +315,7 @@ def is_this_file_name_in_the_path_list(li_fn, fn_query):
 
 
 #########################################################################################################
+import os.path.isfile
 def get_list_of_file_names_with_string_in_multi_directories_of_text_file(txt_li_dir):
     li_fn = []
     with open(txt_li_dir) as f:

@@ -224,6 +224,19 @@ def is_this_existing_directory(path_dir):
     return os.path.isdir(os.path.expanduser(path_dir))
     #return os.path.isdir(path_dir)
 
+    
+#########################################################################################################
+# input
+#   path_file : string of a file path.
+#       ex) '/mnt/d/images/img.bmp'    
+# output
+#   boolean whether 'path_file' is a existing file.
+#       ex) True if '/mnt/d/images/img.bmp' exists.
+
+import os.path
+def is_this_existing_file(path_file):
+    return os.path.isfile(path_file)
+
 
 #########################################################################################################
 # input

@@ -1238,7 +1238,8 @@ def letterboxing_opencv(image, wh_tgt, letterbox_type, n_sp, only_return_image =
         #new_image.fill(128)
         new_image[...] = means_4_pad
     #new_image[dy:dy+nh, dx:dx+nw,:] = image
-    new_image[y_offset : y_offset + h_new, x_offset : x_offset + w_new, :] = image
+    #new_image[y_offset : y_offset + h_new, x_offset : x_offset + w_new, :] = image
+    new_image[y_offset : y_offset + h_new, x_offset : x_offset + w_new] = image
     print_indented(n_sp, 'letterboxing_opencv END');
     if only_return_image:
         return new_image

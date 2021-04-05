@@ -961,11 +961,22 @@ double sinc(double rad)
             return sin(rad) / rad;
             }
 
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
 //   OpenCV related
+//
+//
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 
@@ -2675,7 +2686,8 @@ Mat image_inside_circle(const Mat& im_bin0255, float portion_center, float th_ra
 		//show_image("im_bin0255_inside_circle_after", im_bin0255_inside_circle); //waitKey();  //exit(0);
 	}	
 	Point2f p_center(0.5 * (im_bin0255_inside_circle.cols - 1), 0.5 * (im_bin0255_inside_circle.rows - 1));
-	Mat im_bin0255_circle = Mat::zeros(im_bin0255_inside_circle.size(), im_bin0255_inside_circle.type());
+	//Mat im_bin0255_circle = Mat::zeros(im_bin0255_inside_circle.size(), im_bin0255_inside_circle.type());
+	Mat im_bin0255_circle = zeros_like(im_bin0255_inside_circle);
 	float radius = MIN(im_bin0255_inside_circle.rows * 0.5 - 2, im_bin0255_inside_circle.cols * 0.5 - 2);
 	circle(im_bin0255_circle, p_center, radius, Scalar(255, 255, 255), -1);
 	Mat im_bin0255_inside_circle_wo_circle;
@@ -3457,7 +3469,10 @@ void writeMat2File(cv::Mat& m, const string& filename, bool channelwise)
 	fout.close();
 }
 
-
+Mat zeros_like(const Mat& mat_ori)
+{
+	return Mat::zeros(mat_ori.size(), mat_ori.type());
+}
 
 
 

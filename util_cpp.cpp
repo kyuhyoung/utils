@@ -978,6 +978,19 @@ double sinc(double rad)
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+Mat alpha_blend(Mat& img1, Mat& img2, Mat& mask_0255)
+{
+    // Blend img1 and img2 (of CV_8UC3) with mask (CV_8UC1)
+    assert(img1.size() == img2.size() && img1.size() == mask.size());
+    Mat blended = cv::Mat(img1.size(), img1.type());
+    for (int y = 0; y < blended.rows; ++y){
+        for (int x = 0; x < blended.cols; ++x){
+            float alpha = mask_0255.at<unsigned char>(y, x) / 255.0f;
+            blended.at<cv::Vec3b>(y, x) = alpha * img1.at<cv::Vec3b>(y, x) + (1 - alpha) * img2.at<cv::Vec3b>(y, x);
+        }
+    }
+	return blended;	
+}
 
 
 //------------ Crop two images either horizontally or vetically	--------------  	

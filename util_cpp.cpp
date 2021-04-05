@@ -1445,7 +1445,7 @@ void RotateWrapFillFastSrcSizeExp2(
 }
 
 
-// 	#define WDIBIXEL uint8_t
+// 	#define WDIBPIXEL uint8_t
 //	Mat im_bgr = imread("im_bgr.bmp");
 //	Mat im_bgr_rotated = Mat::zeros(Size(im_bgr.cols * 2, im_bgr.rows * 3), im_bgr.type()); 
 //	WDIBPIXEL *pDstBase = im_bgr_rotated.data, *pSrcBase = im_bgr.data;

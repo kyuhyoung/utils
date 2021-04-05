@@ -66,6 +66,7 @@
   
 #### OpenCV related  
 
+  * alpha_blend()
   * are_all_seqs_gray()
   * cluster_histograms()
   * combine_rotation_translation_into_homogeneous_matrix()

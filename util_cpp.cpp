@@ -994,18 +994,19 @@ Mat alpha_blend(Mat& img1, Mat& img2, Mat& mask_0255)
 
 
 //------------ Crop two images either horizontally or vetically	--------------  	
-Mat concatenate_images(const Mat& img1, const Mat& img2, int horizontal_or_vertical)	
+Mat concatenate_images(const Mat& img1, const Mat& img2, int minus_hori_plus_vert_zero_auto, float factor_margin, const Scalar& color_margin)	
 {	
 	Mat res;	
 	//  Check if the two image have the same # of channels and type	
 	//  If # channels or type is different	
 	//if(img1.type() != img2.type() || img1.channels() != img2.channels())    return res;	
 	assert(img1.type() == img2.type() && img1.channels() == img2.channels());	
-	int rows = img1.rows + img2.rows, cols = img1.cols + img2.cols;	
+	int sum_row = img1.rows + img2.rows, sum_col = img1.cols + img2.cols;	
+	int rows, cols, margin;	
 	bool is_horizontal = true;	
-	if(horizontal_or_vertical >= 0)	
+	if(minus_hori_plus_vert_zero_auto >= 0)	
 	{	
-		if(horizontal_or_vertical > 0)	
+		if(minus_hori_plus_vert_zero_auto > 0)	
 		{	
 			is_horizontal = false;	
 		}	
@@ -1017,24 +1018,28 @@ Mat concatenate_images(const Mat& img1, const Mat& img2, int horizontal_or_verti
 	// Get dimension of final image	
 	if(is_horizontal)	
 	{	
-		rows = max(img1.rows, img2.rows);	
+		rows = max(img1.rows, img2.rows);
+		margin = sum_col * factor_margin; 
+		cols = sum_col + margin;
 	}	
 	else	
 	{	
 		cols = max(img1.cols, img2.cols);	
+		margin = sum_row * factor_margin; 
+		rows = sum_row + margin;
  	}	
  	// Create a black image	
  	//res = Mat3b(rows, cols, Vec3b(0,0,0));	
- 	res = Mat::zeros(rows, cols, img1.type());	
+ 	res = Mat::zeros(rows, cols, img1.type());	res = color_margin;
  	// Copy images in correct position	
  	img1.copyTo(res(Rect(0, 0, img1.cols, img1.rows)));	
 	if(is_horizontal)	
  	{	
- 		img2.copyTo(res(Rect(img1.cols, 0, img2.cols, img2.rows)));	
+ 		img2.copyTo(res(Rect(img1.cols + margin, 0, img2.cols, img2.rows)));	
  	}	
  	else	
  	{	
- 		img2.copyTo(res(Rect(0, img1.rows, img2.cols, img2.rows)));	
+ 		img2.copyTo(res(Rect(0, img1.rows + margin, img2.cols, img2.rows)));	
  	}	
  	//imshow("img1", img1);waitKey();   imshow("img2", img2);   imshow("res", res); waitKey();  exit(0);	
  	return res;	

@@ -999,7 +999,8 @@ Mat concatenate_images(const Mat& img1, const Mat& img2, int horizontal_or_verti
 	Mat res;	
 	//  Check if the two image have the same # of channels and type	
 	//  If # channels or type is different	
-	if(img1.type() != img2.type() || img1.channels() != img2.channels())    return res;	
+	//if(img1.type() != img2.type() || img1.channels() != img2.channels())    return res;	
+	assert(img1.type() == img2.type() && img1.channels() == img2.channels());	
 	int rows = img1.rows + img2.rows, cols = img1.cols + img2.cols;	
 	bool is_horizontal = true;	
 	if(horizontal_or_vertical >= 0)	

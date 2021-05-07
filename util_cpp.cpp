@@ -994,7 +994,7 @@ Mat alpha_blend(Mat& img1, Mat& img2, Mat& mask_0255)
 
 
 //------------ Crop two images either horizontally or vetically	--------------  	
-Mat concatenate_images(const Mat& img1, const Mat& img2, int minus_hori_plus_vert_zero_auto, float factor_margin, const Scalar& color_margin)	
+Mat concatenate_images(const Mat& img1, const Mat& img2, int minus_hori_plus_vert_zero_auto, int neg_left_or_top_0_center_pos_right_or_bottom, float factor_margin, const Scalar& color_margin)	
 {	
 	Mat res;	
 	//  Check if the two image have the same # of channels and type	
@@ -1003,7 +1003,8 @@ Mat concatenate_images(const Mat& img1, const Mat& img2, int minus_hori_plus_ver
 	assert(img1.type() == img2.type() && img1.channels() == img2.channels());	
 	int sum_row = img1.rows + img2.rows, sum_col = img1.cols + img2.cols;	
 	int rows, cols, margin;	
-	bool is_horizontal = true;	
+	bool is_horizontal = true;
+	Point offset_1(0, 0), offset_2(0, 0);
 	if(minus_hori_plus_vert_zero_auto >= 0)	
 	{	
 		if(minus_hori_plus_vert_zero_auto > 0)	
@@ -1018,29 +1019,76 @@ Mat concatenate_images(const Mat& img1, const Mat& img2, int minus_hori_plus_ver
 	// Get dimension of final image	
 	if(is_horizontal)	
 	{	
-		rows = max(img1.rows, img2.rows);
-		margin = sum_col * factor_margin; 
+		margin = sum_col * factor_margin;
 		cols = sum_col + margin;
+		rows = max(img1.rows, img2.rows);
+		offset_2.x = img1.cols + margin;
+		if(img1.rows > img2.rows)
+		{
+			dif_row = img1.rows - img2.rows
+			rows = img1.rows;
+			if(neg_left_or_top_0_center_pos_right_or_bottom > 0)
+			{
+				offset_2.y = dif_row;
+			}
+			else if(0 == neg_left_or_top_0_center_pos_right_or_bottom)
+			{
+				offset_2.y = dif_row * 0.5;
+			}
+		}
+		else if(img1.rows < img2.rows)
+		{
+			dif_row = img2.rows - img1.rows;
+			rows = img2.rows;
+			if(neg_left_or_top_0_center_pos_right_or_bottom > 0)
+			{
+				offset_1.y = dif_row
+			}
+			else if(0 == neg_left_or_top_0_center_pos_right_or_bottom)
+			{
+				offset_1.y = dif_row * 0.5
+			}
+		}			
 	}	
 	else	
 	{	
-		cols = max(img1.cols, img2.cols);	
 		margin = sum_row * factor_margin; 
-		rows = sum_row + margin;
+		cols = max(img1.cols, img2.cols);	
+		rows = sum_row + margin;		
+		offset_2.y = img1.rows + margin;		
+		if(img1.cols > img2.cols)			
+		{
+			dif_col = img1.cols - img2.cols
+			cols = img1.cols;
+			if(neg_left_or_top_0_center_pos_right_or_bottom > 0)
+			{
+				offset_2.x = dif_col;
+			}
+			else if(0 == neg_left_or_top_0_center_pos_right_or_bottom)
+			{
+				offset_2.x = dif_col * 0.5;
+			}
+		}
+		else if(img1.cols < img2.cols)
+		{
+			dif_col = img2.colss - img2.rows;
+			cols = img2.cols;
+			if(neg_left_or_top_0_center_pos_right_or_bottom > 0)
+			{
+				offset_1.x = dif_col
+			}
+			else if(0 == neg_left_or_top_0_center_pos_right_or_bottom)
+			{
+				offset_1.x = dif_col * 0.5
+			}
+		}					
  	}	
  	// Create a black image	
  	//res = Mat3b(rows, cols, Vec3b(0,0,0));	
  	res = Mat::zeros(rows, cols, img1.type());	res = color_margin;
  	// Copy images in correct position	
- 	img1.copyTo(res(Rect(0, 0, img1.cols, img1.rows)));	
-	if(is_horizontal)	
- 	{	
- 		img2.copyTo(res(Rect(img1.cols + margin, 0, img2.cols, img2.rows)));	
- 	}	
- 	else	
- 	{	
- 		img2.copyTo(res(Rect(0, img1.rows + margin, img2.cols, img2.rows)));	
- 	}	
+ 	img1.copyTo(res(Rect(offset_1.x, offset_1.y, img1.cols, img1.rows)));	
+	img2.copyTo(res(Rect(offset_2.x, offset_2.y, img2.cols, img2.rows)));	
  	//imshow("img1", img1);waitKey();   imshow("img2", img2);   imshow("res", res); waitKey();  exit(0);	
  	return res;	
 }	
@@ -2856,7 +2904,9 @@ void compute_pseudo_inverse(const Mat &U, const Mat &sv, const Mat &V, unsigned 
 //	=> The second(which is the last) frame of the video is composed of "/home/dir1/003.bmp", "/home/dir2/003.bmp" and "/home/dir3/003.bmp".   
 
 void concatenate_images_from_seqeunces_into_video_or_sequence(vector< vector<string> >& li_li_path, 
-							      int hori_minus_vert_plus, bool save_as_video, const string& dir_save)
+							      int hori_minus_vert_plus, int neg_left_or_top_0_center_pos_right_or_bottom,
+							      float factor_margin, const Scalar& color_margin,
+							      bool save_as_video, const string& dir_save)
 {
 	vector<vector<int> > li_li_id = get_list_of_list_of_ids_as_number(li_li_path);
 	for(int iS = 0; iS < li_li_id.size(); iS++) sort_two_seqs_as_first_seq_sorted(li_li_id[iS], li_li_path[iS], true);
@@ -2875,7 +2925,10 @@ void concatenate_images_from_seqeunces_into_video_or_sequence(vector< vector<str
 		{
 			idx = li_idx[iS];
 			fn = li_li_path[iS][idx];
-			im_cur = concatenate_images(im_cur, imread(fn, cv_read_flag), hori_minus_vert_plus);
+			//im_cur = concatenate_images(im_cur, imread(fn, cv_read_flag), hori_minus_vert_plus);
+			im_cur = concatenate_images(im_cur, imread(fn, cv_read_flag), hori_minus_vert_plus, neg_left_or_top_0_center_pos_right_or_bottom, 
+						    factor_margin, color_margin)	
+
 		}
          	if(save_as_video) vw = write_one_frame_to_video(vw, im_cur, 0 == iF, path_vid, 30, 1000);
 		else save_one_image_under_directory(im_cur, dir_save, "comparision_");

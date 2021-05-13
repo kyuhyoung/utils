@@ -2986,6 +2986,104 @@ void concatenate_images_from_seqeunces_into_video_or_sequence(vector< vector<str
 
 
 
+void concatenate_images_from_seqeunces_into_video_or_sequence(vector< vector<string> >& li_li_path, 
+							      int hori_minus_vert_plus, int neg_left_or_top_0_center_pos_right_or_bottom,
+							      float factor_margin, const Scalar& color_margin, 
+                                  int neg_vid_0_seq_pos_gif, const string& dir_save)
+{
+	vector<vector<int> > li_li_id = get_list_of_list_of_ids_as_number(li_li_path);
+	for(int iS = 0; iS < li_li_id.size(); iS++) sort_two_seqs_as_first_seq_sorted(li_li_id[iS], li_li_path[iS], true);
+	bool is_gray = are_all_seqs_gray(li_li_path);
+	int /*w_concat, h_concat,*/ iF = 0, n_seq = li_li_path.size(), n_frm = -1, cv_read_flag = is_gray ? CV_LOAD_IMAGE_GRAYSCALE : CV_LOAD_IMAGE_COLOR;
+	if (n_seq > 0) n_frm = li_li_path[0].size();
+    vector<int> li_idx(n_seq, -1);
+	VideoWriter vw;
+	string path_vid_or_gif; //= python_join_equivalent(dir_save, "output.avi");
+    //GifWriter writer = {};
+    if(0 > neg_vid_0_seq_pos_gif)
+    {
+        //path_vid_or_gif = python_join_equivalent(dir_save, "output.mp4");
+        path_vid_or_gif = python_join_equivalent(dir_save, "output.avi");
+    }
+    else if(0 < neg_vid_0_seq_pos_gif)
+    {
+        //path_vid_or_gif = python_join_equivalent(dir_save, "output.gif");
+        path_vid_or_gif = python_join_equivalent(dir_save, "output.webp");
+    }
+
+	//mkdir_if_not_exist(dir_save.c_str());
+    mkdirs(dir_save.c_str());
+    while(get_next_index(li_idx, li_li_id))
+	{
+        cout << "iF : " << iF << " / " << n_frm << endl;
+        int idx = li_idx[0];
+		string fn = li_li_path[0][idx];
+		Mat im_cur = imread(fn, cv_read_flag);
+		for(int iS = 1; iS < n_seq; iS++)
+		{
+			idx = li_idx[iS];
+			fn = li_li_path[iS][idx];
+			//im_cur = concatenate_images(im_cur, imread(fn, cv_read_flag), hori_minus_vert_plus);
+			im_cur = concatenate_images(im_cur, imread(fn, cv_read_flag), hori_minus_vert_plus, neg_left_or_top_0_center_pos_right_or_bottom, 
+						    factor_margin, color_margin);	
+
+		}
+        if(0 > neg_vid_0_seq_pos_gif) vw = write_one_frame_to_video(vw, im_cur, 0 == iF, path_vid_or_gif, 30, 1000);
+	else if(0 <= neg_vid_0_seq_pos_gif) 
+        {
+            //string fn_concat = "concat_" + get_exact_file_name_from_path(fn) + ".bmp"; 
+            string fn_concat = "concat_" + get_exact_file_name_from_path(fn) + ".png"; 
+            save_one_image_under_directory(im_cur, dir_save, fn_concat);
+        }     
+
+	iF++;
+    }
+    if(0 > neg_vid_0_seq_pos_gif) 
+    { 
+        cout << "concatenated video has just saved at : " << path_vid_or_gif << endl;  
+        vw.release();
+        string str_ffmpeg = "ffmpeg -y -i " + path_vid_or_gif + " " + python_join_equivalent(dir_save, "output.mp4");
+        cout << "str_ffmpeg : " << str_ffmpeg << endl;    //exit(0);
+        std::system(str_ffmpeg.c_str());  
+ 
+    }
+    else if(0 < neg_vid_0_seq_pos_gif)
+    {
+#if 0    
+        string str_imagemagick = "convert -delay 20 -loop 0 -monitor " + python_join_equivalent(dir_save, "concat_*") + " " + path_vid_or_gif;
+        cout << "str_imagemagick : " << str_imagemagick << endl;    //exit(0);
+        std::system(str_imagemagick.c_str());  
+        cout << "concatenated animated-gif has just saved at : " << path_vid_or_gif << endl;    //exit(0);  
+        string str_optimize_10 = "convert " + path_vid_or_gif + " -fuzz 10% -layers Optimize " + path_vid_or_gif;
+        cout << "str_optimize_10 : " << str_optimize_10 << endl;    //exit(0);
+        std::system(str_optimize_10.c_str());  
+#else   //0
+        string str_webp = "img2webp -v -mixed -d 40 " + python_join_equivalent(dir_save, "concat_*.png") + " -o " + path_vid_or_gif;
+        cout << "str_webp : " << str_webp << endl;    //exit(0);
+        std::system(str_webp.c_str());    //exit(0); 
+#endif  //0
+        //GifEnd( &writer );
+    }
+    else
+    {
+        cout << "concatenated image sequence has just saved under : " << dir_save << endl;
+    }
+    return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 unsigned int pseudo_inverse(const Mat& A, Mat &Ap, Mat &sv, double svThreshold, Mat &imA, Mat &imAt, Mat &kerA) 
 {
     unsigned int rank, nrows = A.rows, ncols = A.cols;

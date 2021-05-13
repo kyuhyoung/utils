@@ -2818,10 +2818,13 @@ void apply_permutation_in_place(
 	
 void sort_two_seqs_as_first_seq_sorted(vector<int>& li_int, vector<string>& li_string, bool is_descending)
 {
-	auto p = sort_permutation(li_int, [](int const& a, int const& b) {return is_descending ? a < b : a > b;});
+	//auto p = sort_permutation(li_int, [](int const& a, int const& b) {return is_descending ? a < b : a > b;});
+	auto p = sort_permutation(li_int, [&is_descending](int const& a, int const& b) {return is_descending ? a < b : a > b;});
+	//auto p = sort_permutation(li_int, [](int const& a, int const& b) {return a < b;});
 	apply_permutation_in_place(li_int, p);
 	apply_permutation_in_place(li_string, p);
 }
+
 
 //-----------------------------------------------------------------------------------------------------  
 //	vector<int> li_idx({ 1, 3, 2 });	

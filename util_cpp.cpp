@@ -2997,13 +2997,52 @@ void save_one_image_under_directory(const Mat& im, const string& dir_save, const
 VideoWriter init_video_writer(const string& fn_path, double fps, const Size& saiz)
 {
 	VideoWriter writer;
-	writer.open(fn_path, VideoWriter::fourcc('X', 'V', 'I', 'D'), fps, saiz, true);
-	if (!writer.isOpened())
-	{
-		cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;	exit(0);
-	}
+    cout << "fps : " << fps << endl;
+    cout << "saiz : " << saiz << endl;
+    writer.open(fn_path, VideoWriter::fourcc('H', '2', '6', '4'), fps, saiz, true);
+    if (!writer.isOpened())
+    {
+        writer.open(fn_path, VideoWriter::fourcc('X', 'V', 'I', 'D'), fps, saiz, true);
+        if (!writer.isOpened())
+        {
+            writer.open(fn_path, VideoWriter::fourcc('M', 'P', '4', 'V'), fps, saiz, true);
+            if (!writer.isOpened())
+            {
+                writer.open(fn_path, VideoWriter::fourcc('X', '2', '6', '4'), fps, saiz, true);
+                if (!writer.isOpened())
+                {
+                    writer.open(fn_path, VideoWriter::fourcc('M', 'J', 'P', 'G'), fps, saiz, true);
+                    if (!writer.isOpened())
+                    {
+                        cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;	exit(0);
+                    }    
+                    else
+                    {
+                        cout << "Codec : MJPG OK" << endl;
+                    }
+                }
+                else
+                {
+                    cout << "Codec : X264 OK" << endl;
+                }
+            }
+            else
+            {
+                cout << "Codec : MP4V OK" << endl;
+            }
+        }
+        else
+        {
+            cout << "Codec : XVID OK" << endl;
+        }
+    }
+    else
+    {
+        cout << "Codec : H264 OK" << endl;
+    }
 	return writer;
 }
+
 
 
 

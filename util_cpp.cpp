@@ -2766,6 +2766,23 @@ Mat image_inside_circle(const Mat& im_bin0255, float portion_center, float th_ra
 }
 
 
+
+
+//#include <numeric>
+template <typename T, typename Compare>
+std::vector<std::size_t> sort_permutation(
+    const std::vector<T>& vec,
+    Compare compare)
+{
+    std::vector<std::size_t> p(vec.size());
+    std::iota(p.begin(), p.end(), 0);
+    std::sort(p.begin(), p.end(),
+        [&](std::size_t i, std::size_t j){ return compare(vec[i], vec[j]); });
+    return p;
+}
+
+
+
 //-----------------------------------------------------------------------------------------------------  
 //	vector<int> li_int({4, 1, 3, 2});
 //	vector<string> li_string({"aa", "bb", "cc", "dd"});

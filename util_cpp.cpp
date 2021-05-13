@@ -2985,11 +2985,11 @@ unsigned int pseudo_inverse(const Mat& A, Mat &Ap, double svThreshold)
 
 void save_one_image_under_directory(const Mat& im, const string& dir_save, const string& fn_img)
 {
-	mkdir_if_not_exist(dir_save.c_str());
+	//mkdir_if_not_exist(dir_save.c_str());
+	mkdirs(dir_save.c_str());
 	string path_res = python_join_equivalent(dir_save, fn_img);
-	imwrite(path_res, im);
+ 	imwrite(path_res, im);
 }
-
 
 //-----------------------------------------------------------------------------------------------------  
 //	VideoWriter vw = init_video_writer("/home/folder/aaa.avi", 30, Size(640, 480));

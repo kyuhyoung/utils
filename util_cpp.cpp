@@ -3105,6 +3105,31 @@ Mat resize_image(const Mat& im_ori, int w_new, int h_new, float fx, float fy, in
 	return im_resized;
 }
 
+Mat resize_image(const Mat& im_ori, int w_new, int h_new, float fx, float fy, int max_side, bool make_width_multiple_of_2 = false)
+{
+	Mat im_resized;
+	int max_wh = MAX(im_ori.cols, im_ori.rows);
+	if(w_new > 0 && h_new > 0) resize(im_ori, im_resized, Size(w_new, h_new), 0, 0);
+	else if(fx > 0 && fy > 0) resize(im_ori, im_resized, Size(0, 0), fx, fy);
+	else if(max_side < max_wh)
+	{
+		float ratio = float(max_side) / float(max_wh);
+		if (make_width_multiple_of_2)
+		{
+			w_new = 2 * int(float(im_ori.cols) * ratio / 2.0);
+			ratio = float(w_new) / float(im_ori.cols);
+		}			
+		resize(im_ori, im_resized, Size(0, 0), ratio, ratio);
+	}
+	else if(max_side > 0)
+	{
+		im_resized = im_ori.clone();
+		cout << "Resize is NOT applied since does NOT have to !!" << endl;
+	}
+	else { cout << "Can NOT resize image since NO guide is given !!" << endl; exit(0); };
+	return im_resized;
+}
+
 
 //-----------------------------------------------------------------------------------------------------  
 //	vector<vector<string>> li_li_path;

@@ -355,16 +355,28 @@ int get_last_integer_substring(const string& str_ori)
 namespace fs = std::experimental::filesystem;
 vector<string> get_list_of_image_path_under_this_directory(const string& dir_img, int id_frm_start, int id_frm_last)
 {
+    //cout << "dir_img : " << dir_img << endl;    //exit(0);
 	vector<string> li;
 	for(auto& p: fs::recursive_directory_iterator(dir_img))
 	{
 		string str_path = p.path().string();
+        //cout << "id_frm_start : " << id_frm_start << endl; 
+        //cout << "id_frm_last : " << id_frm_last << endl;    //exit(0);
 		if(!is_image_file(str_path)) continue;
-		if(id_frm_start >= 0 &&  get_id_of_file_as_number(str_path) < id_frm_start) continue;
-		if(id_frm_last >= 0 &&  get_id_of_file_as_number(str_path) > id_frm_last) continue;
+		int aidi = get_id_of_file_as_number(str_path);// < id_frm_start) continue;
+        //cout << "aidi : " << aidi << endl;    //exit(0);
+		if(id_frm_start >= 0 &&  aidi < id_frm_start) 
+        {
+            continue;
+        }     
+		if(id_frm_last >= 0 && id_frm_last >= id_frm_start &&  aidi > id_frm_last)
+        {
+            continue;
+        }     
 		li.push_back(str_path);
 	}
 	sort(li.begin(), li.end());
+    //cout << "li.size() : " << li.size() << endl;    exit(0);
 	return li;
 }
 

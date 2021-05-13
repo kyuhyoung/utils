@@ -993,7 +993,7 @@ Mat alpha_blend(Mat& img1, Mat& img2, Mat& mask_0255)
 }
 
 
-//------------ Crop two images either horizontally or vetically	--------------  	
+//------------ Concatenate two images either horizontally or vetically	--------------  	
 Mat concatenate_images(const Mat& img1, const Mat& img2, int minus_hori_plus_vert_zero_auto, int neg_left_or_top_0_center_pos_right_or_bottom, float factor_margin, const Scalar& color_margin)	
 {	
 	Mat res;	
@@ -1002,7 +1002,7 @@ Mat concatenate_images(const Mat& img1, const Mat& img2, int minus_hori_plus_ver
 	//if(img1.type() != img2.type() || img1.channels() != img2.channels())    return res;	
 	assert(img1.type() == img2.type() && img1.channels() == img2.channels());	
 	int sum_row = img1.rows + img2.rows, sum_col = img1.cols + img2.cols;	
-	int rows, cols, margin;	
+	int rows = img1.rows + img2.rows, cols = img1.cols + img2.cols, margin;	
 	bool is_horizontal = true;
 	Point offset_1(0, 0), offset_2(0, 0);
 	if(minus_hori_plus_vert_zero_auto >= 0)	
@@ -1025,7 +1025,7 @@ Mat concatenate_images(const Mat& img1, const Mat& img2, int minus_hori_plus_ver
 		offset_2.x = img1.cols + margin;
 		if(img1.rows > img2.rows)
 		{
-			dif_row = img1.rows - img2.rows
+			int dif_row = img1.rows - img2.rows;
 			rows = img1.rows;
 			if(neg_left_or_top_0_center_pos_right_or_bottom > 0)
 			{
@@ -1038,15 +1038,15 @@ Mat concatenate_images(const Mat& img1, const Mat& img2, int minus_hori_plus_ver
 		}
 		else if(img1.rows < img2.rows)
 		{
-			dif_row = img2.rows - img1.rows;
+			int dif_row = img2.rows - img1.rows;
 			rows = img2.rows;
 			if(neg_left_or_top_0_center_pos_right_or_bottom > 0)
 			{
-				offset_1.y = dif_row
+				offset_1.y = dif_row;
 			}
 			else if(0 == neg_left_or_top_0_center_pos_right_or_bottom)
 			{
-				offset_1.y = dif_row * 0.5
+				offset_1.y = dif_row * 0.5;
 			}
 		}			
 	}	
@@ -1058,7 +1058,7 @@ Mat concatenate_images(const Mat& img1, const Mat& img2, int minus_hori_plus_ver
 		offset_2.y = img1.rows + margin;		
 		if(img1.cols > img2.cols)			
 		{
-			dif_col = img1.cols - img2.cols
+			int dif_col = img1.cols - img2.cols;
 			cols = img1.cols;
 			if(neg_left_or_top_0_center_pos_right_or_bottom > 0)
 			{
@@ -1071,15 +1071,15 @@ Mat concatenate_images(const Mat& img1, const Mat& img2, int minus_hori_plus_ver
 		}
 		else if(img1.cols < img2.cols)
 		{
-			dif_col = img2.colss - img2.rows;
+			int dif_col = img2.cols - img1.rows;
 			cols = img2.cols;
 			if(neg_left_or_top_0_center_pos_right_or_bottom > 0)
 			{
-				offset_1.x = dif_col
+				offset_1.x = dif_col;
 			}
 			else if(0 == neg_left_or_top_0_center_pos_right_or_bottom)
 			{
-				offset_1.x = dif_col * 0.5
+				offset_1.x = dif_col * 0.5;
 			}
 		}					
  	}	
@@ -1092,6 +1092,8 @@ Mat concatenate_images(const Mat& img1, const Mat& img2, int minus_hori_plus_ver
  	//imshow("img1", img1);waitKey();   imshow("img2", img2);   imshow("res", res); waitKey();  exit(0);	
  	return res;	
 }	
+
+
 
 
 

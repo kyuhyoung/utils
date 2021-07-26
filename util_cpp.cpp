@@ -2829,8 +2829,8 @@ void apply_permutation_in_place(
 //	=> li_int : 1, 2, 3, 4 and li_string : "bb", "dd", "cc", "aa" 
 //	sort_two_seqs_as_first_seq_sorted(li_int, li_string, false);
 //	=> li_int : 4, 3, 2, 1 and li_string : "aa", "cc", "dd", "bb"  
-	
-void sort_two_seqs_as_first_seq_sorted(vector<int>& li_int, vector<string>& li_string, bool is_descending)
+template<typename T>	
+void sort_two_seqs_as_first_seq_sorted(vector<int>& li_int, vector<T>& li_string, bool is_descending)
 {
 	//auto p = sort_permutation(li_int, [](int const& a, int const& b) {return is_descending ? a < b : a > b;});
 	auto p = sort_permutation(li_int, [&is_descending](int const& a, int const& b) {return is_descending ? a < b : a > b;});

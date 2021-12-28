@@ -16,6 +16,7 @@
   * is_this_camera_index()
   * is_this_directory_existing()
   * is_this_file_existing()
+  * is_inside_docker()
   * itos_formatted()
   * get_exact_file_name_from_path()
   * get_id_of_file_as_number()

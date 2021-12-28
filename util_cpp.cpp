@@ -63,10 +63,20 @@ bool is_this_directory_existing(const char *direc)
 }
 
 //------------ Check if the given file is the existing one --------------  
-bool is_this_file_existing(const char *fileName)
+#include <sys/stat.h> 
+bool is_this_file_existing(const char *fileName)	//	takes 0.134 sec
 {
-    std::ifstream infile(fileName);
-    return infile.good();
+	struct stat buffer;   
+  	return (stat (fileName, &buffer) == 0); 
+}
+//bool is_this_file_existing(const char *fileName)	//	takes 0.485 sec
+//{
+//    std::ifstream infile(fileName);
+//    return infile.good();
+//}
+bool is_this_file_existing(const std::string& fileName)
+{
+	return is_this_file_existing(fileName.c_str());	
 }
 
 //------------ Create a directory if it does not exist --------------  

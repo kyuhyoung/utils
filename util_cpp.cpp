@@ -79,6 +79,15 @@ bool is_this_file_existing(const std::string& fileName)
 	return is_this_file_existing(fileName.c_str());	
 }
 
+
+//------------ Check if the current process is running inside a docker --------------  
+bool is_inside_docker()
+{
+	return is_this_file_existing("/.dockerenv");
+}
+
+
+
 //------------ Create a directory if it does not exist --------------  
 #include <sys/stat.h>
 #include <stdio.h>

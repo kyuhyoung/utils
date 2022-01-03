@@ -24,6 +24,7 @@
   * get_last_integer_substring()
   * get_list_of_image_path_under_this_directory() 
   * get_list_of_list_of_ids_as_number
+  * lap_time
   * make_string_lowercase()
   * make_string_uppercase()
   * mkdirs()
@@ -42,6 +43,7 @@
   * calc_area_quadrangle()
   * calc_area_triangle()
   * cameraPoseFromHomography
+  * ChordalL1Mean_of_rotation
   * closeEnough
   * compute_angle_deg_between_two_lines()
   * compute_bilinear_weight()
@@ -54,21 +56,26 @@
   * eulerAnglesToRotationMatrix
   * func_add_absolute()
   * generate_random_color_list()
+  * GeodesicL1Mean_of_rotation
   * geometric_median()  
   * hls_01_2_color_name()
   * homography_dlt
   * IsExp2()
   * is_this_point_on_the_line_of_two_points()
   * LineLineIntersect()
+  * logarithm_map
   * matlab_mod_equivalent()
   * mcosc()
   * mean_absolute_of_vector()
   * median_of_vector()
   * msinc()
+  * orthonormalize
   * pose_from_homography_dlt
   * rad2deg()
   * random_number_in_between()
+  * RotationFromUnitAxisAngle
   * rotationMatrixToEulerAngles()
+  * SkewSymmetricMatrix
   * sinc()
   * unwrap()  
   * which_side_this_point_is_on_of_line_with_two_points()

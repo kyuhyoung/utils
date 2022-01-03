@@ -1250,6 +1250,211 @@ Mat orthonormalize(const Mat inMat)
 }
 
 
+
+Mat logarithm_map(const Mat& rot_mat)
+{
+    Mat rot_vec;
+    Rodrigues(rot_mat, rot_vec);
+    return rot_vec;    
+}
+
+
+Mat SkewSymmetricMatrix(const Mat& vec)
+{
+    return cv::sfm::skew(vec);
+} 
+
+Mat RotationFromUnitAxisAngle(const Mat& unit_axis, double angle)
+{
+    Mat rot_mat;
+    Rodrigues(angle * unit_axis, rot_mat);
+    return rot_mat;
+}    
+
+Mat GeodesicL1Mean_of_rotation(vector<Mat> R_input, bool b_outlier_rejection, int n_iterations, float thr_convergence)
+{
+    int n_samples = R_input.size();
+    int idx_firstQ = ceil(float(n_samples) / 4.0);
+    Mat s = zeros_like(R_input[0]);
+    for(int iR = 0; iR < 3; iR++)
+    {
+        for(int iC = 0; iC < 3; iC++)
+        {
+            vector<double> li_val(n_samples);
+            for(int iS = 0; iS < n_samples; iS++)
+            {
+                li_val[iS] = R_input[iS].at<double>(iR, iC);
+            }
+            double val_med = median_of_vector<double>(li_val, -100);
+            s.at<double>(iR, iC) = val_med;
+        }
+    }     
+    
+    //Mat R = ProjectOntoSO3(s);
+    Mat R = orthonormalize(s);	
+    //cout << "R : " << endl << R << endl;    exit(0);
+    for(int iI = 0; iI < n_iterations; iI++)
+    {
+        vector<Mat> vs(n_samples);
+        vector<double> v_norms(n_samples);
+        for(int iS = 0; iS < n_samples; iS++)
+        {
+            Mat v = logarithm_map(R_input[iS] * R.t());
+            double v_norm = norm(v);
+            vs[iS] = v;
+            v_norms[iS] = v_norm;
+        }
+        double thr = 100000000000000000000.0;
+        if(b_outlier_rejection)
+        {
+            vector<double> sorted_v_norms(v_norms);
+            sort(sorted_v_norms.begin(), sorted_v_norms.end());
+            double v_norm_firstQ = sorted_v_norms[idx_firstQ];
+            thr = n_samples <= 50 ? MAX(v_norm_firstQ, 1.0) : MAX(v_norm_firstQ, 0.5);
+        }
+        #if 0
+        cout << "thr : " << thr << endl;
+        cout << "vs : " << endl;
+        for(auto v : vs)
+        {
+            cout << v << endl;
+        }
+        cout << "v_norms : " << endl;
+        for(auto v_norm : v_norms) 
+        {
+            cout << v_norm << ", ";
+        }
+        cout << endl;
+        exit(0);
+        #endif  //  0
+
+        Mat step_num = zeros_like(vs[0]);
+        double step_den = 0;
+        for(int iS = 0; iS < n_samples; iS++)
+        {
+            Mat v = vs[iS];
+            double v_norm = v_norms[iS];
+            if(v_norm > thr)
+            {
+                continue;
+            }
+            step_num += v / v_norm;
+            step_den += 1.0 / v_norm;
+        }
+        Mat delta = step_num / step_den;
+        double delta_angle_rad = norm(delta);
+        Mat delta_axis = delta / delta_angle_rad;
+        Mat R_delta = RotationFromUnitAxisAngle(delta_axis, delta_angle_rad);
+        R = R_delta * R;
+        if(delta_angle_rad < thr_convergence)
+        {
+            break;
+        }
+    }
+    return R;
+}
+
+
+Mat avoid_median_to_be_the_same_as_one_of_samples(const vector<Mat>& R_input, const Mat& s_ori)
+{
+    bool is_current_median_the_same_as_one_or_more_of_samples = false;
+    for(auto R : R_input)
+    {
+        double sum_dif = norm(R - s_ori);
+        if(sum_dif < 0.001)
+        {
+            is_current_median_the_same_as_one_or_more_of_samples = true;
+            break;
+        }     
+    }
+    if(is_current_median_the_same_as_one_or_more_of_samples)
+    {
+        Mat mat_rand = zeros_like(s_ori);
+        randu(mat_rand, Scalar(-0.001), Scalar(0.001));
+        Mat s_new = s_ori + mat_rand;
+        return s_new;
+    }
+    else
+    {
+        return s_ori;
+    }
+}
+
+Mat ChordalL1Mean_of_rotation(vector<Mat> R_input, bool b_outlier_rejection, int n_iterations, float thr_convergence)
+{
+    int n_samples = R_input.size();
+    int idx_firstQ = ceil(float(n_samples) / 4.0);
+    Mat s = zeros_like(R_input[0]);
+    for(int iR = 0; iR < 3; iR++)
+    {
+        for(int iC = 0; iC < 3; iC++)
+        {
+            vector<double> li_val(n_samples);
+            for(int iS = 0; iS < n_samples; iS++)
+            {
+                li_val[iS] = R_input[iS].at<double>(iR, iC);
+            }
+            double val_med = median_of_vector<double>(li_val, -100);
+            s.at<double>(iR, iC) = val_med;
+        }
+    }     
+    //cout << "s : " << endl << s << endl;    exit(0); 
+    for(int iI = 0; iI < n_iterations; iI++)
+    {
+        //cout << "iI : " << iI << endl;    //exit(0); 
+        s = avoid_median_to_be_the_same_as_one_of_samples(R_input, s);
+        vector<double> v_norms(n_samples);
+        for(int iS = 0; iS < n_samples; iS++)
+        {
+            Mat v = R_input[iS] - s;
+            double v_norm = norm(v);
+            v_norms[iS] = v_norm;
+        }
+        
+        double thr = 100000000000000000000.0;
+        if(b_outlier_rejection)
+        {
+            vector<double> sorted_v_norms(v_norms);
+            sort(sorted_v_norms.begin(), sorted_v_norms.end());
+            double v_norm_firstQ = sorted_v_norms[idx_firstQ];
+            thr = n_samples <= 50 ? MAX(v_norm_firstQ, 1.356) : MAX(v_norm_firstQ, 0.7);
+            //  2*sqrt(2)*sin(1/2) is approximately 1.356
+            //  2*sqrt(2)*sin(0.5/2) is approximately 0.7
+        }
+        //cout << "thr : " << thr << endl;    exit(0);
+        Mat step_num = zeros_like(s);
+        double step_den = 0;
+        for(int iS = 0; iS < n_samples; iS++)
+        {
+            double v_norm = v_norms[iS];
+            if(v_norm > thr)
+            {
+                continue;
+            }
+            step_num += R_input[iS] / v_norm;
+            step_den += 1.0 / v_norm;
+        }
+        Mat s_prev = s.clone();
+        s = step_num / step_den;
+        //cout << "s : " << endl << s << endl;    //exit(0); 
+        Mat update_medvec = s - s_prev;
+        //cout << "update_medvec : " << update_medvec << endl;
+        //cout << "thr_convergence : " << thr_convergence << endl;
+        //double t1 = norm(update_medvec);
+        //cout << "t1 : " << t1 << endl;
+        //cout << endl;
+        if(norm(update_medvec) < thr_convergence)
+        {
+            break;
+        }     
+    }  
+    //exit(0);
+    Mat R = ProjectOntoSO3(s);
+    return R;
+}
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////

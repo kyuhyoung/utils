@@ -400,6 +400,39 @@ vector<string> get_list_of_image_path_under_this_directory(const string& dir_img
 }
 
 
+vector<string> get_list_of_string_lines_from_text_file(const string& fn_txt)
+{
+    vector<string> li_str_line;
+    ifstream phile(fn_txt);
+    if(phile.is_open())
+    {
+        string line;
+        while(getline(phile, line))
+        {
+            li_str_line.push_back(line);
+        }
+        phile.close();
+    }
+    return li_str_line;
+}
+
+Mat string_list_2_homogeneous_matrix( const vector<string>& li_str_pose )
+{
+    double  x_meter, y_meter, z_meter;
+    Mat vec_rot_aa;
+    x_meter = stof( li_str_pose[0] );
+    y_meter = stof( li_str_pose[1] );
+    z_meter = stof( li_str_pose[2] );
+    double  aax = stof( li_str_pose[3] ),
+    aay = stof( li_str_pose[4] ),
+    aaz = stof( li_str_pose[5] );
+    vec_rot_aa = ( Mat_<double>( 3, 1 ) << aax, aay, aaz );
+    Mat vec_tra = ( Mat_<double>( 3, 1 ) << x_meter, y_meter, z_meter );
+    Mat mat_bme = combine_rotation_translation_into_homogeneous_matrix( vec_rot_aa, vec_tra );
+    return mat_bme;
+}
+
+
 
 //---------------------------------------------------------------------
 //	vector<vector<string>> li_li_path;

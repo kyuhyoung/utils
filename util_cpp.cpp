@@ -815,7 +815,8 @@ float calc_angle_deg_three_points(float ax, float ay, float bx, float by, float 
 {
     float x_ab = bx - ax, y_ab = by - ay, x_cb = bx - cx, y_cb = by - cy;
     float dot = x_ab * x_cb + y_ab * y_cb; // dot product
-    float cross = x_ab * y_cb - y_ab * x_cb); // cross product
+    //float cross = x_ab * y_cb - y_ab * x_cb; // cross product
+    float cross = x_ab * y_cb - y_ab * x_cb; // cross product
     float rad = atan2(cross, dot);
     return rad * 180. / PI;
 }

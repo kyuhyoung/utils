@@ -60,6 +60,7 @@
   * msinc()
   * rad2deg()
   * random_number_in_between()
+  * rotationMatrixToEulerAngles()
   * sinc()
   * unwrap()  
   * which_side_this_point_is_on_of_line_with_two_points()

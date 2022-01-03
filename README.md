@@ -9,6 +9,7 @@
 
   * cout_indented()
   * error()
+  * get_list_of_string_lines_from_text_file
   * is_first_a_factor_of_second()
   * is_image_file()
   * is_only_number()
@@ -28,8 +29,9 @@
   * mkdirs()
   * python_join_equivalent()
   * split_string_by_delimiter()
+  * string_list_2_homogeneous_matrix
   * to_string_with_precision()
-  * what_time_in_seconds_is_it_now()    
+  * what_time_in_seconds_is_it_now()   
   
 #### math related
 
@@ -39,6 +41,8 @@
   * calc_angle_deg_three_points()
   * calc_area_quadrangle()
   * calc_area_triangle()
+  * cameraPoseFromHomography
+  * closeEnough
   * compute_angle_deg_between_two_lines()
   * compute_bilinear_weight()
   * compute_list_of_possible_rotation_degree()
@@ -46,10 +50,13 @@
   * deg2rad()
   * Det()
   * dist_two_points()
+  * eulerAngles
+  * eulerAnglesToRotationMatrix
   * func_add_absolute()
   * generate_random_color_list()
   * geometric_median()  
   * hls_01_2_color_name()
+  * homography_dlt
   * IsExp2()
   * is_this_point_on_the_line_of_two_points()
   * LineLineIntersect()
@@ -58,6 +65,7 @@
   * mean_absolute_of_vector()
   * median_of_vector()
   * msinc()
+  * pose_from_homography_dlt
   * rad2deg()
   * random_number_in_between()
   * rotationMatrixToEulerAngles()

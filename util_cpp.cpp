@@ -1056,6 +1056,98 @@ double sinc(double rad)
 
 
 
+
+Mat cameraPoseFromHomography(const Mat& H)
+{
+    Mat pose = Mat::eye(3, 4, CV_64FC1); //3x4 matrix
+    float norm1 = (float)norm(H.col(0));
+    float norm2 = (float)norm(H.col(1));
+    float tnorm = (norm1 + norm2) / 2.0f;
+
+    Mat v1 = H.col(0);
+    Mat v2 = pose.col(0);
+
+    cv::normalize(v1, v2); // Normalize the rotation
+
+    v1 = H.col(1);
+    v2 = pose.col(1);
+
+    cv::normalize(v1, v2);
+
+    v1 = pose.col(0);
+    v2 = pose.col(1);
+
+    Mat v3 = v1.cross(v2);  //Computes the cross-product of v1 and v2
+    Mat c2 = pose.col(2);
+    v3.copyTo(c2);
+    pose.col(3) = H.col(2) / tnorm; //vector t [R|t]
+    return pose;
+}
+
+cv::Mat homography_dlt(const std::vector< cv::Point2d > &x1, const std::vector< cv::Point2d > &x2)
+{
+    int npoints = (int)x1.size();
+    cv::Mat A(2*npoints, 9, CV_64F, cv::Scalar(0));
+    // We need here to compute the SVD on a (n*2)*9 matrix (where n is
+    // the number of points). if n == 4, the matrix has more columns
+    // than rows. The solution is to add an extra line with zeros
+    if (npoints == 4)
+        A.resize(2*npoints+1, cv::Scalar(0));
+    // Since the third line of matrix A is a linear combination of the first and second lines
+    // (A is rank 2) we don't need to implement this third line
+    for(int i = 0; i < npoints; i++)
+    {              // Update matrix A using eq. 23
+        A.at<double>(2*i,3) = -x1[i].x;               // -xi_1
+        A.at<double>(2*i,4) = -x1[i].y;               // -yi_1
+        A.at<double>(2*i,5) = -1;                     // -1
+        A.at<double>(2*i,6) =  x2[i].y * x1[i].x;     //  yi_2 * xi_1
+        A.at<double>(2*i,7) =  x2[i].y * x1[i].y;     //  yi_2 * yi_1
+        A.at<double>(2*i,8) =  x2[i].y;               //  yi_2
+        A.at<double>(2*i+1,0) =  x1[i].x;             //  xi_1
+        A.at<double>(2*i+1,1) =  x1[i].y;             //  yi_1
+        A.at<double>(2*i+1,2) =  1;                   //  1
+        A.at<double>(2*i+1,6) = -x2[i].x * x1[i].x;   // -xi_2 * xi_1
+        A.at<double>(2*i+1,7) = -x2[i].x * x1[i].y;   // -xi_2 * yi_1
+        A.at<double>(2*i+1,8) = -x2[i].x;             // -xi_2
+    }
+    // Add an extra line with zero.
+    if (npoints == 4)
+    {
+        for (int i=0; i < 9; i ++) A.at<double>(2*npoints,i) = 0;
+    }
+    cv::Mat w, u, vt;
+    cv::SVD::compute(A, w, u, vt);
+    double smallestSv = w.at<double>(0, 0);
+    unsigned int indexSmallestSv = 0 ;
+    for (int i = 1; i < w.rows; i++)
+    {
+        if ((w.at<double>(i, 0) < smallestSv) )
+        {
+            smallestSv = w.at<double>(i, 0);
+            indexSmallestSv = i;
+        }
+    }
+    cv::Mat h = vt.row(indexSmallestSv);
+    if (h.at<double>(0, 8) < 0) // tz < 0
+    h *=-1;
+    cv::Mat _2H1(3, 3, CV_64F);
+    for (int i = 0 ; i < 3 ; i++)
+        for (int j = 0 ; j < 3 ; j++)
+            _2H1.at<double>(i,j) = h.at<double>(0, 3*i+j);
+    return _2H1;
+}
+
+void pose_from_homography_dlt(const std::vector< cv::Point2d > &xw, const std::vector< cv::Point2d > &xo,
+							  cv::Mat &otw, cv::Mat &oRw)
+{
+	cv::Mat oHw = homography_dlt(xw, xo);
+	Mat mat_pose = cameraPoseFromHomography(oHw);
+	oRw = mat_pose(Rect(0, 0, 3, 3)).clone();
+	otw = mat_pose(Rect(3, 0, 1, 3)).clone();
+}
+	    
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////

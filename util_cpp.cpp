@@ -1229,6 +1229,25 @@ void pose_from_homography_dlt(const std::vector< cv::Point2d > &xw, const std::v
 	otw = mat_pose(Rect(3, 0, 1, 3)).clone();
 }
 	    
+Mat orthonormalize(const Mat inMat)
+{
+  Mat _, U, V, V_, R;  
+  int minLoc[2], maxLoc[2];
+  double minVal, maxVal;
+  SVDecomp(inMat, _, U, V);
+  V_ = V.t();
+  U.at<double>(0,0) *= -1; U.at<double>(0,1) *= -1; U.at<double>(1,0) *= -1; U.at<double>(1,1) *= -1; U.at<double>(2,0) *= -1; U.at<double>(2,1) *= -1;
+  V_.at<double>(0,0) *= -1;V_.at<double>(0,1) *= -1; V_.at<double>(1,0) *= -1; V_.at<double>(1,1) *= -1; V_.at<double>(2,0) *= -1; V_.at<double>(2,1) *= -1;
+  //cout << "V_" << endl << V_.t() << endl;
+  R = U*V_.t();
+  if (determinant(R)<0)
+  {
+    V_.at<double>(0,2) *= -1;V_.at<double>(1,2) *= -1; V_.at<double>(2,2) *= -1;
+    R = U*V_.t();
+  }
+    
+  return R;
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

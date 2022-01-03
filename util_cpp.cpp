@@ -584,6 +584,39 @@ inline double unwrap(double ang_rad_pre, double ang_rad_new)
 
 
 
+// Calculates rotation matrix to euler angles
+// The result is the same as MATLAB except the order
+// of the euler angles ( x and z are swapped ).
+Vec3f rotationMatrixToEulerAngles( const Mat& R, bool to_degree )
+{
+    assert( isRotationMatrix( R ) );
+    float sy = sqrt( R.at<double>( 0, 0 ) * R.at<double>( 0, 0 ) +  R.at<double>( 1, 0 ) * R.at<double>( 1, 0 ) );
+    bool singular = sy < 1e-6; // If
+    float x, y, z;
+
+    if ( !singular )
+    {
+        x = atan2( R.at<double>( 2, 1 ), R.at<double>( 2, 2 ) );
+        y = atan2( -R.at<double>( 2, 0 ), sy );
+        z = atan2( R.at<double>( 1, 0 ), R.at<double>( 0, 0 ) );
+    }
+    else
+    {
+        x = atan2( -R.at<double>( 1, 2 ), R.at<double>( 1, 1 ) );
+        y = atan2( -R.at<double>( 2, 0 ), sy );
+        z = 0;
+    }
+    if(to_degree)
+    {
+        return Vec3f( rad2deg(x), rad2deg(y), rad2deg(z) );
+    }
+    else
+    {
+        return Vec3f( x, y, z );
+    }
+}
+
+
 
 //------------ Distribute weights among the four neighbors a point according to the distance --------------  
 //	float px, py, w_x0_y0, w_x1_y0, w_x0_y1, w_x1_y1;

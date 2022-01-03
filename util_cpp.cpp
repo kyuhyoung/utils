@@ -31,6 +31,14 @@ string python_join_equivalent(const string& dir_to_file, const string& filename)
   return full_path.u8string();                                                                               
 }
 
+
+double lap_time(struct timespec& t_begin, struct timespec& t_end, bool is_millisecond)
+{
+    double lap_sec = (t_end.tv_sec - t_begin.tv_sec) + (t_end.tv_nsec - t_begin.tv_nsec) / 1000000000.0;
+    return is_millisecond ? 1000.0 * lap_sec : lap_sec;
+}
+
+
 //------------ Get the current time in the unit of second --------------  
 //  original code : https://github.com/pjreddie/darknet/blob/master/src/utils.c
 #include <sys/time.h>

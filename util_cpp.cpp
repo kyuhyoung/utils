@@ -454,6 +454,47 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+bool closeEnough(const float& a, const float& b, const float& epsilon = std::numeric_limits<float>::epsilon())
+{
+    return (epsilon > std::abs(a - b));
+}
+
+float3 eulerAngles(const float3x3& R) {
+
+    //check for gimbal lock
+    if (closeEnough(R[0][2], -1.0f))
+    {
+        float x = 0; //gimbal lock, value of x doesn't matter
+        float y = PI / 2;
+        float z = x + atan2(R[1][0], R[2][0]);
+        return { x, y, z };
+    }
+    else if (closeEnough(R[0][2], 1.0f))
+    {
+        float x = 0;
+        float y = -PI / 2;
+        float z = -x + atan2(-R[1][0], -R[2][0]);                                                                            return { x, y, z };
+    }
+    else
+    { //two solutions exist
+        float x1 = -asin(R[0][2]);
+        float x2 = PI - x1;
+        float y1 = atan2(R[1][2] / cos(x1), R[2][2] / cos(x1));                                                              float y2 = atan2(R[1][2] / cos(x2), R[2][2] / cos(x2));                                                              float z1 = atan2(R[0][1] / cos(x1), R[0][0] / cos(x1));                                                              float z2 = atan2(R[0][1] / cos(x2), R[0][0] / cos(x2));
+        cout << "two solutions : " << endl;
+        cout << "1. : (" << rad2deg(x1) << ", " << rad2deg(y1) << ", " << rad2deg(z1) << ")" << endl;
+        cout << "2. : (" << rad2deg(x2) << ", " << rad2deg(y2) << ", " << rad2deg(z2) << ")" << endl;                        //choose one solution to return
+        //for example the "shortest" rotation
+        if ((std::abs(x1) + std::abs(y1) + std::abs(z1)) <= (std::abs(x2) + std::abs(y2) + std::abs(z2)))
+        {
+            return { x1, y1, z1 };
+        }
+        else
+        {
+            return { x2, y2, z2 };
+        }
+    }
+}
+
 //	cout << IsExp2(4) << endl;
 //	=> 1
 //	cout << IsExp2(3) << endl;

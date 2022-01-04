@@ -4355,6 +4355,13 @@ Mat zeros_like(const Mat& mat_ori)
 	return Mat::zeros(mat_ori.size(), mat_ori.type());
 }
 
+Mat ones_like( const Mat& mat_ori, float skaler )
+{
+    return Mat::ones( mat_ori.size(), mat_ori.type() ) * skaler;
+}
+
+
+
 cv::Point2f find_blackhole_by_correlation( const Mat& im_gray, const Rect& roi, const Mat& im_gray_black_circle )
 {
     Mat im_result;

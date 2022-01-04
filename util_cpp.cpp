@@ -408,21 +408,32 @@ vector<string> get_list_of_image_path_under_this_directory(const string& dir_img
 }
 
 
-vector<string> get_list_of_string_lines_from_text_file(const string& fn_txt)
+vector<vector<string> > file_2_list_of_list_of_string(const string& fn)
 {
-    vector<string> li_str_line;
-    ifstream phile(fn_txt);
-    if(phile.is_open())
+    vector<vector<string> > li_li_str;
+    std::ifstream input(fn);
+    if(input.is_open())
     {
-        string line;
-        while(getline(phile, line))
+        std::string line, delimiter = " =[],;";
+        std::string const delims{ delimiter };
+        while(std::getline(input, line))
         {
-            li_str_line.push_back(line);
+            if(line.empty() || 0 == line.rfind("#", 0))
+            {
+                continue;
+            }
+            vector<string> li_str = split_string_by_delimiter(line, delims);
+            li_li_str.push_back(li_str);
         }
-        phile.close();
+        input.close();
     }
-    return li_str_line;
+    else
+    {
+        cout << "Can NOT open the text file : " << fn << endl;   exit(0);
+    }
+    return li_li_str;
 }
+
 
 Mat string_list_2_homogeneous_matrix( const vector<string>& li_str_pose )
 {

@@ -20,6 +20,7 @@
   * is_inside_docker()
   * itos_formatted()
   * get_exact_file_name_from_path()
+  * get_file_paths_of_given_extension_under_this_directory()
   * get_id_of_file_as_number()
   * get_last_integer_substring()
   * get_list_of_image_path_under_this_directory() 
@@ -42,9 +43,10 @@
   * calc_angle_deg_three_points()
   * calc_area_quadrangle()
   * calc_area_triangle()
-  * cameraPoseFromHomography
-  * ChordalL1Mean_of_rotation
-  * closeEnough
+  * cameraPoseFromHomography()
+  * ChordalL1Mean_of_rotation()
+  * closeEnough()
+  * combine_euler_degree_translation_into_homogeneous_matrix()
   * compute_angle_deg_between_two_lines()
   * compute_bilinear_weight()
   * compute_list_of_possible_rotation_degree()
@@ -52,30 +54,36 @@
   * deg2rad()
   * Det()
   * dist_two_points()
-  * eulerAngles
-  * eulerAnglesToRotationMatrix
+  * eulerAngles()
+  * eulerAnglesToRotationMatrix()
+  * eulerDegrees2RotationMatrix()
+  * eulerRadians2RotationMatrix()
   * func_add_absolute()
   * generate_random_color_list()
-  * GeodesicL1Mean_of_rotation
+  * GeodesicL1Mean_of_rotation()
   * geometric_median()  
   * hls_01_2_color_name()
-  * homography_dlt
+  * homography_dlt()
   * IsExp2()
   * is_this_point_on_the_line_of_two_points()
   * LineLineIntersect()
-  * logarithm_map
+  * logarithm_map()
   * matlab_mod_equivalent()
   * mcosc()
   * mean_absolute_of_vector()
   * median_of_vector()
   * msinc()
-  * orthonormalize
-  * pose_from_homography_dlt
+  * normal_pdf()
+  * orthonormalize()
+  * pose_from_homography_dlt()
   * rad2deg()
   * random_number_in_between()
-  * RotationFromUnitAxisAngle
+  * rotation_degree_of_euler_degrees()
+  * RotationFromUnitAxisAngle()
   * rotationMatrixToEulerAngles()
-  * SkewSymmetricMatrix
+  * rotationMatrix2EulerDegrees()
+  * rotationMatrix2EulerRadians()
+  * SkewSymmetricMatrix()
   * sinc()
   * unwrap()  
   * which_side_this_point_is_on_of_line_with_two_points()

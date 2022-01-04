@@ -299,7 +299,6 @@
   * is_this_patch_above_or_equal_to_threshold()
   * compute_edge_integral()
 
-
 #### Pytorch related  
 
   * im2batch()

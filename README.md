@@ -95,6 +95,7 @@
 
   * alpha_blend()
   * are_all_seqs_gray()
+  * binary_mat_2_point_list()
   * cluster_histograms()
   * combine_rotation_translation_into_homogeneous_matrix()
   * compute_area_of_contour()
@@ -129,6 +130,7 @@
   * draw_rotation_pencil()
   * emd_btn_histograms()
   * exponential_map_direct()
+  * find_blackhole_by_correlation()
   * find_peaks_on_mat()
   * find_peaks_2D()
   * get_boundary_point_of_1st_radiated_from_2nd()
@@ -153,6 +155,7 @@
   * mean_traslation_vector()
   * merge_mask()
   * non_maxima_suppression_on_mat()
+  * ones_like()
   * pad_image()
   * pseudo_inverse()
   * print_matrix_min_max()

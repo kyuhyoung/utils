@@ -261,16 +261,6 @@ vector<string> split_string_by_delimiter(const string& strin, string const& deli
 	return li_str;
 }	
 
-//------------ Check if the first integer is one of factors of the second integer --------------  
-//	cout << is_first_a_factor_of_second(3, 15) << endl;
-//	=> true
-//	cout << is_first_a_factor_of_second(2, 15) << endl;
-//	=> false
-bool is_first_a_factor_of_second(int first, int second)
-{
-    return 0 == second % first;
-}
-
 
 //------------ Check if a file is a image. -------------- 
 //	cout << is_image_file("/home/someuser/flower.png") << endl;
@@ -522,6 +512,18 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 //   math related
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//------------ Check if the first integer is one of factors of the second integer --------------  
+//	cout << is_first_a_factor_of_second(3, 15) << endl;
+//	=> true
+//	cout << is_first_a_factor_of_second(2, 15) << endl;
+//	=> false
+bool is_first_a_factor_of_second(int first, int second)
+{
+	return 0 == compute_remainder( second, first );
+}
+
 
 
 float rotation_degree_of_euler_degrees(Vec3f& euler_deg)

@@ -13,6 +13,24 @@ void cout_indented(int n_space, const string& str)
 }
 
 
+std::vector<std::string> get_file_paths_of_given_extension_under_this_directory( const std::string& str_root, const  std::string& ext )
+{
+    boost::filesystem::path root( str_root );
+    std::vector<std::string> paths;
+
+    if ( boost::filesystem::exists( root ) && boost::filesystem::is_directory( root ) )
+    {
+        for ( auto const& entry : boost::filesystem::recursive_directory_iterator( root ) )
+        {
+            if ( boost::filesystem::is_regular_file( entry ) && entry.path().extension() == ext )
+            {
+                paths.emplace_back( entry.path().string() );
+            }
+        }
+    }
+    return paths;
+}
+
 
 //------------ c++ counterpart of python function "join" -------------- 
 //	experimental::filesystem linker error 시

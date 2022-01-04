@@ -1150,6 +1150,12 @@ double msinc(double sinx, double x)
 //srand(time(NULL)); // Seed the time
 inline int random_number_in_between(int minV, int maxV)
 {
+   	static bool init = false;
+	if (!init) 
+	{
+		srand(time(NULL));
+		init = true;
+	}	
     return rand() % (maxV - minV + 1) + minV;
 }    
 

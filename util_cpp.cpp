@@ -524,6 +524,55 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+float rotation_degree_of_euler_degrees(Vec3f& euler_deg)
+{
+    Mat r_vec_rad, r_mat = eulerDegrees2RotationMatrix(euler_deg);
+    Rodrigues(r_mat, r_vec_rad);
+    double rad_rot = norm(r_vec_rad);
+    return rad_2_deg_2(rad_rot);
+}
+
+Vec3f rotationMatrix2EulerRadians(Mat& r_mat)
+{
+    return rotationMatrixToEulerAngles(r_mat);
+}
+
+Vec3f rotationMatrix2EulerDegrees(Mat& r_mat)
+{
+    Vec3f rad_euler = rotationMatrix2EulerRadians(r_mat);
+    return Vec3f(   rad_2_deg_2( rad_euler[0] ),
+                    rad_2_deg_2( rad_euler[1] ),
+                    rad_2_deg_2( rad_euler[2] ) );
+}
+
+Mat eulerRadians2RotationMatrix(Vec3f& euler_rad)
+{
+    return eulerAnglesToRotationMatrix(euler_rad);
+}
+
+Mat eulerDegrees2RotationMatrix(Vec3f& euler_deg)
+{
+    Vec3f euler_rad (   deg_2_rad(euler_deg[0]),
+                        deg_2_rad(euler_deg[1]),
+                        deg_2_rad(euler_deg[2]) );
+    return eulerAnglesToRotationMatrix(euler_rad);
+}
+
+Mat combine_euler_degree_translation_into_homogeneous_matrix(Vec3f& euler_deg, const Mat& t_vec)
+{
+    Mat r_mat = eulerDegrees2RotationMatrix(euler_deg);
+    return combine_rotation_translation_into_homogeneous_matrix(r_mat, t_vec);
+}
+
+
+float normal_pdf(float x, float m, float s)
+{
+    static const float inv_sqrt_2pi = 0.3989422804014327;
+    float a = (x - m) / s;
+    return inv_sqrt_2pi / s * std::exp(-0.5f * a * a);
+}
+
+
 bool closeEnough(const float& a, const float& b, const float& epsilon = std::numeric_limits<float>::epsilon())
 {
     return (epsilon > std::abs(a - b));

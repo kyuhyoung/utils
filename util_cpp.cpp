@@ -1060,48 +1060,53 @@ struct dist_func {
 //	=> geometric_median END
 
 template<typename Scalar, typename Vector, typename Container, typename distFunciton>
-void geometric_median(Container& X, Vector& geo_median, distFunciton distance, int dim, int n_sp, int iterations = 200)
+Vector geometric_median(Container& XX, distFunciton distance, int dim, /*int n_sp,*/ int iterations = 200)
 {
-    cout_indented(n_sp, "geometric_median");
-    size_t N = X.size();
-    cout_indented(n_sp + 1, "N : " + to_string(N));
-    if(N < 3) return;
-    // initial guess
-    bool is_early_stopped = false;
-    Scalar th_delta;
-    std::vector<Vector> A (2, (X[0] + X[1]) / Scalar(2));
-    for(int it = 0; it < iterations; it++)
+    Vector geo_median;| |
+    size_t N = XX.size();
+    if(1 == N)
     {
-        Vector numerator; 
-        for(size_t i = 0; i < dim; i++) numerator[i] = 0;
-        Scalar denominator = 0;
-        int t = it % 2;
-        for (int n = 0; n < N; n++)
-        {
-            Scalar dist = distance(X[n], A[t]);
-            if (dist != 0)
-            {
-                numerator += X[n] / dist;
-                denominator += 1.0 / dist;
-            }
-        }
-        A[1 - t] = numerator / denominator;
-        Scalar d_delta = distance(A[t], A[1 - t]);
-        if(it)
-        {
-            if(d_delta < th_delta)
-            {
-                is_early_stopped = true;
-                geo_median = A[1 - t];
-                break;
-            }
-        }
-        else th_delta = d_delta * 0.001;
+        geo_median = XX[0];
     }
-    if(!is_early_stopped) geo_median = A[iterations % 2];
-    stringstream ss;    ss << "geo_median : " << geo_median;    cout_indented(n_sp + 1, ss.str());
-    cout_indented(n_sp, "geometric_median END");
+    else
+    {
+        // initial guess
+        bool is_early_stopped = false;
+        Scalar th_delta;
+        std::vector<Vector> AA (2, (XX[0] + XX[1]) / Scalar(2));
+        for(int it = 0; it < iterations; it++)
+        {
+            Vector numerator;
+            for(size_t i = 0; i < dim; i++) numerator[i] = 0;
+            Scalar denominator = 0;
+            int t = it % 2;
+            for (int n = 0; n < N; n++)
+            {
+                Scalar dist = distance(XX[n], AA[t]);
+                if (dist != 0)
+                {
+                    numerator += XX[n] / dist;
+                    denominator += 1.0 / dist;
+                }
+            }
+            AA[1 - t] = numerator / denominator;
+            Scalar d_delta = distance(AA[t], AA[1 - t]);
+            if(it)
+            {
+                if(d_delta < th_delta)
+                {
+                    is_early_stopped = true;
+                    geo_median = AA[1 - t];
+                    break;
+                }
+            }
+            else th_delta = d_delta * 0.001;
+        }
+        if(!is_early_stopped) geo_median = AA[iterations % 2];
+    }
+    return geo_median;
 }
+
 
 #define RAD_MIN_MC      2.5e-4
 double mcosc(double cosx, double x)

@@ -2230,14 +2230,23 @@ void RotateWrapFill(
 }
 
 
+bool is_this_simple_float( float val )
+{
+    float times100_f = val * 100;
+    int times100_i = int( times100_f );
+    return 0 == float( times100_i ) - times100_f;
+}
+
+
+
 double compute_area_of_contour(const vector<Point>& li_pt, int n_sp)     
 {
 	cout_indented(n_sp, "compute_area_of_contour");                                                     
 	return contourArea(li_pt);           
 }
 
- Point2f compute_center_of_contour(const vector<Point>& li_pt, int n_sp)   
- {                                                                                                        
+Point2f compute_center_of_contour(const vector<Point>& li_pt, int n_sp)   
+{                                                                                                        
 	 cout_indented(n_sp, "compute_center_of_countour"); 
 	 const Point *pts = (const Point *) Mat(li_pt).data;
 	 int n_pt = Mat(li_pt).rows;      
@@ -2246,7 +2255,15 @@ double compute_area_of_contour(const vector<Point>& li_pt, int n_sp)
 	 fillPoly(im_blob, &pts, &n_pt, 1, Scalar(255));       
 	 Moments mom = moments(im_blob, true);  
 	 return Point2f(mom.m10 / mom.m00, mom.m01 / mom.m00);
- }	 
+}	
+
+
+float compute_remainder( float numerator, float denominator )
+{
+    float scale = 100000.0;
+    return float( int( numerator * scale ) % int( denominator * scale ) ) / scale;
+}
+
 
 
 std::pair<cv::Mat, cv::Mat> split_homogeneous_transform_matrix_into_rotation_and_translation(const Mat& mat_homo)

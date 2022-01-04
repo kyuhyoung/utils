@@ -9,7 +9,7 @@
 
   * cout_indented()
   * error()
-  * get_list_of_string_lines_from_text_file
+  * file_2_list_of_list_of_string()
   * is_first_a_factor_of_second()
   * is_image_file()
   * is_only_number()

@@ -4355,6 +4355,49 @@ Mat zeros_like(const Mat& mat_ori)
 	return Mat::zeros(mat_ori.size(), mat_ori.type());
 }
 
+cv::Point2f find_blackhole_by_correlation( const Mat& im_gray, const Rect& roi, const Mat& im_gray_black_circle )
+{
+    Mat im_result;
+    matchTemplate( im_gray( roi ), im_gray_black_circle, im_result, cv::TM_CCOEFF_NORMED );
+    double minVal, maxVal;
+    Point minLoc, maxLoc;
+    minMaxLoc( im_result, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
+    cv::Point p_tl( roi.x + maxLoc.x, roi.y + maxLoc.y );
+    cv::Point p_br( p_tl.x + im_gray_black_circle.cols, p_tl.y + im_gray_black_circle.rows );
+    return cv::Point2f( 0.5 * float( p_tl.x + p_br.x ), 0.5 * ( p_tl.y + p_br.y ) );
+}
+
+std::vector<cv::Point2f> binary_mat_2_point_list( cv::Mat& binaryImage, cv::Mat* im_mask = NULL )
+{
+    std::vector<cv::Point2f> pointPositions;
+    uchar* p_data_y = NULL, p_data = NULL, p_mask_y = NULL, p_mask = NULL;
+    for ( int y = binaryImage.rows - 1; y >= 0; --y )
+    {
+        p_data_y = binaryImage.ptr<uchar>( y );
+
+        if ( im_mask )
+        {
+            p_mask_y = im_mask->ptr<uchar>( y );
+        }
+        for ( int x = binaryImage.cols - 1; x >= 0; --x )
+        {
+            p_data = p_data_y + x;
+
+            if ( im_mask )
+            {
+                p_mask = p_mask_y + x;
+            }
+            if ( *( p_data ) > 0 && ( im_mask ? * ( p_mask ) > 0 : true ) )
+            {
+                pointPositions.push_back( cv::Point2f( x, y ) );
+            }
+        }
+    }
+    return pointPositions;
+}
+
+
+
 
 
 	

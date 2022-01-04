@@ -4370,7 +4370,7 @@ cv::Point2f find_blackhole_by_correlation( const Mat& im_gray, const Rect& roi, 
 std::vector<cv::Point2f> binary_mat_2_point_list( cv::Mat& binaryImage, cv::Mat* im_mask = NULL )
 {
     std::vector<cv::Point2f> pointPositions;
-    uchar* p_data_y = NULL, p_data = NULL, p_mask_y = NULL, p_mask = NULL;
+    uchar *p_data_y = NULL, *p_data = NULL, *p_mask_y = NULL, *p_mask = NULL;
     for ( int y = binaryImage.rows - 1; y >= 0; --y )
     {
         p_data_y = binaryImage.ptr<uchar>( y );

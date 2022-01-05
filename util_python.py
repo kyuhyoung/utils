@@ -220,7 +220,7 @@ def get_exact_file_name_from_path(str_path):
 #           False if 'strin' is '' or '  '.
 
 def is_this_empty_string(strin):
-    return (strin in (None, '')) or (not strin.stip())
+    return (strin in (None, '')) or (not strin.strip())
 
 
 #########################################################################################################

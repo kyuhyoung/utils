@@ -215,6 +215,7 @@
   * get_batch_size_as_multiple_of_num_gpu()
   * print_indented()
   * str2bool()
+  * split_string_by_delimiter()
 
 #### math related  
  

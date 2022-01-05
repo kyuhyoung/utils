@@ -8,6 +8,7 @@
 # li_str = split_string_by_delimiter(str_ori, str_delimiter)
 # print(li_str)
 # => ['Beautiful', 'is', 'better', 'than', 'ugly']
+import re
 def split_string_by_delimiter(str_ori, str_delimiter):
     #li_str = re.split('; |, ',str)
     li_str = re.split(str_delimiter, str_ori)

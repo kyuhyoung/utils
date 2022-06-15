@@ -1178,7 +1178,8 @@ def convert_bbox_type(bbox, bbox_type_src, bbox_type_tgt):
 #########################################################################################################
 def letterboxing_pil(image, wh_tgt, letterbox_type, only_return_image = True, means = None, interpolation = None):
     '''resize image with unchanged aspect ratio using padding'''
-    h_src, w_src = image.size
+    #h_src, w_src = image.size
+    w_src, h_src = image.size
     w_tgt, h_tgt = wh_tgt
     #scale = min(w/iw, h/ih)
     scale = min(w_tgt / w_src, h_tgt / h_src)

@@ -27,6 +27,7 @@
   * lap_time
   * make_string_lowercase()
   * make_string_uppercase()
+  * mkdir_p()
   * mkdirs()
   * python_join_equivalent()
   * split_string_by_delimiter()

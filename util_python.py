@@ -176,7 +176,7 @@ def get_list_of_file_path_under_1st_with_3rd_extension(direc, include_subdirecto
     else:
         for name_file_dir in os.listdir(direc):
             path_file_dir = os.path.join(direc, name_file_dir)
-                if os.path.isfile(path_file_dir):
+            if os.path.isfile(path_file_dir):
                 if is_extension_given:
                     if name_file_dir.lower().endswith(ext.lower()):
                         li_path_total.append(path_file_dir)

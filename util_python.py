@@ -174,6 +174,34 @@ def get_list_of_file_path_under_1st_with_2nd_extension(direc, ext = ''):
                 li_path_total += li_path
     return sorted(li_path_total)
 
+
+
+def get_list_of_file_path_under_1st_with_2nd_extension(direc, include_subdirectories, ext = ''):
+    li_path_total = []
+    is_extension_given = not (is_this_empty_string(ext))
+    if include_subdirectories:
+        for dirpath, dirnames, filenames in os.walk(os.path.expanduser(direc)):
+            n_file_1 = len(filenames)
+            if n_file_1:
+                if is_extension_given:
+                    li_path = [os.path.join(dirpath, f) for f in filenames if f.lower().endswith(ext.lower())]
+                else:
+                    li_path = [os.path.join(dirpath, f) for f in filenames]
+                n_file_2 = len(li_path)
+                if n_file_2:
+                    li_path_total += li_path
+    else:
+        for name_file_dir in os.listdir(direc):
+            path_file_dir = os.path.join(direc, name_file_dir)
+                if os.path.isfile(path_file_dir):
+                if is_extension_given:
+                    if name_file_dir.lower().endswith(ext.lower()):
+                        li_path_total.append(path_file_dir)
+                else:
+                    li_path_total.append(path_file_dir)
+    return sorted(li_path_total)
+
+
 #########################################################################################################
 # input
 #   x : number

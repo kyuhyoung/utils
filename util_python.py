@@ -243,7 +243,8 @@ def is_this_empty_string(strin):
 #       ex) True if '/mnt/d/images' exists.
 
 def is_this_existing_directory(path_dir):
-    return os.path.isdir(os.path.expanduser(path_dir))
+    return os.path.exists(path_dir) and os.path.isdir(path_dir)
+    #return os.path.isdir(os.path.expanduser(path_dir))
     #return os.path.isdir(path_dir)
 
     
@@ -257,7 +258,7 @@ def is_this_existing_directory(path_dir):
 
 import os.path
 def is_this_existing_file(path_file):
-    return os.path.isfile(path_file)
+    return os.path.exists(path_file) and os.path.isfile(path_file)
 
 
 #########################################################################################################

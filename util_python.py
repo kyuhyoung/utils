@@ -16,11 +16,22 @@ def split_string_by_delimiter(str_ori, str_delimiter):
 
 
 #########################################################################################################
+# $ x = float('nan')
+# $ isNaN(x)
+# $ => True
+# $ isNaN(1.6)
+# $ => False  
+import math
+def isNaN(num):
+    return math.isnan(num)
+
+
+#########################################################################################################
 # input
 # direc = '/path/to/the/directory'
 # remove_directory(direc)  
 def remove_directory(direc):
-    shutil.rmtree(direc)
+    return shutil.rmtree(direc)
 
 #########################################################################################################
 # input

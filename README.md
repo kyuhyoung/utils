@@ -195,6 +195,7 @@
   * float3()
   * is_dict_with_given_keys()
   * is_this_list_empty()
+  * isNaN
   * find_nth_largest()
   * get_list_of_file_path_under_1st_with_2nd_extension()
   * round_i()

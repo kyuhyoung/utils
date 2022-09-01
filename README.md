@@ -215,6 +215,9 @@
   * get_list_of_file_names_with_string_in_multi_directories_of_text_file()
   * get_batch_size_as_multiple_of_num_gpu()
   * print_indented()
+  * remove_directory()
+  * rm_directory_if_exist()
+  * rm_and_mkdir()  
   * str2bool()
   * split_string_by_delimiter()
 

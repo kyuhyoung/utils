@@ -14,7 +14,31 @@ def split_string_by_delimiter(str_ori, str_delimiter):
     li_str = re.split(str_delimiter, str_ori)
     return li_str
 
-    
+
+#########################################################################################################
+# input
+# direc = '/path/to/the/directory'
+# remove_directory(direc)  
+def remove_directory(direc):
+    shutil.rmtree(direc)
+
+#########################################################################################################
+# input
+# direc = '/path/to/the/directory'
+# rm_directory_if_exist(direc)  
+def rm_directory_if_exist(direc):
+    if is_this_existing_directory(direc):
+        remove_directory(direc)    
+
+#########################################################################################################
+# input
+# direc = '/path/to/the/directory'
+# rm_and_mkdir(direc)  
+def rm_and_mkdir(direc):
+    rm_directory_if_exist(direc)
+    os.makedirs(direc)
+
+
 #########################################################################################################
 # input
 # str_path = '/path/to/the/file.ext'

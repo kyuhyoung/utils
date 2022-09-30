@@ -256,6 +256,7 @@
 
 #### image related  
 
+  * video_2_image_sequence()
   * aspectcrop()
   * centercrop_and_resize()
   * compensate_division()

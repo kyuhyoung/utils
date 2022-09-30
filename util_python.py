@@ -1101,6 +1101,42 @@ def wh_iou(box1, box2):
 ###################################################################################################################
 
 
+
+#########################################################################################################
+#   video_2_image_sequence('/home/kevin/video/test.mp4', '/home/kevin/video/img_seq', (10, 10, 1920, 1080))
+import os, cv2, sys, shutil
+def video_2_image_sequence(fn_vid, dir_seq, xywh_crop):
+    cap = cv2.VideoCapture(fn_vid)
+    # Check if camera opened successfully
+    if (cap.isOpened()== False): 
+        print("Error opening video stream or file");    exit(0)
+    if os.path.exists(dir_seq):
+        shutil.rmtree(dir_seq)
+    os.makedirs(dir_seq)     
+    if xywh_crop:
+        x_crop, y_crop, w_crop, h_crop = xywh_crop[0], xywh_crop[1], xywh_crop[2], xywh_crop[3]
+    # Read until video is completed
+    cnt = 0;    n_img = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    while(cap.isOpened()):
+        # Capture frame-by-frame
+        ret, frame = cap.read()       
+        if ret == True:
+            if xywh_crop:
+                frame = frame[y_crop : y_crop + h_crop, x_crop : x_crop + w_crop] 
+            fn_img = os.path.join(dir_seq, '%05d.png' % (cnt))
+            # save image
+            cv2.imwrite(fn_img, frame)
+            sys.stdout.write('{} / {} th image saved at {}\r'.format(cnt, n_img, fn_img));  sys.stdout.flush();
+        # Break the loop
+        else: 
+            break
+        cnt += 1
+    # When everything done, release the video capture object
+    cap.release()
+    return
+
+
+#########################################################################################################
 def cropbbox(imagewidth, imageheight, thumbwidth, thumbheight):
     """ cropbbox(imagewidth,imageheight, thumbwidth,thumbheight)
 
@@ -1127,6 +1163,7 @@ def cropbbox(imagewidth, imageheight, thumbwidth, thumbheight):
     return dx, dy, cropwidth + dx, cropheight + dy
 
 
+#########################################################################################################
 def aspectcrop(im, wh_2_be):
     thumbwidth, thumbheight = wh_2_be
     #im = Image.open(StringIO(f))
@@ -1135,6 +1172,7 @@ def aspectcrop(im, wh_2_be):
     im_cropped = im.crop((dx, dy, cropwidth_plus_dx, cropheight_plus_dy))
     return im_cropped 
 
+#########################################################################################################
 def centercrop_and_resize(im, wh_2_be):
     #w_2_be, h_2_be = wh_2_be
     #h_over_w_2_be = h_2_be / w_2_be

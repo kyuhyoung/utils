@@ -1529,7 +1529,7 @@ def convert_vid_2_animated_gif(fn_vid):
 
 def is_video_file(fn): 
     ext = (".3g2", ".3gp", ".asf", ".asx", ".avi", ".flv", ".m2ts", ".mkv", ".mov", ".mp4", ".mpg", ".mpeg", ".rm", ".swf", ".vob", ".wmv")
-    return fn.endswith(ext)
+    return fn.lower().endswith(ext)
 
 #########################################################################################################
 # check if a file name is that of image file by extension.

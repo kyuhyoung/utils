@@ -1540,7 +1540,7 @@ def is_video_file(fn):
 
 def is_image_file(fn): 
     ext = (".bmp", ".ppm", ".png", ".gif", ".jpg", ".jpeg", ".tif", ".pgm")
-    return fn.endswith(ext)
+    return fn.lower().endswith(ext)
 
 #########################################################################################################
 #   print(get_sequence_id_from_directory('/home/someuser/seq_eyedea_104/, true)

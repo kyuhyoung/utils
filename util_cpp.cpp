@@ -49,7 +49,14 @@ string python_join_equivalent(const string& dir_to_file, const string& filename)
   return full_path.u8string();                                                                               
 }
 
-
+/*
+#include <time.h>
+struct timespec t_begin, t_end;
+clock_gettime(CLOCK_MONOTONIC, &t_begin);
+//	do something
+clock_gettime(CLOCK_MONOTONIC, &t_end);
+double lap_ms = lap_time(t_begin, t_end, true);
+*/
 double lap_time(struct timespec& t_begin, struct timespec& t_end, bool is_millisecond)
 {
     double lap_sec = (t_end.tv_sec - t_begin.tv_sec) + (t_end.tv_nsec - t_begin.tv_nsec) / 1000000000.0;

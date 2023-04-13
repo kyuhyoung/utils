@@ -30,6 +30,7 @@ def isNaN(num):
 # input
 # direc = '/path/to/the/directory'
 # remove_directory(direc)  
+import shutil
 def remove_directory(direc):
     return shutil.rmtree(direc)
 

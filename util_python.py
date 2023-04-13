@@ -1539,7 +1539,7 @@ def is_video_file(fn):
 #    boolean whether it is image file or not.   
 
 def is_image_file(fn): 
-    ext = (".bmp", ".ppm", ".png", ".gif", ".jpg", ".jpeg", ".tif", ".pgm")
+    ext = (".bmp", ".ppm", ".png", ".gif", ".jpg", ".jpeg", ".tif", ".pgm", ".webp")
     return fn.lower().endswith(ext)
 
 #########################################################################################################

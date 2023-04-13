@@ -311,7 +311,7 @@
   * is_this_patch_above_or_equal_to_threshold()
   * compute_edge_integral()
 
-#### Pytorch related  
+#### PyTorch related  
 
   * im2batch()
   * compute_and_draw_fps_and_cofidence_threshold()

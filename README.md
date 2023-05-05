@@ -191,6 +191,7 @@
   * is_only_letter()
   * is_only_number()
   * is_only_letter_or_digit()
+  * file_2_list_of_list_of_string()
   * filter_coi()
   * float3()
   * is_dict_with_given_keys()

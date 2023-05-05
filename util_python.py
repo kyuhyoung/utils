@@ -76,8 +76,8 @@ def count_substring(strin, sub_str):
     return kount
 
 
-def file_2_list_of_list_of_string():
-    with open('filename.txt', 'r') as file:
+def file_2_list_of_list_of_string(fn_txt):
+    with open(fn_txt, 'r') as file:
         lines = [line.strip().split() for line in file]
         return lines
 

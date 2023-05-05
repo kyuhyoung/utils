@@ -75,8 +75,12 @@ def count_substring(strin, sub_str):
         kount = 1 + count_substring(strin[idx_sub + 1:], sub_str)
     return kount
 
+def file_2_list_of_strings(fn_txt):
+    with open(fn_txt, 'r') as file:
+        lines = [line.strip() for line in file]
+        return lines
 
-def file_2_list_of_list_of_string(fn_txt):
+def file_2_list_of_list_of_strings(fn_txt):
     with open(fn_txt, 'r') as file:
         lines = [line.strip().split() for line in file]
         return lines

@@ -76,6 +76,11 @@ def count_substring(strin, sub_str):
     return kount
 
 
+def file_2_list_of_list_of_string():
+    with open('filename.txt', 'r') as file:
+        lines = [line.strip().split() for line in file]
+        return lines
+
 #########################################################################################################
 def filter_coi(li_det, li_class, li_coi, idx_class, device):
     #n_det = len(li_det);

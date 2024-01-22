@@ -1380,7 +1380,7 @@ def get_list_of_image_path_under_this_directory(dir_img, ext = ''):
 # output
 #    li_color_bgr : list of the size [n_class x 3]. It doesn't have to be 'bgr' (It can be 'rgb')
    
-def genereate_random_color_list(n_class):
+def generate_random_color_list(n_class):
     li_color_bgr = []
     li_color_bgr.append((255, 0, 0))
     li_color_bgr.append((0, 255, 0))

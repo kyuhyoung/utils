@@ -266,7 +266,7 @@
   * convert_bbox_type()  
   * cropbbox()
   * get_list_of_image_path_under_this_directory()
-  * genereate_random_color_list()
+  * generate_random_color_list()
   * gen_random_color_bgr()
   * letterboxing_pil()
   * letterboxing_opencv()
